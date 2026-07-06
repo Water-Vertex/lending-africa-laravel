@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\AdminDashboardController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\LoanProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,7 +14,7 @@ Route::post('/admin/login', [AuthController::class, 'login']);
 
 /*
 |--------------------------------------------------------------------------
-| Protected Routes (Sanctum)
+| Protected Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
@@ -23,6 +24,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/me',      [AuthController::class, 'me']);
 
     // Dashboard
-    Route::get('/admin/dashboard/stats', [AdminDashboardController::class, 'stats']);
+    Route::get('/admin/dashboard/stats', [DashboardController::class, 'stats']);
+
+    // Loan Products
+    Route::apiResource('/admin/loan-products', LoanProductController::class);
+    Route::patch('/admin/loan-products/{loanProduct}/toggle-status', [LoanProductController::class, 'toggleStatus']);
 
 });
