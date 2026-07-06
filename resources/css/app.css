@@ -1,0 +1,419 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+/* ================= THEME (replaces tailwind.config.js in v4) ================= */
+@theme {
+    /* Fonts — overriding the default so body/display fonts match the AIP design */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* Brand colors */
+    --color-primary: #6DBE3B;
+    --color-primary-dark: #58A02E;
+    --color-primary-light: #E8F5DE;
+    --color-primary-xlight: #F4FAF0;
+    --color-dark: #1A2332;
+
+    /* Keyframes */
+    --animate-float: float 4s ease-in-out infinite;
+    --animate-fade-up: fadeInUp 0.6s ease both;
+    --animate-marquee: marquee 20s linear infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* ================= BASE ================= */
+@layer base {
+    * {
+        @apply m-0 p-0 box-border;
+    }
+    html {
+        @apply scroll-smooth;
+    }
+    body {
+        @apply font-sans text-dark bg-white antialiased;
+    }
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        @apply bg-gray-100;
+    }
+    ::-webkit-scrollbar-thumb {
+        @apply bg-primary rounded-full;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-primary-dark;
+    }
+}
+
+/* ================= COMPONENTS ================= */
+@layer components {
+
+    /* ---- Container (restores centering + padding that the old custom CSS
+         provided globally; sections using only class="container" need this) ---- */
+    .container {
+        @apply mx-auto px-5;
+        max-width: 1200px;
+    }
+
+    /* ---- Header ---- */
+    #main-header {
+        @apply transition-shadow duration-300;
+    }
+    #main-header.scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ---- Hero Section ---- */
+    .hero-section {
+        @apply relative overflow-hidden;
+        background: linear-gradient(135deg, #1A2332 0%, #243447 60%, #1e3a2f 100%);
+    }
+    .hero-section::before {
+        content: '';
+        @apply absolute pointer-events-none;
+        top: -100px;
+        right: -100px;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(109, 190, 59, 0.15) 0%, transparent 70%);
+    }
+    .hero-section::after {
+        content: '';
+        @apply absolute pointer-events-none;
+        bottom: -80px;
+        left: -80px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(109, 190, 59, 0.08) 0%, transparent 70%);
+    }
+
+    /* ---- Hero Loan Calculator Card ---- */
+    .calc-card {
+        @apply rounded-3xl;
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.4);
+    }
+    .calc-tab {
+        @apply px-5 py-2.5 rounded-[10px] font-semibold text-sm cursor-pointer transition-all duration-200 text-gray-500 border-none bg-transparent;
+    }
+    .calc-tab.active {
+        @apply bg-primary text-white;
+        box-shadow: 0 4px 12px rgba(109, 190, 59, 0.3);
+    }
+    .range-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        @apply w-full h-1.5 rounded outline-none bg-gray-200;
+    }
+    .range-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        @apply w-5 h-5 rounded-full bg-primary cursor-pointer border-4 border-white;
+        box-shadow: 0 2px 8px rgba(109, 190, 59, 0.4);
+    }
+
+    /* ---- Section Titles ---- */
+    .section-badge {
+        @apply inline-flex items-center gap-1.5 bg-primary-light text-primary-dark text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full mb-4;
+    }
+    .section-title {
+        @apply font-display font-extrabold text-dark leading-tight tracking-tight;
+        font-size: clamp(28px, 4vw, 42px);
+    }
+    .section-subtitle {
+        @apply text-base text-gray-500 leading-relaxed;
+        max-width: 560px;
+    }
+
+    /* ---- Service Cards ---- */
+    .service-card {
+        @apply bg-white border border-gray-200 rounded-[20px] p-8 relative overflow-hidden transition-all duration-300;
+    }
+    .service-card::before {
+        content: '';
+        @apply absolute top-0 left-0 right-0 h-[3px] scale-x-0 transition-transform duration-300;
+        background: linear-gradient(90deg, #6DBE3B, #58A02E);
+    }
+    .service-card:hover {
+        @apply -translate-y-1.5 border-primary-light;
+        box-shadow: 0 24px 48px -12px rgba(109, 190, 59, 0.2);
+    }
+    .service-card:hover::before {
+        @apply scale-x-100;
+    }
+    .service-icon {
+        @apply w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center text-[22px] text-primary-dark mb-5 transition-all duration-300;
+    }
+    .service-card:hover .service-icon {
+        @apply bg-primary text-white;
+    }
+
+    /* ---- Stats Section ---- */
+    .stats-section {
+        @apply bg-dark relative overflow-hidden;
+    }
+    .stats-section::before {
+        content: '';
+        @apply absolute inset-0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236DBE3B' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .stat-card {
+        @apply text-center py-10 px-5 border-r border-white/[0.08];
+    }
+    .stat-card:last-child {
+        @apply border-r-0;
+    }
+    .stat-number {
+        @apply font-display text-5xl font-extrabold text-primary leading-none mb-2;
+    }
+    .stat-label {
+        @apply text-sm text-white/60 font-medium;
+    }
+
+    /* ---- How It Works ---- */
+    .step-card {
+        @apply text-center px-7 py-10 relative;
+    }
+    .step-number {
+        @apply w-16 h-16 rounded-full bg-primary-light border-[3px] border-primary flex items-center justify-center font-display text-[22px] font-extrabold text-primary-dark mx-auto mb-6 relative z-[1] transition-all duration-300;
+    }
+    .step-card:hover .step-number {
+        @apply bg-primary text-white scale-110;
+    }
+    .step-connector {
+        @apply absolute h-0.5 z-0;
+        top: 72px;
+        left: calc(50% + 48px);
+        right: calc(-50% + 48px);
+        background: linear-gradient(90deg, #6DBE3B, #E8F5DE);
+    }
+
+    /* ---- Loan Types ---- */
+    .loan-type-card {
+        @apply rounded-3xl px-10 py-12 relative overflow-hidden;
+    }
+    .loan-type-card.personal {
+        @apply text-white;
+        background: linear-gradient(135deg, #1A2332 0%, #243447 100%);
+    }
+    .loan-type-card.sme {
+        @apply text-white;
+        background: linear-gradient(135deg, #58A02E 0%, #6DBE3B 100%);
+    }
+    .loan-badge {
+        @apply inline-block bg-white/[0.15] border border-white/30 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide mb-5;
+    }
+    .loan-feature {
+        @apply flex items-center gap-2.5 py-2 text-sm text-white/85 border-b border-white/10;
+    }
+    .loan-feature:last-child {
+        @apply border-b-0;
+    }
+    .loan-feature i {
+        color: #a8f080;
+        @apply text-[13px];
+    }
+
+    /* ---- Testimonials ---- */
+    .testimonial-card {
+        @apply bg-white border border-gray-200 rounded-[20px] p-8 transition-all duration-300 relative;
+    }
+    .testimonial-card:hover {
+        @apply border-primary-light;
+        box-shadow: 0 20px 40px -10px rgba(109, 190, 59, 0.15);
+    }
+    .testimonial-card::before {
+        content: '"';
+        @apply absolute font-serif text-primary-light leading-none;
+        top: 20px;
+        right: 28px;
+        font-size: 72px;
+    }
+    .star-rating {
+        @apply text-amber-400 text-sm;
+    }
+
+    /* ---- CTA Section ---- */
+    .cta-section {
+        @apply relative overflow-hidden;
+        background: linear-gradient(135deg, #58A02E 0%, #6DBE3B 100%);
+    }
+    .cta-section::before {
+        content: '';
+        @apply absolute rounded-full bg-white/5;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+    }
+
+    /* ---- FAQ ---- */
+    .faq-item {
+        @apply border border-gray-200 rounded-2xl overflow-hidden mb-3 transition-all duration-200;
+    }
+    .faq-item.open {
+        @apply border-primary;
+        box-shadow: 0 4px 16px rgba(109, 190, 59, 0.1);
+    }
+    .faq-question {
+        @apply w-full text-left px-6 py-5 font-semibold text-[15px] text-dark bg-transparent border-none cursor-pointer flex justify-between items-center gap-3 transition-colors duration-200;
+    }
+    .faq-question:hover {
+        @apply text-primary-dark;
+    }
+    .faq-item.open .faq-question {
+        @apply text-primary-dark;
+    }
+    .faq-icon {
+        @apply w-7 h-7 rounded-full bg-primary-light flex items-center justify-center flex-shrink-0 transition-all duration-300 text-primary-dark text-xs;
+    }
+    .faq-item.open .faq-icon {
+        @apply bg-primary text-white rotate-180;
+    }
+    .faq-answer {
+        @apply overflow-hidden px-6 text-sm text-gray-500 leading-[1.8];
+        max-height: 0;
+        transition: max-height 0.35s ease, padding 0.3s ease;
+    }
+    .faq-item.open .faq-answer {
+        max-height: 200px;
+        @apply pb-5;
+    }
+
+    /* ---- Why Choose Us ---- */
+    .why-card {
+        @apply flex gap-5 p-6 rounded-2xl transition-all duration-[250ms] items-start;
+    }
+    .why-card:hover {
+        @apply bg-primary-xlight translate-x-1.5;
+    }
+    .why-icon {
+        @apply w-[50px] h-[50px] rounded-2xl bg-primary-light flex items-center justify-center flex-shrink-0 text-xl text-primary-dark transition-all duration-[250ms];
+    }
+    .why-card:hover .why-icon {
+        @apply bg-primary text-white;
+    }
+
+    /* ---- Partners ---- */
+    .partner-logo {
+        @apply flex items-center justify-center h-20 px-8 border border-gray-200 rounded-2xl grayscale opacity-60 transition-all duration-300 font-bold text-lg text-gray-800;
+    }
+    .partner-logo:hover {
+        @apply grayscale-0 opacity-100 border-primary;
+        box-shadow: 0 4px 16px rgba(109, 190, 59, 0.15);
+    }
+
+    /* ---- Contact Form ---- */
+    .contact-form-input {
+        @apply w-full px-[18px] py-3.5 border border-gray-200 rounded-xl text-sm font-sans text-dark transition-all duration-200 outline-none bg-gray-50;
+    }
+    .contact-form-input:focus {
+        @apply border-primary bg-white;
+        box-shadow: 0 0 0 3px rgba(109, 190, 59, 0.12);
+    }
+    .contact-form-input::placeholder {
+        @apply text-gray-400;
+    }
+
+    /* ---- Buttons ---- */
+    .btn-primary {
+        @apply bg-primary text-white font-bold px-8 py-3.5 rounded-full border-none cursor-pointer text-[15px] transition-all duration-200 inline-flex items-center gap-2 font-sans;
+    }
+    .btn-primary:hover {
+        @apply bg-primary-dark -translate-y-0.5;
+        box-shadow: 0 12px 24px -6px rgba(109, 190, 59, 0.4);
+    }
+    .btn-outline-white {
+        @apply bg-transparent text-white font-bold px-[30px] py-[13px] rounded-full border-2 border-white/50 cursor-pointer text-[15px] transition-all duration-200 inline-flex items-center gap-2 font-sans;
+    }
+    .btn-outline-white:hover {
+        @apply bg-white/10 border-white;
+    }
+    .btn-white {
+        @apply bg-white text-primary-dark font-bold px-8 py-3.5 rounded-full border-none cursor-pointer text-[15px] transition-all duration-200 inline-flex items-center gap-2;
+    }
+    .btn-white:hover {
+        @apply bg-primary-xlight -translate-y-0.5;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ---- Section Padding Utilities ---- */
+    .section-pad {
+        @apply py-24;
+    }
+    .section-pad-sm {
+        @apply py-16;
+    }
+
+    /* ---- Marquee Partners ---- */
+    .marquee-track {
+        @apply flex gap-6 w-max;
+        animation: marquee 20s linear infinite;
+    }
+    .marquee-track:hover {
+        animation-play-state: paused;
+    }
+    .marquee-wrap {
+        @apply overflow-hidden;
+    }
+}
+
+/* ================= UTILITIES ================= */
+@layer utilities {
+    .animate-float {
+        animation: float 4s ease-in-out infinite;
+    }
+    .animate-fade-up {
+        animation: fadeInUp 0.6s ease both;
+    }
+    .delay-1 {
+        animation-delay: 0.1s;
+    }
+    .delay-2 {
+        animation-delay: 0.2s;
+    }
+    .delay-3 {
+        animation-delay: 0.3s;
+    }
+    .delay-4 {
+        animation-delay: 0.4s;
+    }
+}
+
+/* ================= RESPONSIVE OVERRIDES ================= */
+@media (max-width: 768px) {
+    .section-pad {
+        @apply py-16;
+    }
+    .section-pad-sm {
+        @apply py-12;
+    }
+    .stat-card {
+        @apply border-r-0 border-b border-white/[0.08];
+    }
+    .step-connector {
+        @apply hidden;
+    }
+    .loan-type-card {
+        @apply px-7 py-9;
+    }
+}
