@@ -18,4 +18,3 @@ Route::post('/apply', function () {
 Route::post('/contact', function () {
     return back()->with('success', 'Message sent successfully!');
 })->name('contact.store');
-

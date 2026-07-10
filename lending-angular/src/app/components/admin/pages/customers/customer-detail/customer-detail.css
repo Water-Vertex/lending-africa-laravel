@@ -1,0 +1,138 @@
+/* src/app/components/admin/pages/customers/customer-detail/customer-detail.css */
+
+.container {
+    max-width: 1280px;
+}
+
+/* Smooth transitions */
+.transition-colors, .transition-shadow {
+    transition: all 0.2s ease;
+}
+
+/* Loading animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Hover effects */
+.hover\:bg-gray-700:hover {
+    background-color: #374151;
+}
+
+.hover\:bg-orange-700:hover {
+    background-color: #ea580c;
+}
+
+.hover\:bg-red-700:hover {
+    background-color: #b91c1c;
+}
+
+.hover\:shadow-md:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Badge styles */
+.rounded-full {
+    border-radius: 9999px;
+}
+
+/* Modal overlay */
+.fixed {
+    position: fixed;
+}
+
+.inset-0 {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.bg-opacity-50 {
+    background-opacity: 0.5;
+}
+
+.z-50 {
+    z-index: 50;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Document card hover */
+.hover\:shadow-md:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Status colors */
+.bg-green-100 {
+    background-color: #d1fae5;
+}
+.text-green-800 {
+    color: #065f46;
+}
+.bg-yellow-100 {
+    background-color: #fef3c7;
+}
+.text-yellow-800 {
+    color: #92400e;
+}
+.bg-red-100 {
+    background-color: #fee2e2;
+}
+.text-red-800 {
+    color: #991b1b;
+}
+.bg-blue-100 {
+    background-color: #dbeafe;
+}
+.text-blue-800 {
+    color: #1e40af;
+}
+.bg-purple-100 {
+    background-color: #ede9fe;
+}
+.text-purple-800 {
+    color: #5b21b6;
+}
+.bg-gray-100 {
+    background-color: #f3f4f6;
+}
+.text-gray-800 {
+    color: #1f2937;
+}
+
+/* Document verification status */
+.bg-yellow-100.text-yellow-800 {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+.bg-green-100.text-green-800 {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+.bg-red-100.text-red-800 {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Font styles */
+.font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Container for consistent spacing */
+.space-y-6 > * + * {
+    margin-top: 1.5rem;
+}

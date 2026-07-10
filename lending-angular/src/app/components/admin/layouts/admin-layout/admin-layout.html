@@ -1,0 +1,241 @@
+<style>
+  .sidebar-nav-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(186, 232, 45, 0.35) transparent;
+  }
+  .sidebar-nav-scroll::-webkit-scrollbar {
+    width: 5px;
+  }
+  .sidebar-nav-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-nav-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(186, 232, 45, 0.35);
+    border-radius: 9999px;
+  }
+  .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(186, 232, 45, 0.65);
+  }
+</style>
+
+<!-- Mobile Overlay -->
+<div
+  *ngIf="sidebarOpen"
+  (click)="closeSidebar()"
+  class="fixed inset-0 z-40 bg-black/50 lg:hidden"
+></div>
+
+<div class="flex h-screen bg-gray-50 overflow-hidden">
+
+  <!-- ============================================================
+       SIDEBAR
+  ============================================================ -->
+  <aside
+    [class.translate-x-0]="sidebarOpen"
+    [class.-translate-x-full]="!sidebarOpen"
+    class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-black text-white transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:z-auto"
+  >
+
+    <!-- Logo -->
+    <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10 flex-shrink-0">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:#BAE82D;">
+        <span class="font-bold text-black text-lg leading-none">A</span>
+      </div>
+      <div class="leading-tight">
+        <span class="block font-bold text-white text-base tracking-tight">AIP</span>
+        <span class="block text-[10px] text-white/40 tracking-wide">Admin Panel</span>
+      </div>
+
+      <!-- Close on mobile -->
+      <button (click)="closeSidebar()" class="ml-auto lg:hidden text-white/60 hover:text-white p-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5 sidebar-nav-scroll">
+
+      <!-- Main -->
+      <p class="text-[10px] font-semibold text-white/30 uppercase tracking-widest px-3 pt-2 pb-2">Main</p>
+
+      <a routerLink="/admin/dashboard" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-chart-pie w-4 text-center"></i> Dashboard
+      </a>
+
+        <a routerLink="/admin/roles" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+          <i class="fas fa-user-shield w-4 text-center"></i> Roles
+        </a>
+
+        <a routerLink="/admin/users" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+          <i class="fas fa-user-gear w-4 text-center"></i>  Users
+        </a>
+         <!-- Collateral Types -->
+        <a routerLink="/admin/collateral-types" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+          <i class="fas fa-tags w-4 text-center"></i> Collateral Types
+        </a>
+
+        <!-- Collaterals -->
+        <a routerLink="/admin/collaterals" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+          <i class="fas fa-warehouse w-4 text-center"></i> Collaterals
+        </a>
+
+        <a routerLink="/admin/customers/list" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+          <i class="fas fa-users w-4 text-center"></i> Customers
+        </a>
+
+      <!-- Loans Section -->
+      <p class="text-[10px] font-semibold text-white/30 uppercase tracking-widest px-3 pt-4 pb-2">Loans</p>
+
+      <a routerLink="/admin/loan-applications" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-file-alt w-4 text-center"></i> Applications
+      </a>
+
+      <a routerLink="/admin/loan-products/list" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-box-open w-4 text-center"></i> Loan Products
+      </a>
+
+      <a routerLink="/admin/disbursements" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-building-columns w-4 text-center"></i> Disbursements
+      </a>
+
+      <a routerLink="/admin/payments" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-money-bill-wave w-4 text-center"></i> Payments
+      </a>
+
+      <!-- Reports -->
+      <p class="text-[10px] font-semibold text-white/30 uppercase tracking-widest px-3 pt-4 pb-2">Reports</p>
+
+      <a routerLink="/admin/reports/loans" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-chart-bar w-4 text-center"></i> Loan Reports
+      </a>
+
+      <a routerLink="/admin/reports/payments" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-receipt w-4 text-center"></i> Payment Reports
+      </a>
+
+      <!-- Configuration -->
+      <p class="text-[10px] font-semibold text-white/30 uppercase tracking-widest px-3 pt-4 pb-2">Configuration</p>
+
+      <a routerLink="/admin/banks" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-landmark w-4 text-center"></i> Banks
+      </a>
+
+      <a routerLink="/admin/collateral-types" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-shield-halved w-4 text-center"></i> Collateral Types
+      </a>
+
+      <a routerLink="/admin/users" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-user-gear w-4 text-center"></i> Staff Users
+      </a>
+
+      <a routerLink="/admin/faqs" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-circle-question w-4 text-center"></i> FAQs
+      </a>
+
+      <a routerLink="/admin/pages" routerLinkActive="bg-[#BAE82D] text-black shadow-md shadow-black/20"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150">
+        <i class="fas fa-file w-4 text-center"></i> CMS Pages
+      </a>
+
+    </nav>
+
+    <!-- User at bottom -->
+    <div class="flex-shrink-0 border-t border-white/10 p-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-black text-sm flex-shrink-0"
+             style="background:#BAE82D;">
+          {{ userInitials }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-white truncate">{{ getFullName() }}</p>
+          <p class="text-xs text-white/40 truncate">{{ getEmail() }}</p>
+        </div>
+        <button (click)="logout()" title="Logout" class="text-white/40 hover:text-red-400 transition-colors p-1">
+          <i class="fas fa-right-from-bracket text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================ -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+    <!-- Topbar -->
+    <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 lg:px-6 h-16 flex items-center justify-between gap-4">
+
+      <!-- Left -->
+      <div class="flex items-center gap-3">
+        <!-- Mobile hamburger -->
+        <button (click)="toggleSidebar()" class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <div>
+          <span class="text-sm font-semibold text-gray-800">Admin Console</span>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="flex items-center gap-3 relative">
+        <!-- User button -->
+        <button
+          (click)="toggleUserMenu()"
+          class="flex items-center gap-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl px-3 py-2 transition-all duration-150"
+        >
+          <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-black text-sm"
+               style="background:#BAE82D;">
+            {{ userInitials }}
+          </div>
+          <span class="text-sm font-semibold text-gray-800 hidden sm:block">{{ getFullName() }}</span>
+          <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+        </button>
+
+        <!-- Dropdown -->
+        <div
+          *ngIf="userMenuOpen"
+          class="absolute right-0 top-full mt-2 w-60 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
+        >
+          <div class="px-4 py-3 border-b border-gray-100">
+            <p class="text-sm font-semibold text-gray-900">{{ getFullName() }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">{{ getEmail() }}</p>
+          </div>
+          <button
+            (click)="logout()"
+            class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all"
+          >
+            <i class="fas fa-right-from-bracket text-gray-400 w-4"></i> Sign Out
+          </button>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- Page Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>
