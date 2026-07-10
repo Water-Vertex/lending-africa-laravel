@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\LoanProductController;
 
 /*
@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/me',      [AuthController::class, 'me']);
 
     // Dashboard
-    Route::get('/admin/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/admin/dashboard/stats', [AdminDashboardController::class, 'stats']);
 
     // Loan Products
     Route::apiResource('/admin/loan-products', LoanProductController::class);
