@@ -8895,8 +8895,12 @@
 <<<<<<< HEAD
     "platform-dev": [],
     "plugin-api-version": "2.6.0"
+<<<<<<< HEAD
 =======
     "platform-dev": {},
     "plugin-api-version": "2.9.0"
 >>>>>>> origin/Muneeb
 }
+=======
+}
+>>>>>>> origin/Midha

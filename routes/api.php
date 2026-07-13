@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\LoanProductController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\BankController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -66,5 +68,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/{customer}/status', [CustomerController::class, 'updateStatus']);
     Route::post('/{customer}/documents', [CustomerController::class, 'addDocuments']);
 });
+
+    
+   
+     Route::get('/admin/banks',           [BankController::class, 'index']);
+Route::post('/admin/banks',          [BankController::class, 'store']);
+Route::get('/admin/banks/{id}',      [BankController::class, 'show']);
+Route::put('/admin/banks/{id}',      [BankController::class, 'update']);
+Route::delete('/admin/banks/{id}',   [BankController::class, 'destroy']);
+
+    // Staff
+      Route::get('/admin/staff/last-code', [StaffController::class, 'getLastStaffCode']);
+    Route::get('/admin/staff',           [StaffController::class, 'index']);
+    Route::post('/admin/staff',          [StaffController::class, 'store']);
+    Route::get('/admin/staff/{id}',      [StaffController::class, 'show']);
+    Route::put('/admin/staff/{id}',      [StaffController::class, 'update']);
+    Route::delete('/admin/staff/{id}',   [StaffController::class, 'destroy']);
 
 });
