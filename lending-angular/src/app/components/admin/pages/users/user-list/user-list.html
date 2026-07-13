@@ -1,0 +1,179 @@
+<!-- src/app/components/admin/pages/users/user-list/user-list.html -->
+<div class="container mx-auto px-4 py-8">
+
+  <!-- Header -->
+  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Staff Users</h1>
+        <p class="text-gray-600 mt-1">Manage system users</p>
+      </div>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+
+        <!-- Refresh Button -->
+        <button
+          (click)="refreshData()"
+          [disabled]="isLoading"
+          class="px-4 py-2 rounded-md transition-colors flex items-center justify-center space-x-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background-color: #3EE5CF; color: #007B77;"
+        >
+          <i class="fas fa-sync-alt" [class.animate-spin]="isLoading"></i>
+          <span>{{ isLoading ? 'Refreshing...' : 'Refresh' }}</span>
+        </button>
+
+        <!-- Add New User Button - Fixed: Added opening <a> tag -->
+        <a
+          routerLink="/admin/users/add"
+          class="px-4 py-2 text-white rounded-md hover:bg-[#005C59] transition-colors flex items-center justify-center space-x-2 text-sm font-medium"
+          style="background-color: #007B77;"
+        >
+          <i class="fas fa-plus"></i>
+          <span>Add New User</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="bg-white rounded-lg border border-gray-200 p-8 text-center mb-6">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007B77] mx-auto"></div>
+    <p class="text-gray-500 mt-2">Loading Users...</p>
+  </div>
+
+  <!-- Search -->
+  <div *ngIf="!isLoading" class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <div class="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-full">
+      <i class="fas fa-search text-gray-400 mr-2"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch()"
+        placeholder="Search users by name, email or role..."
+        class="bg-transparent border-none focus:outline-none focus:ring-0 w-full text-sm"
+      >
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading">
+
+    <!-- No Data -->
+    <div *ngIf="filteredUsers.length === 0" class="bg-white rounded-lg border border-gray-200 p-8 text-center">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-user-gear text-gray-400 text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No Users Found</h3>
+      <p class="text-gray-600 mb-4">Start by adding your first user</p>
+      <a routerLink="/admin/users/add" class="font-medium text-sm hover:underline" style="color: #007B77;">+ Add New User</a>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="filteredUsers.length > 0" class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+
+      <!-- Mobile View -->
+      <div class="md:hidden divide-y divide-gray-200">
+        <div *ngFor="let user of filteredUsers; trackBy: trackById" class="p-4 hover:bg-gray-50">
+          <div class="flex justify-between items-start mb-3">
+            <span class="text-sm font-medium text-gray-500">#{{user.id}}</span>
+            <div class="flex space-x-2">
+              <a routerLink="/admin/users/edit/{{user.id}}"
+                 class="px-3 py-1 rounded text-xs font-medium transition-colors"
+                 style="background-color: #3EE5CF; color: #007B77;">
+                <i class="fas fa-edit mr-1"></i> Edit
+              </a>
+              <button (click)="deleteUser(user.id)"
+                 class="px-3 py-1 rounded text-xs font-medium transition-colors"
+                 style="background-color: #FEF3C7; color: #92400E;">
+                <i class="fas fa-trash mr-1"></i> Delete
+              </button>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div>
+              <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Name</h4>
+              <p class="text-sm font-medium text-gray-900">{{user.first_name}} {{user.last_name}}</p>
+            </div>
+            <div>
+              <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email</h4>
+              <p class="text-sm text-gray-600">{{user.email}}</p>
+            </div>
+            <div>
+              <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Role</h4>
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">{{ user.role?.name || '-' }}</span>
+            </div>
+            <div>
+              <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</h4>
+              <span
+                class="px-2 py-1 rounded text-xs font-medium capitalize"
+                [ngClass]="user.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+              >{{ user.status }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop View -->
+      <div class="hidden md:block overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let user of filteredUsers; trackBy: trackById" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{{user.id}}</td>
+              <td class="px-6 py-4 text-sm font-medium text-gray-900">{{user.first_name}} {{user.last_name}}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{user.email}}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{user.phone || '-'}}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">{{ user.role?.name || '-' }}</span>
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <span
+                  class="px-2 py-1 rounded text-xs font-medium capitalize"
+                  [ngClass]="user.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                >{{ user.status }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex space-x-2">
+                  <a routerLink="/admin/users/edit/{{user.id}}"
+                     class="px-3 py-1 rounded text-xs font-medium transition-colors"
+                     style="background-color: #3EE5CF; color: #007B77;">
+                    <i class="fas fa-edit mr-1"></i> Edit
+                  </a>
+                  <button (click)="deleteUser(user.id)"
+                     class="px-3 py-1 rounded text-xs font-medium transition-colors"
+                     style="background-color: #FEF3C7; color: #92400E;">
+                    <i class="fas fa-trash mr-1"></i> Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="border-t border-gray-200 px-6 py-4 bg-gray-50">
+        <div class="flex justify-between items-center">
+          <div class="text-sm text-gray-700">Showing {{filteredUsers.length}} Users</div>
+          <button
+            (click)="refreshData()"
+            [disabled]="isLoading"
+            class="text-sm font-medium flex items-center disabled:opacity-50 transition-colors"
+            style="color: #007B77;"
+          >
+            <i class="fas fa-sync-alt mr-2" [class.animate-spin]="isLoading"></i>
+            {{ isLoading ? 'Refreshing...' : 'Refresh List' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
