@@ -551,8 +551,7 @@
             <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
                 <h3 class="font-display font-bold text-dark text-xl mb-6">Loan Application Form</h3>
 
-                <form action="{{ route('apply.store') }}" method="POST" class="space-y-5">
-                    @csrf
+<form method="POST" action="{{ route('loan.application.store') }}" id="loan-application-form" class="space-y-5">    @csrf
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-800 mb-1.5">First Name *</label>
@@ -575,19 +574,19 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Type *</label>
-                            <select name="loan_type" required class="contact-form-input">
-                                <option value="">Select Type</option>
-                                <option value="personal" {{ old('loan_type') == 'personal' ? 'selected' : '' }}>Personal Loan</option>
-                                <option value="sme"      {{ old('loan_type') == 'sme' ? 'selected' : '' }}>SME Business Loan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Amount (₦) *</label>
-                            <input type="number" name="loan_amount" placeholder="50000" min="50000" max="300000" required class="contact-form-input" value="{{ old('loan_amount') }}">
-                        </div>
-                    </div>
+    <div>
+        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Type *</label>
+        <select name="loan_type" id="loan_type" required class="contact-form-input">
+            <option value="">Select Type</option>
+            <option value="personal" {{ old('loan_type') == 'personal' ? 'selected' : '' }}>Personal Loan</option>
+            <option value="sme"      {{ old('loan_type') == 'sme' ? 'selected' : '' }}>SME Business Loan</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Amount (₦) *</label>
+        <input type="number" name="loan_amount" id="loan_amount" placeholder="50000" min="50000" max="300000" required class="contact-form-input" value="{{ old('loan_amount') }}">
+    </div>
+</div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-800 mb-1.5">Preferred Bank *</label>
@@ -600,7 +599,7 @@
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Purpose *</label>
-                        <textarea name="purpose" rows="3" placeholder="Briefly describe what you need the loan for..." required class="contact-form-input resize-none">{{ old('purpose') }}</textarea>
+                        <textarea name="loan_purpose" rows="3" placeholder="Briefly describe what you need the loan for..." required class="contact-form-input resize-none">{{ old('purpose') }}</textarea>
                     </div>
 
                     <button type="submit" class="btn-primary w-full justify-center" style="display:flex;">
