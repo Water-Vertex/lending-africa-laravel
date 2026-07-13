@@ -93,9 +93,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // Update max amount based on tab
             if (amountSlider) {
                 if (tab.dataset.type === 'sme') {
-                    amountSlider.max = 150000;
+                    amountSlider.max = 300000;
                 } else {
-                    amountSlider.max = 100000;
+                    amountSlider.max = 200000;
                 }
                 calcLoan();
             }
@@ -155,5 +155,44 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // ===== Scroll-Spy: highlight active nav link based on visible section =====
+    const navLinks       = document.querySelectorAll('.nav-link');
+    const navLinksMobile = document.querySelectorAll('.nav-link-mobile');
+    const sectionIds     = ['home', 'about', 'how-it-works', 'faq', 'contact'];
+    const sections = sectionIds
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+
+    function setActiveNav(sectionId) {
+        navLinks.forEach(link => {
+            if (link.dataset.navSection === sectionId) {
+                link.classList.add('text-primary', 'bg-primary-xlight');
+            } else {
+                link.classList.remove('text-primary', 'bg-primary-xlight');
+            }
+        });
+        navLinksMobile.forEach(link => {
+            if (link.dataset.navSection === sectionId) {
+                link.classList.add('text-primary', 'bg-primary-xlight');
+            } else {
+                link.classList.remove('text-primary', 'bg-primary-xlight');
+            }
+        });
+    }
+
+    if (sections.length) {
+        const spyObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setActiveNav(entry.target.id);
+                }
+            });
+        }, {
+            rootMargin: '-40% 0px -50% 0px', // triggers when section is roughly centered in viewport
+            threshold: 0
+        });
+        sections.forEach(sec => spyObserver.observe(sec));
+    }
 });
 </script>

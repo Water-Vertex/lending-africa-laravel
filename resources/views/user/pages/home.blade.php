@@ -31,7 +31,7 @@
                 {{-- Key Points --}}
                 <div class="flex flex-wrap gap-4 mb-10">
                     <div class="flex items-center gap-2 text-gray-300 text-sm font-medium">
-                        <i class="fas fa-check-circle text-primary"></i> 24-Hour Approval
+                        <i class="fas fa-check-circle text-primary"></i> Approval in 2 – 5 Days
                     </div>
                     <div class="flex items-center gap-2 text-gray-300 text-sm font-medium">
                         <i class="fas fa-check-circle text-primary"></i> Low Interest Rates
@@ -95,9 +95,9 @@
                             <label class="text-sm font-semibold text-gray-800">Loan Amount</label>
                             <span id="loan-amount-display" class="text-primary font-bold text-lg font-display">₦50,000</span>
                         </div>
-                        <input type="range" id="loan-amount-slider" class="range-slider" min="10000" max="100000" value="50000" step="5000">
+                        <input type="range" id="loan-amount-slider" class="range-slider" min="50000" max="200000" value="50000" step="5000">
                         <div class="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>₦10,000</span><span>₦100,000</span>
+                            <span>₦50,000</span><span>₦200,000</span>
                         </div>
                     </div>
 
@@ -156,7 +156,7 @@
                 <p class="stat-label">Approval Rate</p>
             </div>
             <div class="stat-card">
-                <p class="stat-number counter" data-target="24" data-suffix="hrs">0</p>
+                <p class="stat-number counter" data-target="5" data-suffix=" Days">0</p>
                 <p class="stat-label">Avg. Disbursement</p>
             </div>
             <div class="stat-card">
@@ -184,29 +184,31 @@
             {{-- Personal Loan --}}
             <div class="loan-type-card personal" id="personal-loan">
                 <div class="loan-badge">Personal Loan</div>
-                <h3 class="font-display font-bold text-white text-3xl mb-3">Up to ₦100,000</h3>
+                <h3 class="font-display font-bold text-white text-3xl mb-3">Up to ₦200,000</h3>
                 <p class="text-gray-300 text-sm leading-relaxed mb-8">
-                    Get quick personal financing for medical bills, school fees, rent, travel, or any personal need — with a simple application and fast disbursement.
+                    Get quick personal financing for medical bills, school fees, rent, travel, or any personal need — with a simple application and fast disbursement. We approve it fast and send the money to you without any delay.
                 </p>
+<div class="grid grid-cols-2 gap-4 mb-8">
+    <div class="bg-white/10 rounded-xl p-4">
+        <p class="text-black text-xs mb-1">Interest Rate</p>
+        <p class="text-white font-bold font-display text-xl">From 20% p.a.</p>
+    </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="text-gray-400 text-xs mb-1">Interest Rate</p>
-                        <p class="text-white font-bold font-display text-xl">From 24% p.a.</p>
-                    </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="text-gray-400 text-xs mb-1">Tenure</p>
-                        <p class="text-white font-bold font-display text-xl">3 – 36 Months</p>
-                    </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="text-gray-400 text-xs mb-1">Min. Amount</p>
-                        <p class="text-white font-bold font-display text-xl">₦10,000</p>
-                    </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="text-gray-400 text-xs mb-1">Processing Fee</p>
-                        <p class="text-white font-bold font-display text-xl">1% only</p>
-                    </div>
-                </div>
+    <div class="bg-white/10 rounded-xl p-4">
+        <p class="text-black text-xs mb-1">Tenure</p>
+        <p class="text-white font-bold font-display text-xl">6 – 36 Months</p>
+    </div>
+
+    <div class="bg-white/10 rounded-xl p-4">
+        <p class="text-black text-xs mb-1">Min. Amount</p>
+        <p class="text-white font-bold font-display text-xl">₦50,000</p>
+    </div>
+
+    <div class="bg-white/10 rounded-xl p-4">
+        <p class="text-black text-xs mb-1">Processing Time</p>
+        <p class="text-white font-bold font-display text-xl">2 – 5 Days</p>
+    </div>
+</div>
 
                 <div class="space-y-1 mb-8">
                     <div class="loan-feature"><i class="fas fa-check-circle"></i> No collateral required for amounts under ₦50,000</div>
@@ -223,30 +225,32 @@
             {{-- SME Loan --}}
             <div class="loan-type-card sme" id="sme-loan">
                 <div class="loan-badge">SME Business Loan</div>
-                <h3 class="font-display font-bold text-white text-3xl mb-3">Up to ₦150,000</h3>
+                <h3 class="font-display font-bold text-white text-3xl mb-3">Up to ₦300,000</h3>
                 <p class="text-gray-300 text-sm leading-relaxed mb-8">
                     Power your small or medium enterprise with working capital, equipment purchase, or business expansion funding — designed specifically for Nigerian entrepreneurs.
                 </p>
 
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="text-gray-400 text-xs mb-1">Interest Rate</p>
-                        <p class="text-white font-bold font-display text-xl">From 20% p.a.</p>
-                    </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="text-gray-400 text-xs mb-1">Tenure</p>
-                        <p class="text-white font-bold font-display text-xl">6 – 36 Months</p>
-                    </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="text-gray-400 text-xs mb-1">Min. Amount</p>
-                        <p class="text-white font-bold font-display text-xl">₦50,000</p>
-                    </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="text-gray-400 text-xs mb-1">Processing Fee</p>
-                        <p class="text-white font-bold font-display text-xl">1.5% only</p>
-                    </div>
-                </div>
+              <div class="grid grid-cols-2 gap-4 mb-8">
+    <div class="bg-white/10 rounded-xl p-4">
+        <p class="text-black text-xs mb-1">Interest Rate</p>
+        <p class="text-white font-bold font-display text-xl">From 20% p.a.</p>
+    </div>
 
+    <div class="bg-white/10 rounded-xl p-4">
+        <p class="text-black text-xs mb-1">Tenure</p>
+        <p class="text-white font-bold font-display text-xl">6 – 36 Months</p>
+    </div>
+
+    <div class="bg-white/10 rounded-xl p-4">
+        <p class="text-black text-xs mb-1">Min. Amount</p>
+        <p class="text-white font-bold font-display text-xl">₦50,000</p>
+    </div>
+
+    <div class="bg-white/10 rounded-xl p-4">
+        <p class="text-black text-xs mb-1">Processing Time</p>
+        <p class="text-white font-bold font-display text-xl">2 – 5 Days</p>
+    </div>
+</div>
                 <div class="space-y-1 mb-8">
                     <div class="loan-feature"><i class="fas fa-check-circle"></i> Business registration documents accepted</div>
                     <div class="loan-feature"><i class="fas fa-check-circle"></i> Co-signer / collateral may be required</div>
@@ -281,8 +285,8 @@
             $steps = [
                 ['icon' => 'fa-file-alt',       'title' => 'Fill Application',     'desc' => 'Complete our simple online form in under 5 minutes. No complex paperwork, no branch visit needed.'],
                 ['icon' => 'fa-file-magnifying-glass', 'title' => 'Document Review', 'desc' => 'Our loan officers verify your documents and assess your eligibility swiftly and fairly.'],
-                ['icon' => 'fa-circle-check',   'title' => 'Loan Approval',        'desc' => 'Receive a decision within 24 hours. We notify you via SMS and email once your loan is approved.'],
-                ['icon' => 'fa-building-columns','title' => 'Get Disbursed',        'desc' => 'Funds transferred directly to your Polaris or Zenith Bank account — same day after approval.'],
+                ['icon' => 'fa-circle-check',   'title' => 'Loan Approval',        'desc' => 'Receive a decision within 2 to 5 business days. We notify you via SMS and email once your loan is approved.'],
+                ['icon' => 'fa-building-columns','title' => 'Get Disbursed',        'desc' => 'Funds transferred directly to your Polaris or Zenith Bank account after approval.'],
             ];
             @endphp
 
@@ -347,7 +351,7 @@
                         </div>
                         <div>
                             <p class="text-xs text-gray-500">Quick Approval</p>
-                            <p class="text-sm font-bold text-dark">Within 24 Hours</p>
+                            <p class="text-sm font-bold text-dark">Within 2 – 5 Days</p>
                         </div>
                     </div>
                 </div>
@@ -365,8 +369,8 @@
                     <div class="why-card">
                         <div class="why-icon"><i class="fas fa-bolt"></i></div>
                         <div>
-                            <h4 class="font-semibold text-dark mb-1">Lightning Fast Approval</h4>
-                            <p class="text-gray-500 text-sm leading-relaxed">Our automated verification system processes your application in real time, giving you a decision in under 24 hours.</p>
+                            <h4 class="font-semibold text-dark mb-1">Fast Approval Process</h4>
+                            <p class="text-gray-500 text-sm leading-relaxed">Our verification system processes your application efficiently, giving you a decision within 2 to 5 business days.</p>
                         </div>
                     </div>
                     <div class="why-card">
@@ -465,10 +469,10 @@
 
             @php
             $testimonials = [
-                ['name' => 'Adaeze Okonkwo',    'role' => 'Petty Trader, Lagos',         'rating' => 5, 'text' => 'I needed money urgently to restock my shop before the festive season. AIP approved my loan in less than 24 hours and the money was in my account by evening. Best experience ever!'],
+                ['name' => 'Adaeze Okonkwo',    'role' => 'Petty Trader, Lagos',         'rating' => 5, 'text' => 'I needed money urgently to restock my shop before the festive season. AIP approved my loan within a few days and the money was in my account soon after. Best experience ever!'],
                 ['name' => 'Emeka Chukwuemeka', 'role' => 'Civil Servant, Abuja',         'rating' => 5, 'text' => 'The process was super straightforward. I filled the form online, submitted my documents, and got a call from my loan officer the next morning. No stress at all!'],
                 ['name' => 'Fatima Al-Hassan',  'role' => 'Fashion Designer, Kano',       'rating' => 5, 'text' => 'The SME loan helped me buy new sewing machines for my fashion business. The interest rate was very fair and the repayment plan was flexible. Highly recommend AIP!'],
-                ['name' => 'Chidi Nwosu',       'role' => 'Software Developer, Port Harcourt','rating' => 5, 'text' => 'I was skeptical at first, but AIP delivered exactly as promised. Transparent fees, no hidden charges. My loan was disbursed to my Zenith Bank account same day!'],
+                ['name' => 'Chidi Nwosu',       'role' => 'Software Developer, Port Harcourt','rating' => 5, 'text' => 'I was skeptical at first, but AIP delivered exactly as promised. Transparent fees, no hidden charges. My loan was disbursed to my Zenith Bank account within days!'],
                 ['name' => 'Blessing Ikenna',   'role' => 'Nurse, Enugu',                 'rating' => 5, 'text' => 'Used AIP for my house rent when I was in a tight spot. The online application took only 3 minutes and the customer service team was very responsive throughout.'],
                 ['name' => 'Ibrahim Musa',      'role' => 'Restaurant Owner, Kaduna',     'rating' => 5, 'text' => 'African Investment Partners gave my food business the boost it needed. The SME loan process was smooth and the dedicated loan officer was always reachable.'],
             ];
@@ -581,7 +585,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Amount (₦) *</label>
-                            <input type="number" name="loan_amount" placeholder="50000" min="10000" max="150000" required class="contact-form-input" value="{{ old('loan_amount') }}">
+                            <input type="number" name="loan_amount" placeholder="50000" min="50000" max="300000" required class="contact-form-input" value="{{ old('loan_amount') }}">
                         </div>
                     </div>
 
@@ -647,10 +651,10 @@
             <div>
                 @php
                 $faqs = [
-                    ['q' => 'How long does loan approval take?',                   'a' => 'Most applications are reviewed and decided within 24 hours. Once approved, disbursement is processed the same day to your Polaris or Zenith Bank account.'],
+                    ['q' => 'How long does loan approval take?',                   'a' => 'Most applications are reviewed and decided within 2 to 5 business days. Once approved, disbursement is processed shortly after to your Polaris or Zenith Bank account.'],
                     ['q' => 'What documents do I need to apply?',                  'a' => 'You will need: a valid government-issued ID, 3 months bank statements, proof of income (payslip or business revenue record), and your BVN. SME applicants may also need business registration documents.'],
                     ['q' => 'Is there any collateral required?',                   'a' => 'Personal loans under ₦50,000 require no collateral. Larger amounts and SME loans may require a co-signer or collateral depending on your credit profile.'],
-                    ['q' => 'What is the minimum and maximum loan amount?',        'a' => 'Personal loans range from ₦10,000 to ₦100,000. SME business loans range from ₦50,000 to ₦150,000.'],
+                    ['q' => 'What is the minimum and maximum loan amount?',        'a' => 'Personal loans range from ₦50,000 to ₦200,000. SME business loans range from ₦50,000 to ₦300,000.'],
                     ['q' => 'Can I repay my loan early?',                          'a' => 'Yes! Early repayment is allowed and encouraged. There is no penalty for paying off your loan before the due date, and you save on interest.'],
                     ['q' => 'Which banks does AIP work with?',                     'a' => 'AIP exclusively partners with Polaris Bank and Zenith Bank for loan disbursement and repayment processing in Nigeria.'],
                     ['q' => 'What happens if I miss a repayment?',                 'a' => 'A late fee will be applied on overdue installments. We encourage customers to contact us before missing a payment so we can discuss restructuring options.'],
@@ -695,7 +699,7 @@
                     <i class="fas fa-play text-xs"></i> Learn How It Works
                 </a>
             </div>
-            <p class="text-white/60 text-sm mt-6">No commitment required · Response within 24 hours · 100% online</p>
+            <p class="text-white/60 text-sm mt-6">No commitment required · Response within 2 to 5 days · 100% online</p>
         </div>
     </div>
 </section>

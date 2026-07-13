@@ -1,0 +1,195 @@
+<div class="p-4 lg:p-6">
+
+  <!-- ── Header ── -->
+  <div class="flex items-center gap-4 mb-6">
+    <a routerLink="/admin/loan-products/list"
+       class="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-all">
+      <i class="fas fa-arrow-left text-sm"></i>
+    </a>
+    <div>
+      <h1 class="text-xl font-bold text-gray-900">{{ isEdit ? 'Edit Loan Product' : 'Add Loan Product' }}</h1>
+      <p class="text-sm text-gray-500 mt-0.5">{{ isEdit ? 'Update the product details below.' : 'Fill in the details to create a new loan product.' }}</p>
+    </div>
+  </div>
+
+  <!-- ── Loading skeleton (edit mode) ── -->
+  <div *ngIf="loading" class="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+    <div *ngFor="let i of [1,2,3,4,5]" class="h-12 bg-gray-100 rounded-xl animate-pulse"></div>
+  </div>
+
+  <!-- ── Form ── -->
+  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
+
+    <!-- ── Error ── -->
+    <div *ngIf="errorMsg" class="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+      <i class="fas fa-triangle-exclamation"></i> {{ errorMsg }}
+    </div>
+
+    <!-- Row 1: Name + Type -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 space-y-5">
+      <h3 class="text-sm font-bold text-gray-700 border-b border-gray-100 pb-3">Basic Information</h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Name -->
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Product Name <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="name" placeholder="e.g. Standard Personal Loan"
+                 [class.border-red-300]="err('name')"
+                 class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none bg-gray-50 focus:bg-white focus:border-[#BAE82D] transition-all" />
+          <p *ngIf="err('name')" class="mt-1 text-xs text-red-500">Product name is required.</p>
+        </div>
+
+        <!-- Loan Type -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Loan Type <span class="text-red-500">*</span></label>
+          <div class="flex gap-3">
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" formControlName="loan_type" value="personal" class="sr-only peer" />
+              <div class="border-2 rounded-xl px-4 py-3 text-center text-sm font-semibold transition-all
+                          border-gray-200 text-gray-500 peer-checked:border-[#BAE82D] peer-checked:text-black peer-checked:bg-[#BAE82D]/10">
+                <i class="fas fa-user mr-2"></i> Personal
+              </div>
+            </label>
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" formControlName="loan_type" value="sme" class="sr-only peer" />
+              <div class="border-2 rounded-xl px-4 py-3 text-center text-sm font-semibold transition-all
+                          border-gray-200 text-gray-500 peer-checked:border-[#3EE5CF] peer-checked:text-[#007B77] peer-checked:bg-[#3EE5CF]/10">
+                <i class="fas fa-briefcase mr-2"></i> SME
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Status <span class="text-red-500">*</span></label>
+          <div class="flex gap-3">
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" formControlName="status" value="active" class="sr-only peer" />
+              <div class="border-2 rounded-xl px-4 py-3 text-center text-sm font-semibold transition-all
+                          border-gray-200 text-gray-500 peer-checked:border-green-400 peer-checked:text-green-700 peer-checked:bg-green-50">
+                <span class="w-2 h-2 rounded-full bg-green-500 inline-block mr-1.5"></span> Active
+              </div>
+            </label>
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" formControlName="status" value="inactive" class="sr-only peer" />
+              <div class="border-2 rounded-xl px-4 py-3 text-center text-sm font-semibold transition-all
+                          border-gray-200 text-gray-500 peer-checked:border-gray-400 peer-checked:text-gray-700 peer-checked:bg-gray-100">
+                <span class="w-2 h-2 rounded-full bg-gray-400 inline-block mr-1.5"></span> Inactive
+              </div>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Row 2: Amounts -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 space-y-5">
+      <h3 class="text-sm font-bold text-gray-700 border-b border-gray-100 pb-3">Loan Amounts & Rates</h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <!-- Min Amount -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Minimum Amount (₦) <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₦</span>
+            <input type="number" formControlName="minimum_amount" placeholder="10000"
+                   [class.border-red-300]="err('minimum_amount')"
+                   class="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none bg-gray-50 focus:bg-white focus:border-[#BAE82D] transition-all" />
+          </div>
+          <p *ngIf="err('minimum_amount')" class="mt-1 text-xs text-red-500">Minimum amount is required.</p>
+        </div>
+
+        <!-- Max Amount -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Maximum Amount (₦) <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₦</span>
+            <input type="number" formControlName="maximum_amount" placeholder="100000"
+                   [class.border-red-300]="err('maximum_amount')"
+                   class="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none bg-gray-50 focus:bg-white focus:border-[#BAE82D] transition-all" />
+          </div>
+          <p *ngIf="err('maximum_amount')" class="mt-1 text-xs text-red-500">Maximum amount is required.</p>
+        </div>
+
+        <!-- Interest Rate -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Interest Rate (% p.a.) <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <input type="number" formControlName="interest_rate" placeholder="24" step="0.01"
+                   [class.border-red-300]="err('interest_rate')"
+                   class="w-full pr-10 pl-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none bg-gray-50 focus:bg-white focus:border-[#BAE82D] transition-all" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">%</span>
+          </div>
+          <p *ngIf="err('interest_rate')" class="mt-1 text-xs text-red-500">Interest rate is required (0–100).</p>
+        </div>
+
+        <!-- Processing Fee -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Processing Fee (₦)</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₦</span>
+            <input type="number" formControlName="processing_fee" placeholder="0"
+                   class="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none bg-gray-50 focus:bg-white focus:border-[#BAE82D] transition-all" />
+          </div>
+        </div>
+
+        <!-- Late Fee -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Late Payment Fee (₦)</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₦</span>
+            <input type="number" formControlName="late_fee" placeholder="0"
+                   class="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none bg-gray-50 focus:bg-white focus:border-[#BAE82D] transition-all" />
+          </div>
+        </div>
+
+        <!-- Duration -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Max Duration (Months) <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <input type="number" formControlName="duration_months" placeholder="36"
+                   [class.border-red-300]="err('duration_months')"
+                   class="w-full pr-16 pl-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none bg-gray-50 focus:bg-white focus:border-[#BAE82D] transition-all" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">months</span>
+          </div>
+          <p *ngIf="err('duration_months')" class="mt-1 text-xs text-red-500">Duration is required.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-5">
+      <h3 class="text-sm font-bold text-gray-700 border-b border-gray-100 pb-3 mb-4">Description (Optional)</h3>
+      <textarea formControlName="description" rows="3" placeholder="Brief description of this loan product..."
+                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none bg-gray-50 focus:bg-white focus:border-[#BAE82D] transition-all resize-none"></textarea>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col sm:flex-row items-center justify-end gap-3">
+      <a routerLink="/admin/loan-products/list"
+         class="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-all text-center">
+        Cancel
+      </a>
+      <button type="submit" [disabled]="saving"
+              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-black transition-all disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90 active:scale-95"
+              style="background:#BAE82D;">
+        <i *ngIf="saving" class="fas fa-spinner fa-spin text-xs"></i>
+        <i *ngIf="!saving && isEdit" class="fas fa-save text-xs"></i>
+        <i *ngIf="!saving && !isEdit" class="fas fa-plus text-xs"></i>
+        {{ saving ? 'Saving...' : isEdit ? 'Update Product' : 'Create Product' }}
+      </button>
+    </div>
+
+  </form>
+  <div *ngIf="toastMsg"
+       class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-white border border-green-200 shadow-2xl rounded-xl px-5 py-4 animate-[fadeIn_0.3s_ease]">
+    <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+      <i class="fas fa-check text-green-600 text-sm"></i>
+    </div>
+    <p class="text-sm font-semibold text-gray-800">{{ toastMsg }}</p>
+  </div>
+</div>
