@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\BankController;
+use App\Http\Controllers\Api\FaqController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes

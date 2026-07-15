@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
@@ -83,5 +84,71 @@ class AuthController extends Controller
                 'status'     => $user->status,
             ],
         ]);
+    }
+
+
+
+
+      /*
+    |--------------------------------------------------------------------------
+    | STAFF LOGIN (web / blade — session guard 'staff')
+    |--------------------------------------------------------------------------
+    */
+
+    public function showStaffLoginForm(): \Illuminate\View\View|RedirectResponse
+    {
+        if (Auth::guard('staff')->check()) {
+            return redirect()->route('staff.dashboard');
+        }
+
+       return view('user.pages.staff.login');
+    }
+
+    public function staffLogin(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'staff_code' => 'required|string',
+            'password'   => 'required|string',
+        ]);
+
+        $credentials = [
+            'staff_code' => strtoupper(trim($request->staff_code)),
+            'password'   => $request->password,
+        ];
+
+        if (!Auth::guard('staff')->attempt($credentials, $request->boolean('remember'))) {
+            return back()
+                ->withErrors(['staff_code' => 'Invalid staff code or password.'])
+                ->onlyInput('staff_code');
+        }
+
+        $staff = Auth::guard('staff')->user();
+
+        if ($staff->status !== 'active') {
+            Auth::guard('staff')->logout();
+            return back()
+                ->withErrors(['staff_code' => 'Your account is inactive. Please contact admin.'])
+                ->onlyInput('staff_code');
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->route('staff.dashboard');
+    }
+
+    public function staffDashboard(): \Illuminate\View\View
+    {
+        $staff = Auth::guard('staff')->user()->load('bank');
+
+        return view('user.pages.staff.dashboard', compact('staff'));  
+    }
+
+    public function staffLogout(Request $request): RedirectResponse
+    {
+        Auth::guard('staff')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('staff.login.show');
     }
 }
