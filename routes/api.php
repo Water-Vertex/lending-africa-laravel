@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\BankController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\LoanApplicationInquiryController;
 
 // Public routes
 Route::post('admin/login', [AuthController::class, 'login']);
@@ -37,7 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/admin/roles/{id}',   [RoleController::class, 'destroy']);
 
 
-
+    Route::get('/admin/loan-inquiries', [LoanApplicationInquiryController::class, 'index']);
+    Route::get('/admin/loan-inquiries/stats', [LoanApplicationInquiryController::class, 'stats']);
+    Route::get('/admin/loan-inquiries/{id}', [LoanApplicationInquiryController::class, 'show']);
 
     // Users
     Route::get('/admin/users',           [UserController::class, 'index']);

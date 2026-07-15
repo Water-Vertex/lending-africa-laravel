@@ -26,4 +26,10 @@ class LoanProduct extends Model
         'processing_fee' => 'decimal:2',
         'late_fee'       => 'decimal:2',
     ];
+
+    // ye relationship add karein
+    public function loanApplications()
+    {
+        return $this->hasMany(LoanApplication::class);
+    }
 }

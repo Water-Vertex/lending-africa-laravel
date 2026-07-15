@@ -69,4 +69,13 @@ class Customer extends Model
 
         return sprintf('%s%s%04d', $prefix, $year, $number);
     }
+    public function businesses(): HasMany
+{
+    return $this->hasMany(Business::class);
+}
+
+public function loanApplications(): HasMany
+{
+    return $this->hasMany(LoanApplication::class);
+}
 }
