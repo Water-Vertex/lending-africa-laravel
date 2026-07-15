@@ -44,7 +44,11 @@ class BankController extends Controller
         }
 
         try {
-            $bank = Bank::create($validator->validated());
+            $bank = Bank::create([
+                'name' => $request->name,
+                'code' => $request->code,
+                'status' => $request->status
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -103,7 +107,11 @@ class BankController extends Controller
         }
 
         try {
-            $bank->update($validator->validated());
+            $bank->update([
+                'name' => $request->name,
+                'code' => $request->code,
+                'status' => $request->status
+            ]);
 
             return response()->json([
                 'success' => true,

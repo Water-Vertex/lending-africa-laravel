@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
+use App\Models\Bank;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -34,31 +35,81 @@ class StaffController extends Controller
 
    
   // 🔥 ORIGINAL - Get last staff code (global)
-    public function getLastStaffCode()
-    {
-        try {
-            $lastStaff = Staff::orderBy('id', 'desc')->first();
+    // public function getLastStaffCode()
+    // {
+    //     try {
+    //         $lastStaff = Staff::orderBy('id', 'desc')->first();
             
-            if ($lastStaff) {
-                return response()->json([
-                    'success' => true,
-                    'data' => $lastStaff->staff_code
-                ], 200);
-            }
+    //         if ($lastStaff) {
+    //             return response()->json([
+    //                 'success' => true,
+    //                 'data' => $lastStaff->staff_code
+    //             ], 200);
+    //         }
             
+    //         return response()->json([
+    //             'success' => true,
+    //             'data' => 'STF0000'
+    //         ], 200);
+            
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to get last staff code',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
+    public function getLastStaffCode(Request $request)
+{
+    try {
+        $bankId = $request->query('bank_id');
+
+        if (!$bankId) {
             return response()->json([
                 'success' => true,
-                'data' => 'STF0000'
+                'data' => null
             ], 200);
-            
-        } catch (\Exception $e) {
+        }
+
+        $bank = Bank::find($bankId);
+
+        if (!$bank) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get last staff code',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Bank not found'
+            ], 404);
         }
+
+        $prefix = $this->getBankPrefix($bank->name);
+
+        $lastStaff = Staff::where('staff_code', 'like', $prefix . '%')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $nextNumber = 1;
+        if ($lastStaff) {
+            $numPart = substr($lastStaff->staff_code, strlen($prefix));
+            $nextNumber = ((int) $numPart) + 1;
+        }
+
+        $nextCode = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+        return response()->json([
+            'success' => true,
+            'data' => $nextCode
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to get last staff code',
+            'error' => $e->getMessage()
+        ], 500);
     }
+  }
     /**
      * Store a newly created staff member.
      * Auto-generates staff_code and password.
@@ -79,11 +130,13 @@ class StaffController extends Controller
         ]);
 
         try {
-            // 1) Generate unique staff_code (STF0001, STF0002, ...) — yehi login id hai
-            $staffCode = $this->generateStaffCode();
-
+           $bank = Bank::findOrFail($request->bank_id);
+            $staffCode = $this->generateStaffCode($bank);
             // 2) Generate random plain password
-            $plainPassword = Str::random(4) . rand(10, 99) . Str::random(4);
+            // $plainPassword = Str::random(4) . rand(10, 99) . Str::random(4);
+            $plainPassword = $request->filled('password') 
+    ? $request->password 
+    : Str::random(4) . rand(10, 99) . Str::random(4);
 
             // 3) Create staff record
             $staff = Staff::create([
@@ -243,18 +296,52 @@ class StaffController extends Controller
     /**
      * Generate the next sequential staff code, e.g. STF0001, STF0002...
      */
-    private function generateStaffCode(): string
-    {
-        do {
-            $lastStaff = Staff::orderBy('id', 'desc')->first();
+    // private function generateStaffCode(): string
+    // {
+    //     do {
+    //         $lastStaff = Staff::orderBy('id', 'desc')->first();
 
-            $nextNumber = $lastStaff
-                ? ((int) substr($lastStaff->staff_code, 3)) + 1
-                : 1;
+    //         $nextNumber = $lastStaff
+    //             ? ((int) substr($lastStaff->staff_code, 3)) + 1
+    //             : 1;
 
-            $code = 'STF' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-        } while (Staff::where('staff_code', $code)->exists());
+    //         $code = 'STF' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    //     } while (Staff::where('staff_code', $code)->exists());
 
-        return $code;
-    }
+    //     return $code;
+    // }
+
+
+    /**
+ * Get bank's first letter as prefix, e.g. "Polaris Bank" -> P
+ */
+private function getBankPrefix(string $bankName): string
+{
+    $clean = preg_replace('/[^A-Za-z]/', '', $bankName);
+    return $clean !== '' ? strtoupper(substr($clean, 0, 1)) : 'X';
+}
+
+/**
+ * Generate the next unique staff code for a given bank, e.g. P0001, Z0004...
+ */
+private function generateStaffCode(Bank $bank): string
+{
+    $prefix = $this->getBankPrefix($bank->name);
+
+    do {
+        $lastStaff = Staff::where('staff_code', 'like', $prefix . '%')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $nextNumber = 1;
+        if ($lastStaff) {
+            $numPart = substr($lastStaff->staff_code, strlen($prefix));
+            $nextNumber = ((int) $numPart) + 1;
+        }
+
+        $code = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    } while (Staff::where('staff_code', $code)->exists());
+
+    return $code;
+}
 }
