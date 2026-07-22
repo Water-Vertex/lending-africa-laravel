@@ -10,6 +10,9 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\BankController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\FaqController;
+use App\Http\Controllers\Api\LoanApplicationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LoanApplicationInquiryController;
 
@@ -61,8 +64,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/collateral-types/{id}',      [CollateralController::class, 'typesShow']);
     Route::put('/admin/collateral-types/{id}',      [CollateralController::class, 'typesUpdate']);
     Route::delete('/admin/collateral-types/{id}',   [CollateralController::class, 'typesDestroy']);
+Route::get('/admin/collaterals-form/loan-applications', [CollateralController::class, 'loanApplicationsList']);
+    Route::get('/admin/collaterals-form/collateral-types', [CollateralController::class, 'collateralTypesList']);
 
     Route::apiResource('customers', CustomerController::class);
+    Route::put('/admin/reset-password', [ProfileController::class, 'changePassword']);
+
+
+Route::get('/admin/faqs', [FaqController::class, 'index']);
+Route::post('/admin/faqs', [FaqController::class, 'store']);
+Route::get('/admin/faqs/{id}', [FaqController::class, 'show']);
+Route::put('/admin/faqs/{id}', [FaqController::class, 'update']);
+Route::delete('/admin/faqs/{id}', [FaqController::class, 'destroy']);
+// Loan Applications (read + status change only)
+Route::get('/admin/loan-applications',              [LoanApplicationController::class, 'index']);
+Route::get('/admin/loan-applications/stats',         [LoanApplicationController::class, 'stats']);
+Route::get('/admin/loan-applications/{id}',          [LoanApplicationController::class, 'show']);
+Route::patch('/admin/loan-applications/{id}/status', [LoanApplicationController::class, 'updateStatus']);
+ 
 
     // Additional custom routes
     Route::prefix('customers')->group(function () {
