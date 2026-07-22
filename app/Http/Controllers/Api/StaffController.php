@@ -344,4 +344,89 @@ private function generateStaffCode(Bank $bank): string
 
     return $code;
 }
+
+
+
+/**
+ * Get authenticated staff's own profile (self-service).
+ */
+public function profile(Request $request)
+{
+    try {
+        $staff = $request->user()->load('bank');
+
+        return response()->json([
+            'success' => true,
+            'data' => $staff
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to fetch profile',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Update authenticated staff's own profile.
+ * staff_code aur bank_id yahan se kabhi update nahi honge.
+ */
+public function updateProfile(Request $request)
+{
+    $staff = $request->user();
+
+    $request->validate([
+        'branch_name'      => 'nullable|string|max:255',
+        'first_name'       => 'required|string|max:255',
+        'last_name'        => 'required|string|max:255',
+        'email'            => [
+            'required',
+            'email',
+            'max:255',
+            Rule::unique('staff', 'email')->ignore($staff->id),
+        ],
+        'phone'            => 'nullable|string|max:20',
+        'designation'      => 'nullable|string|max:255',
+        'employee_id'      => 'nullable|string|max:100',
+        'current_password' => 'nullable|required_with:new_password|string',
+        'new_password'     => 'nullable|string|min:6|confirmed',
+    ]);
+
+    try {
+        $data = [
+            'branch_name'  => $request->branch_name,
+            'first_name'   => $request->first_name,
+            'last_name'    => $request->last_name,
+            'email'        => $request->email,
+            'phone'        => $request->phone,
+            'designation'  => $request->designation,
+            'employee_id'  => $request->employee_id,
+        ];
+
+        if ($request->filled('new_password')) {
+            if (!Hash::check($request->current_password, $staff->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current password is incorrect'
+                ], 422);
+            }
+            $data['password'] = Hash::make($request->new_password);
+        }
+
+        $staff->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'data'    => $staff->fresh()->load('bank')
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update profile',
+            'error'   => $e->getMessage()
+        ], 500);
+    }
+}
 }

@@ -16,6 +16,28 @@
     @yield('styles')
 </head>
 <body class="bg-white font-sans text-dark antialiased">
+    <body>
+
+    {{-- Force page to always open at the top — prevents unwanted auto-scroll --}}
+    <script>
+        // Disable browser's automatic scroll-position restoration
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        // Remove any stray hash from the URL on load (e.g. #apply) without a jump
+        if (window.location.hash) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+
+        // Belt-and-braces: force scroll to top before anything else paints
+        window.scrollTo(0, 0);
+    </script>
+<script>
+    window.addEventListener('load', function () {
+        window.scrollTo(0, 0);
+    });
+</script>
     <!-- Top Announcement Bar -->
     <div class="bg-primary text-white text-center py-2.5 text-sm font-medium">
         <span class="mr-2">🎉</span>

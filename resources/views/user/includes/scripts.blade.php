@@ -194,5 +194,140 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         sections.forEach(sec => spyObserver.observe(sec));
     }
+
+    // ===== Toast Notification =====
+function showToast(message, type = 'success') {
+    // Container ek dafa banao agar exist nahi karta
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = `
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        `;
+        document.body.appendChild(container);
+    }
+
+    const isSuccess = type === 'success';
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        min-width: 280px;
+        max-width: 380px;
+        background: ${isSuccess ? '#22c55e' : '#ef4444'};
+        color: #fff;
+        padding: 16px 18px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        font-family: inherit;
+        transform: translateX(120%);
+        opacity: 0;
+        transition: transform 0.35s ease, opacity 0.35s ease;
+    `;
+
+    toast.innerHTML = `
+        <i class="fas ${isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation'}" style="font-size:18px; margin-top:2px;"></i>
+        <div style="flex:1;">
+            <p style="font-weight:700; font-size:14px; margin:0 0 2px;">${isSuccess ? 'Success' : 'Error'}</p>
+            <p style="font-size:13px; opacity:0.95; margin:0; line-height:1.4;">${message}</p>
+        </div>
+        <button type="button" style="background:none; border:none; color:#fff; opacity:0.8; cursor:pointer; font-size:14px; line-height:1;">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+    });
+
+    const removeToast = () => {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 350);
+    };
+
+    toast.querySelector('button').addEventListener('click', removeToast);
+    setTimeout(removeToast, 5000);
+}
+
+// ===== Loan Application Form (AJAX submit) =====
+const loanForm = document.getElementById('loan-application-form');
+if (loanForm) {
+    loanForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const submitBtn = loanForm.querySelector('button[type="submit"]');
+        const originalBtnHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+        const formData = new FormData(loanForm);
+
+        fetch(loanForm.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+            body: formData,
+        })
+        .then(async (response) => {
+            const data = await response.json();
+            return { status: response.status, data };
+        })
+        .then(({ data }) => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                loanForm.reset();
+            } else {
+                showToast(data.message || 'Something went wrong. Please try again.', 'error');
+            }
+        })
+        .catch(() => {
+            showToast('Something went wrong. Please try again.', 'error');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
+        });
+    });
+}
+// ===== Dynamic loan amount max based on loan type =====
+const loanTypeSelect = document.getElementById('loan_type');
+const loanAmountInput = document.getElementById('loan_amount');
+
+if (loanTypeSelect && loanAmountInput) {
+    function updateLoanAmountMax() {
+        if (loanTypeSelect.value === 'personal') {
+            loanAmountInput.max = 200000;
+        } else if (loanTypeSelect.value === 'sme') {
+            loanAmountInput.max = 300000;
+        } else {
+            loanAmountInput.max = 300000; 
+        }
+
+        // Agar current value naye max se zyada hai to browser validation trigger karo
+        loanAmountInput.reportValidity();
+    }
+
+    loanTypeSelect.addEventListener('change', updateLoanAmountMax);
+
+    // Page load par bhi set karo (agar old('loan_type') already selected ho)
+    updateLoanAmountMax();
+}
+
+
 });
 </script>
