@@ -51,4 +51,8 @@ class LoanApplication extends Model
 
         return sprintf('%s%s%05d', $prefix, $year, $number);
     }
+    public function collaterals(): \Illuminate\Database\Eloquent\Relations\HasMany
+{
+    return $this->hasMany(Collateral::class, 'application_id');
+}
 }
