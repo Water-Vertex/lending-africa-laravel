@@ -71,7 +71,7 @@
 
             <!-- Right Side -->
           <div class="hidden lg:flex items-center gap-3">
-    <a href="{{ route('staff.login.show') }}"     target="_blank" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
+    <a href="http://localhost:4200/staff/login"   target="_blank" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
         <i class="fas fa-sign-in-alt text-xs"></i> Staff Login
     </a>
     <a href="#apply"
@@ -79,6 +79,7 @@
         Apply for Loan
     </a>
 </div>
+
 
             <!-- Mobile Hamburger -->
             <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-lg text-dark hover:bg-gray-100 transition">
