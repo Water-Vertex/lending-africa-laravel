@@ -97,11 +97,19 @@
                             <i class="fas fa-angle-right text-primary text-xs"></i> Contact Us
                         </a>
                     </li>
+                    <!-- Policies - Dynamic from database -->
+                    @php
+                        $footerPolicies = \App\Models\Policy::where('status', true)
+                            ->orderBy('title', 'asc')
+                            ->get();
+                    @endphp
+                    @foreach($footerPolicies as $policy)
                     <li>
-                        <a href="#" class="text-gray-400 hover:text-primary text-sm transition flex items-center gap-2">
-                            <i class="fas fa-angle-right text-primary text-xs"></i> Privacy Policy
+                        <a href="{{ route('policy.show', $policy->slug) }}" class="text-gray-400 hover:text-primary text-sm transition flex items-center gap-2">
+                            <i class="fas fa-angle-right text-primary text-xs"></i> {{ $policy->title }}
                         </a>
                     </li>
+                    @endforeach
                 </ul>
             </div>
 
@@ -164,7 +172,17 @@
                     &copy; <span id="footer-year"></span> African Investment Partners (AIP). All rights reserved.
                 </p>
                 <div class="flex items-center gap-5">
-                    <a href="#" class="text-gray-500 hover:text-primary text-xs transition">Privacy Policy</a>
+                    @php
+                        $footerPoliciesBottom = \App\Models\Policy::where('status', true)
+                            ->orderBy('title', 'asc')
+                            ->take(3)
+                            ->get();
+                    @endphp
+                    @foreach($footerPoliciesBottom as $policy)
+                    <a href="{{ route('policy.show', $policy->slug) }}" class="text-gray-500 hover:text-primary text-xs transition">
+                        {{ $policy->title }}
+                    </a>
+                    @endforeach
                     <a href="#" class="text-gray-500 hover:text-primary text-xs transition">Terms of Use</a>
                     <a href="#" class="text-gray-500 hover:text-primary text-xs transition">Sitemap</a>
                 </div>
@@ -172,3 +190,13 @@
         </div>
     </div>
 </footer>
+
+<!-- Footer Year Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const yearSpan = document.getElementById('footer-year');
+        if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+        }
+    });
+</script>
