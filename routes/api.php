@@ -56,6 +56,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/loan-inquiries/stats', [LoanApplicationInquiryController::class, 'stats']);
         Route::get('/loan-inquiries/{id}', [LoanApplicationInquiryController::class, 'show']);
 
+
+                // Loan Applications
+        Route::get('/loan-applications', [App\Http\Controllers\Api\LoanApplicationController::class, 'index']);
+        Route::get('/loan-applications/stats', [App\Http\Controllers\Api\LoanApplicationController::class, 'stats']);
+        Route::get('/loan-applications/{id}', [App\Http\Controllers\Api\LoanApplicationController::class, 'show']);
+        Route::patch('/loan-applications/{id}/status', [App\Http\Controllers\Api\LoanApplicationController::class, 'updateStatus']);
+
         // Users
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
