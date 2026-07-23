@@ -547,72 +547,78 @@
                 </div>
             </div>
 
-            {{-- Application Form --}}
-            <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-                <h3 class="font-display font-bold text-dark text-xl mb-6">Loan Application Form</h3>
-
-<form method="POST" action="{{ route('loan.application.store') }}" id="loan-application-form" class="space-y-5">    @csrf
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-800 mb-1.5">First Name *</label>
-                            <input type="text" name="first_name" placeholder="John" required class="contact-form-input" value="{{ old('first_name') }}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-800 mb-1.5">Last Name *</label>
-                            <input type="text" name="last_name" placeholder="Doe" required class="contact-form-input" value="{{ old('last_name') }}">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Email Address *</label>
-                        <input type="email" name="email" placeholder="john@example.com" required class="contact-form-input" value="{{ old('email') }}">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Phone Number *</label>
-                        <input type="tel" name="phone" placeholder="+234 800 000 0000" required class="contact-form-input" value="{{ old('phone') }}">
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div>
-        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Type *</label>
-        <select name="loan_type" id="loan_type" required class="contact-form-input">
-            <option value="">Select Type</option>
-            <option value="personal" {{ old('loan_type') == 'personal' ? 'selected' : '' }}>Personal Loan</option>
-            <option value="sme"      {{ old('loan_type') == 'sme' ? 'selected' : '' }}>SME Business Loan</option>
-        </select>
+{{-- Application Form --}}
+<div class="rounded-3xl p-8 shadow-2xl overflow-hidden" style="background-color: #243447;">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: rgba(186, 232, 45, 0.15);">
+            <i class="fas fa-file-signature text-primary"></i>
+        </div>
+        <h3 class="font-display font-bold text-white text-xl">Loan Application Form</h3>
     </div>
-    <div>
-        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Amount (₦) *</label>
-        <input type="number" name="loan_amount" id="loan_amount" placeholder="50000" min="50000" max="300000" required class="contact-form-input" value="{{ old('loan_amount') }}">
-    </div>
-</div>
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Preferred Bank *</label>
-                        <select name="preferred_bank" required class="contact-form-input">
-                            <option value="">Select Bank</option>
-                            <option value="polaris" {{ old('preferred_bank') == 'polaris' ? 'selected' : '' }}>Polaris Bank</option>
-                            <option value="zenith"  {{ old('preferred_bank') == 'zenith' ? 'selected' : '' }}>Zenith Bank</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Loan Purpose *</label>
-                        <textarea name="loan_purpose" rows="3" placeholder="Briefly describe what you need the loan for..." required class="contact-form-input resize-none">{{ old('purpose') }}</textarea>
-                    </div>
-
-                    <button type="submit" class="btn-primary w-full justify-center" style="display:flex;">
-                        Submit Application <i class="fas fa-paper-plane text-sm"></i>
-                    </button>
-
-                    <p class="text-center text-xs text-gray-500">
-                        By submitting this form, you agree to our
-                        <a href="#" class="text-primary hover:underline">Privacy Policy</a> and
-                        <a href="#" class="text-primary hover:underline">Terms of Use</a>.
-                    </p>
-                </form>
+    <form method="POST" action="{{ route('loan.application.store') }}" id="loan-application-form" class="space-y-5">
+        @csrf
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-semibold text-white mb-1.5">First Name *</label>
+                <input type="text" name="first_name" placeholder="John" required class="contact-form-input" value="{{ old('first_name') }}">
             </div>
+            <div>
+                <label class="block text-sm font-semibold text-white mb-1.5">Last Name *</label>
+                <input type="text" name="last_name" placeholder="Doe" required class="contact-form-input" value="{{ old('last_name') }}">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-white mb-1.5">Email Address *</label>
+            <input type="email" name="email" placeholder="john@example.com" required class="contact-form-input" value="{{ old('email') }}">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-white mb-1.5">Phone Number *</label>
+            <input type="tel" name="phone" placeholder="+234 800 000 0000" required class="contact-form-input" value="{{ old('phone') }}">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-semibold text-white mb-1.5">Loan Type *</label>
+                <select name="loan_type" id="loan_type" required class="contact-form-input">
+                    <option value="">Select Type</option>
+                    <option value="personal" {{ old('loan_type') == 'personal' ? 'selected' : '' }}>Personal Loan</option>
+                    <option value="sme"      {{ old('loan_type') == 'sme' ? 'selected' : '' }}>SME Business Loan</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-white mb-1.5">Loan Amount (₦) *</label>
+                <input type="number" name="loan_amount" id="loan_amount" placeholder="50000" min="50000" max="300000" required class="contact-form-input" value="{{ old('loan_amount') }}">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-white mb-1.5">Preferred Bank *</label>
+            <select name="preferred_bank" required class="contact-form-input">
+                <option value="">Select Bank</option>
+                <option value="polaris" {{ old('preferred_bank') == 'polaris' ? 'selected' : '' }}>Polaris Bank</option>
+                <option value="zenith"  {{ old('preferred_bank') == 'zenith' ? 'selected' : '' }}>Zenith Bank</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-white mb-1.5">Loan Purpose *</label>
+            <textarea name="loan_purpose" rows="3" placeholder="Briefly describe what you need the loan for..." required class="contact-form-input resize-none">{{ old('purpose') }}</textarea>
+        </div>
+
+        <button type="submit" class="btn-primary w-full justify-center" style="display:flex;">
+            Submit Application <i class="fas fa-paper-plane text-sm"></i>
+        </button>
+
+        <p class="text-center text-xs text-white">
+            By submitting this form, you agree to our
+            <a href="#" class="text-primary hover:underline">Privacy Policy</a> and
+            <a href="#" class="text-primary hover:underline">Terms of Use</a>.
+        </p>
+    </form>
+</div>
 
         </div>
     </div>

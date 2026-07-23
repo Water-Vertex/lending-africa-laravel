@@ -7,7 +7,8 @@ use App\Models\CollateralType;
 use App\Models\Collateral;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Http\JsonResponse;
+use App\Models\LoanApplication;
 class CollateralController extends Controller
 {
     /*
@@ -19,143 +20,138 @@ class CollateralController extends Controller
     /**
      * Display a listing of collaterals.
      */
-    public function index()
+   public function index(Request $request): JsonResponse
     {
-        try {
-            $collaterals = Collateral::with('collateralType')->orderBy('id', 'desc')->get();
+        $query = Collateral::with(['loanApplication.customer', 'collateralType']);
 
-            return response()->json([
-                'success' => true,
-                'data' => $collaterals
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch collaterals',
-                'error' => $e->getMessage()
-            ], 500);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('asset_name', 'like', "%{$search}%");
         }
+
+        $collaterals = $query->latest()->paginate($request->get('per_page', 15));
+
+        return response()->json([
+            'success' => true,
+            'data'    => $collaterals,
+        ]);
     }
 
     /**
-     * Store a newly created collateral.
+     * List loan applications for the dropdown (id + application_no + customer name).
      */
-    public function store(Request $request)
+    public function loanApplicationsList(): JsonResponse
     {
-        $request->validate([
-            'application_id'         => 'required|integer',
-            'collateral_type_id'     => 'required|exists:collateral_types,id',
-            'asset_name'             => 'required|string|max:200',
-            'estimated_value'        => 'nullable|numeric',
-            'ownership_document_no'  => 'nullable|string|max:100',
-            'verification_status'    => 'required|in:pending,verified,rejected',
+        $applications = LoanApplication::with('customer')
+            ->latest()
+            ->get()
+            ->map(function ($app) {
+                return [
+                    'id'             => $app->id,
+                    'application_no' => $app->application_no,
+                    'customer_name'  => $app->customer?->full_name ?? 'N/A',
+                    'loan_amount'    => $app->loan_amount,
+                    'status'         => $app->status,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data'    => $applications,
+        ]);
+    }
+
+    /**
+     * List collateral types for the dropdown.
+     */
+    public function collateralTypesList(): JsonResponse
+    {
+        $types = CollateralType::orderBy('name')->get(['id', 'name']);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $types,
+        ]);
+    }
+
+    /**
+     * Store a new collateral.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'application_id'          => ['required', 'integer', 'exists:loan_applications,id'],
+            'collateral_type_id'      => ['required', 'integer', 'exists:collateral_types,id'],
+            'asset_name'              => ['required', 'string', 'max:200'],
+            'estimated_value'         => ['nullable', 'numeric', 'min:0'],
+            'ownership_document_no'   => ['nullable', 'string', 'max:100'],
+            'verification_status'     => ['required', Rule::in(Collateral::VERIFICATION_STATUSES)],
         ]);
 
         try {
-            $collateral = Collateral::create([
-                'application_id'        => $request->application_id,
-                'collateral_type_id'    => $request->collateral_type_id,
-                'asset_name'            => $request->asset_name,
-                'estimated_value'       => $request->estimated_value,
-                'ownership_document_no' => $request->ownership_document_no,
-                'verification_status'   => $request->verification_status,
-            ]);
+            $collateral = Collateral::create($validated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Collateral created successfully',
-                'data'    => $collateral->load('collateralType')
+                'data'    => $collateral->load(['loanApplication', 'collateralType']),
+                'message' => 'Collateral created successfully.',
             ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create collateral',
-                'error'   => $e->getMessage()
+                'message' => 'Failed to create collateral.',
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Display the specified collateral.
+     * Show a single collateral.
      */
-    public function show($id)
+    public function show(Collateral $collateral): JsonResponse
     {
-        try {
-            $collateral = Collateral::with('collateralType')->findOrFail($id);
-
-            return response()->json([
-                'success' => true,
-                'data'    => $collateral
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Collateral not found'
-            ], 404);
-        }
+        return response()->json([
+            'success' => true,
+            'data'    => $collateral->load(['loanApplication.customer', 'collateralType']),
+        ]);
     }
 
     /**
-     * Update the specified collateral.
+     * Update a collateral.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Collateral $collateral): JsonResponse
     {
-        $request->validate([
-            'application_id'         => 'required|integer',
-            'collateral_type_id'     => 'required|exists:collateral_types,id',
-            'asset_name'             => 'required|string|max:200',
-            'estimated_value'        => 'nullable|numeric',
-            'ownership_document_no'  => 'nullable|string|max:100',
-            'verification_status'    => 'required|in:pending,verified,rejected',
+        $validated = $request->validate([
+            'application_id'          => ['required', 'integer', 'exists:loan_applications,id'],
+            'collateral_type_id'      => ['required', 'integer', 'exists:collateral_types,id'],
+            'asset_name'              => ['required', 'string', 'max:200'],
+            'estimated_value'         => ['nullable', 'numeric', 'min:0'],
+            'ownership_document_no'   => ['nullable', 'string', 'max:100'],
+            'verification_status'     => ['required', Rule::in(Collateral::VERIFICATION_STATUSES)],
         ]);
 
-        try {
-            $collateral = Collateral::findOrFail($id);
-            $collateral->update([
-                'application_id'        => $request->application_id,
-                'collateral_type_id'    => $request->collateral_type_id,
-                'asset_name'            => $request->asset_name,
-                'estimated_value'       => $request->estimated_value,
-                'ownership_document_no' => $request->ownership_document_no,
-                'verification_status'   => $request->verification_status,
-            ]);
+        $collateral->update($validated);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Collateral updated successfully',
-                'data'    => $collateral->load('collateralType')
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update collateral',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data'    => $collateral->fresh()->load(['loanApplication', 'collateralType']),
+            'message' => 'Collateral updated successfully.',
+        ]);
     }
 
     /**
-     * Remove the specified collateral.
+     * Delete a collateral.
      */
-    public function destroy($id)
+    public function destroy(Collateral $collateral): JsonResponse
     {
-        try {
-            $collateral = Collateral::findOrFail($id);
-            $collateral->delete();
+        $collateral->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Collateral deleted successfully'
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete collateral',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Collateral deleted successfully.',
+        ]);
     }
-
 
     /*
     |--------------------------------------------------------------------------

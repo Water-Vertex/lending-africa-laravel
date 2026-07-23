@@ -10,7 +10,9 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\BankController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\FaqController;
+use App\Http\Controllers\Api\LoanApplicationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LoanApplicationInquiryController;
 use App\Http\Controllers\Api\CustomerByStaffController;
@@ -76,6 +78,31 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/collaterals/{id}', [CollateralController::class, 'show']);
         Route::put('/collaterals/{id}', [CollateralController::class, 'update']);
         Route::delete('/collaterals/{id}', [CollateralController::class, 'destroy']);
+
+//    // Collateral Types (collateral_types table)
+//     Route::get('/admin/collateral-types',           [CollateralController::class, 'typesIndex']);
+//     Route::post('/admin/collateral-types',          [CollateralController::class, 'typesStore']);
+//     Route::get('/admin/collateral-types/{id}',      [CollateralController::class, 'typesShow']);
+//     Route::put('/admin/collateral-types/{id}',      [CollateralController::class, 'typesUpdate']);
+//     Route::delete('/admin/collateral-types/{id}',   [CollateralController::class, 'typesDestroy']);
+Route::get('/collaterals-form/loan-applications', [CollateralController::class, 'loanApplicationsList']);
+    Route::get('/collaterals-form/collateral-types', [CollateralController::class, 'collateralTypesList']);
+
+    Route::apiResource('customers', CustomerController::class);
+    Route::put('/admin/reset-password', [ProfileController::class, 'changePassword']);
+
+
+Route::get('/faqs', [FaqController::class, 'index']);
+Route::post('/faqs', [FaqController::class, 'store']);
+Route::get('/faqs/{id}', [FaqController::class, 'show']);
+Route::put('/faqs/{id}', [FaqController::class, 'update']);
+Route::delete('/admin/faqs/{id}', [FaqController::class, 'destroy']);
+// Loan Applications (read + status change only)
+Route::get('/loan-applications',              [LoanApplicationController::class, 'index']);
+Route::get('/loan-applications/stats',         [LoanApplicationController::class, 'stats']);
+Route::get('/loan-applications/{id}',          [LoanApplicationController::class, 'show']);
+Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class, 'updateStatus']);
+ 
 
         // Collateral Types
         Route::get('/collateral-types', [CollateralController::class, 'typesIndex']);
