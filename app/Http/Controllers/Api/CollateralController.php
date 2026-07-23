@@ -7,7 +7,8 @@ use App\Models\CollateralType;
 use App\Models\Collateral;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Http\JsonResponse;
+use App\Models\LoanApplication;
 class CollateralController extends Controller
 {
     /*
