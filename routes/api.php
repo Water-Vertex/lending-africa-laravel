@@ -149,6 +149,7 @@ Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class
     Route::put('/profile', [StaffController::class, 'updateProfile']);
 
         Route::get('/loan-products', [CustomerByStaffController::class, 'loanProducts']);
+         Route::get('/check-email', [CustomerByStaffController::class, 'checkEmail']);
 
         // Staff Customers
         Route::get('/customers', [CustomerByStaffController::class, 'index']);
