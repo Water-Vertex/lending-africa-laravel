@@ -37,22 +37,50 @@ class CustomerByStaffController extends Controller
     }
 
     /**
+     * POST /api/staff/check-email
+     * Check if email already exists in customers table.
+     */
+    public function checkEmail(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email|max:255'
+        ]);
+
+        $exists = Customer::where('email', $request->input('email'))->exists();
+
+        return response()->json([
+            'exists' => $exists
+        ]);
+    }
+
+    /**
      * GET /api/staff/customers
      * Get customers registered by the logged-in staff member.
      */
-    public function index(): JsonResponse
+     public function index(Request $request): JsonResponse
     {
-        /** @var \App\Models\Staff $staff */
-        $staff = Auth::guard('staff')->user();
+        $perPage = $request->get('per_page', 15);
+        
+        // Get customers with all relations
+        $customers = CustomerByStaff::with([
+            'customer',
+            'customer.business',
+            'customer.documents',
+            'customer.loanApplications'  // ✅ This should work
+        ])
+        ->where('staff_id', auth()->id())
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage);
 
-        $customers = CustomerByStaff::with(['customer.business', 'customer.documents'])
-            ->where('staff_id', $staff->id)
-            ->latest()
-            ->paginate(15);
+        // ✅ Debug: Log to check if data exists
+        \Log::info('Customer data:', [
+            'count' => $customers->count(),
+            'first_loan_apps' => $customers->first()?->customer?->loanApplications
+        ]);
 
         return response()->json([
             'success' => true,
-            'data'    => $customers,
+            'data' => $customers
         ]);
     }
 
@@ -68,6 +96,7 @@ class CustomerByStaffController extends Controller
 
         $isSme = $request->input('customer_type') === 'sme';
 
+        // Validation Rules
         $rules = [
             'customer_type'  => ['required', Rule::in(Customer::CUSTOMER_TYPES)],
             'first_name'     => 'required|string|max:100',
@@ -88,29 +117,32 @@ class CustomerByStaffController extends Controller
             'address'        => 'nullable|string',
             'status'         => ['nullable', Rule::in(Customer::STATUSES)],
 
+            // Documents
             'documents'                        => 'nullable|array',
             'documents.*.document_type'        => ['nullable', Rule::in(CustomerDocument::DOCUMENT_TYPES)],
             'documents.*.file'                 => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'documents.*.verification_status'  => ['nullable', Rule::in(CustomerDocument::VERIFICATION_STATUSES)],
 
+            // Loan Application
             'loan_product_id' => ['required', 'exists:loan_products,id'],
             'loan_amount'     => ['required', 'numeric', 'min:0'],
             'duration_months' => ['required', 'integer', 'min:1'],
             'purpose'         => ['required', 'string', 'max:1000'],
         ];
 
+        // SME specific fields
         if ($isSme) {
             $rules = array_merge($rules, [
                 'business_name'                  => ['required', 'string', 'max:200'],
                 'registration_number'            => ['nullable', 'string', 'max:100'],
-                'tax_number'                      => ['nullable', 'string', 'max:100'],
-                'business_type'                   => ['nullable', 'string', 'max:100'],
-                'business_monthly_revenue'        => ['nullable', 'numeric', 'min:0'],
-                'business_monthly_expense'        => ['nullable', 'numeric', 'min:0'],
-                'business_address'                => ['nullable', 'string'],
-                'business_city'                    => ['nullable', 'string', 'max:100'],
-                'business_state'                   => ['nullable', 'string', 'max:100'],
-                'business_local_government_area'   => ['nullable', 'string', 'max:100'],
+                'tax_number'                     => ['nullable', 'string', 'max:100'],
+                'business_type'                  => ['nullable', 'string', 'max:100'],
+                'business_monthly_revenue'       => ['nullable', 'numeric', 'min:0'],
+                'business_monthly_expense'       => ['nullable', 'numeric', 'min:0'],
+                'business_address'               => ['nullable', 'string'],
+                'business_city'                  => ['nullable', 'string', 'max:100'],
+                'business_state'                 => ['nullable', 'string', 'max:100'],
+                'business_local_government_area' => ['nullable', 'string', 'max:100'],
             ]);
         }
 
@@ -119,6 +151,7 @@ class CustomerByStaffController extends Controller
             'loan_product_id.exists' => 'Selected loan product is invalid.',
         ]);
 
+        // Validate Loan Product
         $loanProduct = LoanProduct::where('id', $validated['loan_product_id'])
             ->where('status', 'active')
             ->first();
@@ -152,7 +185,7 @@ class CustomerByStaffController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1) Create customer record
+            // 1) Create Customer Record
             $customerData = collect($validated)->only([
                 'customer_type', 'first_name', 'last_name', 'middle_name', 'date_of_birth',
                 'gender', 'national_id', 'email', 'phone_primary', 'phone_secondary',
@@ -165,7 +198,7 @@ class CustomerByStaffController extends Controller
 
             $customer = Customer::create($customerData);
 
-            // 2) Create business record (only for SME customers)
+            // 2) Create Business Record (only for SME customers)
             $business = null;
 
             if ($isSme) {
@@ -180,16 +213,16 @@ class CustomerByStaffController extends Controller
                     'address'                => $validated['business_address'] ?? null,
                     'city'                   => $validated['business_city'] ?? null,
                     'state'                  => $validated['business_state'] ?? null,
-                    'local_government_area' => $validated['business_local_government_area'] ?? null,
+                    'local_government_area'  => $validated['business_local_government_area'] ?? null,
                     'status'                 => 'active',
                 ]);
             }
 
-            // 3) Upload customer documents
+            // 3) Upload Customer Documents
             foreach ($request->file('documents', []) as $index => $docFiles) {
                 $file = $docFiles['file'] ?? null;
 
-                if (! $file) {
+                if (!$file) {
                     continue;
                 }
 
@@ -197,25 +230,25 @@ class CustomerByStaffController extends Controller
 
                 $customer->documents()->create([
                     'document_type'        => $validated['documents'][$index]['document_type'] ?? 'other',
-                    'file_path'             => $path,
+                    'file_path'            => $path,
                     'verification_status'  => $validated['documents'][$index]['verification_status'] ?? 'pending',
                 ]);
             }
 
-            // 4) Create loan application
+            // 4) Create Loan Application
             $loanApplication = LoanApplication::create([
                 'application_no'  => LoanApplication::generateApplicationNo(),
-                'customer_id'      => $customer->id,
-                'business_id'      => $business?->id,
-                'loan_product_id'  => $loanProduct->id,
-                'loan_amount'      => $validated['loan_amount'],
-                'duration_months'  => $validated['duration_months'],
-                'purpose'          => $validated['purpose'],
-                'status'           => 'submitted',
+                'customer_id'     => $customer->id,
+                'business_id'     => $business?->id,
+                'loan_product_id' => $loanProduct->id,
+                'loan_amount'     => $validated['loan_amount'],
+                'duration_months' => $validated['duration_months'],
+                'purpose'         => $validated['purpose'],
+                'status'          => 'submitted',
                 'application_date' => now()->toDateString(),
             ]);
 
-            // 5) Link customer with logged-in staff in customer_by_staff table
+            // 5) Link Customer with Staff
             CustomerByStaff::create([
                 'customer_id'   => $customer->id,
                 'customer_code' => $customer->customer_code,
@@ -229,8 +262,8 @@ class CustomerByStaffController extends Controller
                 'success' => true,
                 'message' => 'Customer "' . $customer->full_name . '" (' . $customer->customer_code . ') registered successfully. Loan application ' . $loanApplication->application_no . ' has been submitted.',
                 'data'    => [
-                    'customer' => $customer->fresh(['documents', 'businesses']),
-                    'loan_application' => $loanApplication,
+                    'customer'          => $customer->fresh(['documents', 'business']),
+                    'loan_application'  => $loanApplication,
                 ],
             ], 201);
 
