@@ -1,8 +1,7 @@
-@extends('user.pages.staff.layouts.app')
-
+@extends('user.layouts.app')
 @section('title', 'Customer Registration – African Investment Partners')
 
-@push('styles')
+@section('content')
 <style>
     /* ============================================================
        PREMIUM FORM STYLES
@@ -317,9 +316,7 @@
         }
     }
 </style>
-@endpush
 
-@section('content')
 <div class="max-w-5xl mx-auto px-4 py-8">
 
     {{-- ===== HEADER ===== --}}
@@ -371,6 +368,10 @@
         </div>
         <div id="step-indicator-2" class="step-item">
             <div class="step-number">2</div>
+            <span class="step-text">Co-Signer</span>
+        </div>
+        <div id="step-indicator-3" class="step-item">
+            <div class="step-number">3</div>
             <span class="step-text">Loan Application</span>
         </div>
     </div>
@@ -591,20 +592,154 @@
                     </button>
                 </div>
 
+                {{-- Customer Bank Details --}}
+                <div class="mb-8">
+                    <div class="form-section-title">
+                        <div class="icon-wrapper"><i class="fas fa-university"></i></div>
+                        Customer Bank Details
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="form-group">
+                            <label class="form-label-premium">Bank <span class="text-red-500">*</span></label>
+                            <select name="bank_id" required class="form-input-premium">
+                                <option value="">Select bank</option>
+                                @foreach ($banks as $bank)
+                                    <option value="{{ $bank->id }}" {{ old('bank_id') == $bank->id ? 'selected' : '' }}>
+                                        {{ $bank->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">Account Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="account_name" required class="form-input-premium" value="{{ old('account_name') }}" placeholder="Account holder name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">Account Number <span class="text-red-500">*</span></label>
+                            <input type="text" name="account_number" required class="form-input-premium" value="{{ old('account_number') }}" placeholder="0123456789">
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Step 1 Actions --}}
                 <div class="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t-2 border-slate-100">
                     <a href="{{ url()->previous() }}" class="btn-secondary-premium">
                         <i class="fas fa-times"></i> Cancel
                     </a>
-                    <button type="button" id="next-btn" class="btn-primary-premium">
+                    <button type="button" id="next-btn-1" class="btn-primary-premium">
+                        <span>Continue to Co-Signer</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            {{-- ===== STEP 2 — CO-SIGNER ===== --}}
+            <div id="step-2" style="display:none;">
+
+                <div class="mb-8">
+                    <div class="form-section-title">
+                        <div class="icon-wrapper"><i class="fas fa-user-shield"></i></div>
+                        Co-Signer / Guarantor Information
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="form-group">
+                            <label class="form-label-premium">First Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="cosigner_first_name" required class="form-input-premium" value="{{ old('cosigner_first_name') }}" placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">Last Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="cosigner_last_name" required class="form-input-premium" value="{{ old('cosigner_last_name') }}" placeholder="Enter last name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">Middle Name</label>
+                            <input type="text" name="cosigner_middle_name" class="form-input-premium" value="{{ old('cosigner_middle_name') }}" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                        <div class="form-group">
+                            <label class="form-label-premium">Date of Birth</label>
+                            <input type="date" name="cosigner_date_of_birth" class="form-input-premium" value="{{ old('cosigner_date_of_birth') }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">Relationship to Customer</label>
+                            <input type="text" name="cosigner_relationship" class="form-input-premium" value="{{ old('cosigner_relationship') }}" placeholder="e.g. Spouse, Sibling, Friend">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">BVN</label>
+                            <input type="text" name="cosigner_bvn" class="form-input-premium" value="{{ old('cosigner_bvn') }}" placeholder="Bank Verification Number">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        <div class="form-group">
+                            <label class="form-label-premium">Email Address</label>
+                            <input type="email" name="cosigner_email" class="form-input-premium" value="{{ old('cosigner_email') }}" placeholder="cosigner@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">Occupation</label>
+                            <input type="text" name="cosigner_occupation" class="form-input-premium" value="{{ old('cosigner_occupation') }}" placeholder="e.g. Teacher, Trader">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        <div class="form-group">
+                            <label class="form-label-premium">Primary Phone <span class="text-red-500">*</span></label>
+                            <input type="text" name="cosigner_phone_primary" required class="form-input-premium" value="{{ old('cosigner_phone_primary') }}" placeholder="080 1234 5678">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">Secondary Phone</label>
+                            <input type="text" name="cosigner_phone_secondary" class="form-input-premium" value="{{ old('cosigner_phone_secondary') }}" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                        <div class="form-group">
+                            <label class="form-label-premium">Country</label>
+                            <input type="text" name="cosigner_country" class="form-input-premium" value="{{ old('cosigner_country', 'Nigeria') }}" placeholder="Nigeria">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">State</label>
+                            <input type="text" name="cosigner_state" class="form-input-premium" value="{{ old('cosigner_state') }}" placeholder="State">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">City</label>
+                            <input type="text" name="cosigner_city" class="form-input-premium" value="{{ old('cosigner_city') }}" placeholder="City">
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <label class="form-label-premium">Address</label>
+                        <textarea name="cosigner_address" rows="2" class="form-input-premium resize-none" placeholder="Full address">{{ old('cosigner_address') }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        <div class="form-group">
+                            <label class="form-label-premium">Photo ID (Upload)</label>
+                            <input type="file" name="cosigner_photo_id" class="form-input-premium !py-2" accept=".jpg,.jpeg,.png,.pdf">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label-premium">Evidence of Occupation (Upload)</label>
+                            <input type="file" name="cosigner_evidence_of_occupation" class="form-input-premium !py-2" accept=".jpg,.jpeg,.png,.pdf">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Step 2 Actions --}}
+                <div class="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t-2 border-slate-100">
+                    <button type="button" id="back-btn-2" class="btn-secondary-premium">
+                        <i class="fas fa-arrow-left"></i> Back to Profile
+                    </button>
+                    <button type="button" id="next-btn-2" class="btn-primary-premium">
                         <span>Continue to Loan</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
 
-            {{-- ===== STEP 2 ===== --}}
-            <div id="step-2" style="display:none;">
+            {{-- ===== STEP 3 — LOAN APPLICATION ===== --}}
+            <div id="step-3" style="display:none;">
 
                 <div class="mb-8">
                     <div class="form-section-title">
@@ -647,10 +782,10 @@
                     </div>
                 </div>
 
-                {{-- Step 2 Actions --}}
+                {{-- Step 3 Actions --}}
                 <div class="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t-2 border-slate-100">
-                    <button type="button" id="back-btn" class="btn-secondary-premium">
-                        <i class="fas fa-arrow-left"></i> Back to Profile
+                    <button type="button" id="back-btn-3" class="btn-secondary-premium">
+                        <i class="fas fa-arrow-left"></i> Back to Co-Signer
                     </button>
                     <button type="submit" id="submit-btn" class="btn-primary-premium">
                         <span id="submit-btn-text">Submit & Create Customer</span>
@@ -782,45 +917,69 @@
             filterProducts();
 
             // Step navigation
-            const nextBtn = document.getElementById('next-btn');
-            const backBtn = document.getElementById('back-btn');
             const step1 = document.getElementById('step-1');
             const step2 = document.getElementById('step-2');
+            const step3 = document.getElementById('step-3');
+
             const ind1 = document.getElementById('step-indicator-1');
             const ind2 = document.getElementById('step-indicator-2');
+            const ind3 = document.getElementById('step-indicator-3');
 
-            function goToStep2() {
-                step1.style.display = 'none';
-                step2.style.display = 'block';
-                ind1.classList.remove('step-active');
-                ind1.classList.add('step-completed');
-                ind2.classList.add('step-active');
+            function showStep(activeStep) {
+                [step1, step2, step3].forEach(s => s.style.display = 'none');
+                [ind1, ind2, ind3].forEach(i => { i.classList.remove('step-active'); i.classList.remove('step-completed'); });
+
+                if (activeStep === 1) {
+                    step1.style.display = 'block';
+                    ind1.classList.add('step-active');
+                } else if (activeStep === 2) {
+                    step2.style.display = 'block';
+                    ind1.classList.add('step-completed');
+                    ind2.classList.add('step-active');
+                } else if (activeStep === 3) {
+                    step3.style.display = 'block';
+                    ind1.classList.add('step-completed');
+                    ind2.classList.add('step-completed');
+                    ind3.classList.add('step-active');
+                }
+
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
-            function goToStep1() {
-                step2.style.display = 'none';
-                step1.style.display = 'block';
-                ind2.classList.remove('step-active');
-                ind1.classList.remove('step-completed');
-                ind1.classList.add('step-active');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            nextBtn?.addEventListener('click', () => {
-                const required = step1.querySelectorAll('[required]');
+            function validateStepFields(stepEl) {
+                const required = stepEl.querySelectorAll('[required]');
                 let invalid = null;
                 required.forEach(f => { if (!invalid && !f.checkValidity()) invalid = f; });
-                if (invalid) { invalid.reportValidity(); invalid.focus(); return; }
-                goToStep2();
+                if (invalid) { invalid.reportValidity(); invalid.focus(); return false; }
+                return true;
+            }
+
+            document.getElementById('next-btn-1')?.addEventListener('click', () => {
+                if (!validateStepFields(step1)) return;
+                showStep(2);
             });
 
-            backBtn?.addEventListener('click', goToStep1);
+            document.getElementById('back-btn-2')?.addEventListener('click', () => showStep(1));
+
+            document.getElementById('next-btn-2')?.addEventListener('click', () => {
+                if (!validateStepFields(step2)) return;
+                showStep(3);
+            });
+
+            document.getElementById('back-btn-3')?.addEventListener('click', () => showStep(2));
 
             @if ($errors->any())
                 const errorKeys = @json(array_keys($errors->toArray()));
-                const step2Fields = ['loan_product_id', 'loan_amount', 'duration_months', 'purpose'];
-                if (errorKeys.some(k => step2Fields.includes(k))) goToStep2();
+                const step2Fields = ['cosigner_first_name', 'cosigner_last_name', 'cosigner_phone_primary'];
+                const step3Fields = ['loan_product_id', 'loan_amount', 'duration_months', 'purpose'];
+
+                if (errorKeys.some(k => step3Fields.includes(k))) {
+                    showStep(3);
+                } else if (errorKeys.some(k => step2Fields.includes(k) || k.startsWith('cosigner_'))) {
+                    showStep(2);
+                } else {
+                    showStep(1);
+                }
             @endif
         }
 

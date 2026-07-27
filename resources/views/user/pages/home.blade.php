@@ -171,8 +171,9 @@
 {{-- ============================================================
      LOAN TYPES SECTION
 ============================================================ --}}
-<section class="section-pad bg-white" id="personal-loan">
+<section class="section-pad bg-soft section-decor" id="personal-loan">
     <div class="container">
+        <div class="section-decor-dot"></div>
         <div class="text-center mb-14">
             <div class="section-badge"><i class="fas fa-hand-holding-dollar text-xs"></i> Our Products</div>
             <h2 class="section-title mb-4">Loan Products Designed<br>For You</h2>
@@ -190,22 +191,22 @@
                 </p>
 <div class="grid grid-cols-2 gap-4 mb-8">
     <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-black text-xs mb-1">Interest Rate</p>
+        <p class="text-white/70 text-xs mb-1">Interest Rate</p>
         <p class="text-white font-bold font-display text-xl">From 20% p.a.</p>
     </div>
 
     <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-black text-xs mb-1">Tenure</p>
+        <p class="text-white/70 text-xs mb-1">Tenure</p>
         <p class="text-white font-bold font-display text-xl">6 – 36 Months</p>
     </div>
 
     <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-black text-xs mb-1">Min. Amount</p>
+        <p class="text-white/70 text-xs mb-1">Min. Amount</p>
         <p class="text-white font-bold font-display text-xl">₦50,000</p>
     </div>
 
     <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-black text-xs mb-1">Processing Time</p>
+        <p class="text-white/70 text-xs mb-1">Processing Time</p>
         <p class="text-white font-bold font-display text-xl">2 – 5 Days</p>
     </div>
 </div>
@@ -232,22 +233,22 @@
 
               <div class="grid grid-cols-2 gap-4 mb-8">
     <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-black text-xs mb-1">Interest Rate</p>
+        <p class="text-white/70 text-xs mb-1">Interest Rate</p>
         <p class="text-white font-bold font-display text-xl">From 20% p.a.</p>
     </div>
 
     <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-black text-xs mb-1">Tenure</p>
+        <p class="text-white/70 text-xs mb-1">Tenure</p>
         <p class="text-white font-bold font-display text-xl">6 – 36 Months</p>
     </div>
 
     <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-black text-xs mb-1">Min. Amount</p>
+        <p class="text-white/70 text-xs mb-1">Min. Amount</p>
         <p class="text-white font-bold font-display text-xl">₦50,000</p>
     </div>
 
     <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-black text-xs mb-1">Processing Time</p>
+        <p class="text-white/70 text-xs mb-1">Processing Time</p>
         <p class="text-white font-bold font-display text-xl">2 – 5 Days</p>
     </div>
 </div>
@@ -315,8 +316,9 @@
 {{-- ============================================================
      WHY CHOOSE US
 ============================================================ --}}
-<section class="section-pad bg-white" id="about">
+<section class="section-pad bg-alt section-decor" id="about">
     <div class="container">
+        <div class="section-decor-dot"></div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
             {{-- Left Image Placeholder --}}
@@ -412,8 +414,9 @@
 {{-- ============================================================
      ELIGIBILITY REQUIREMENTS
 ============================================================ --}}
-<section class="section-pad bg-primary-xlight">
+<section class="section-pad bg-primary-xlight section-decor">
     <div class="container">
+        <div class="section-decor-dot"></div>
         <div class="text-center mb-14">
             <div class="section-badge"><i class="fas fa-clipboard-check text-xs"></i> Requirements</div>
             <h2 class="section-title mb-4">Who Can Apply?</h2>
@@ -457,8 +460,9 @@
 {{-- ============================================================
      TESTIMONIALS
 ============================================================ --}}
-<section class="section-pad bg-white">
+<section class="section-pad bg-soft section-decor">
     <div class="container">
+        <div class="section-decor-dot"></div>
         <div class="text-center mb-14">
             <div class="section-badge"><i class="fas fa-quote-left text-xs"></i> Testimonials</div>
             <h2 class="section-title mb-4">What Our Customers Say</h2>
@@ -517,7 +521,7 @@
                 <p class="section-subtitle mb-8">Fill in your details below and our team will contact you within 2 business hours to guide you through the rest.</p>
 
                 <div class="space-y-4">
-                    <div class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="info-strip">
                         <div class="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-clock text-primary text-sm"></i>
                         </div>
@@ -526,7 +530,7 @@
                             <p class="text-gray-500 text-xs leading-relaxed">Our loan officers will call you back within 2 business hours of submitting your application.</p>
                         </div>
                     </div>
-                    <div class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="info-strip">
                         <div class="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-lock text-primary text-sm"></i>
                         </div>
@@ -535,7 +539,7 @@
                             <p class="text-gray-500 text-xs leading-relaxed">We use bank-grade SSL encryption to protect all your personal and financial information.</p>
                         </div>
                     </div>
-                    <div class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="info-strip">
                         <div class="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-ban text-primary text-sm"></i>
                         </div>
@@ -628,8 +632,9 @@
 {{-- ============================================================
      FAQ SECTION
 ============================================================ --}}
-<section class="section-pad bg-white" id="faq">
+<section class="section-pad bg-alt section-decor" id="faq">
     <div class="container">
+        <div class="section-decor-dot"></div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
 
             {{-- Left --}}
@@ -751,7 +756,7 @@
             </div>
 
             {{-- Contact Form --}}
-            <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+            <div class="lg:col-span-2 form-panel">
                 <h3 class="font-display font-bold text-dark text-xl mb-6">Send Us a Message</h3>
                 <form action="{{ route('contact.store') }}" method="POST" class="space-y-5">
                     @csrf

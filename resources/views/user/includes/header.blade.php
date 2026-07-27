@@ -71,7 +71,10 @@
 
             <!-- Right Side -->
           <div class="hidden lg:flex items-center gap-3">
-    <a href="http://localhost:4200/staff/login"   target="_blank" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
+    <!-- <a href="http://localhost:4200/staff/login"   target="_blank" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
+        <i class="fas fa-sign-in-alt text-xs"></i> Staff Login
+    </a> -->
+     <a href="{{ route('staff.customer.create') }}" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
         <i class="fas fa-sign-in-alt text-xs"></i> Staff Login
     </a>
     <a href="#apply"

@@ -146,7 +146,9 @@
 
     /* ---- Service Cards ---- */
     .service-card {
-        @apply bg-white border border-gray-200 rounded-[20px] p-8 relative overflow-hidden transition-all duration-300;
+        @apply border border-gray-200 rounded-[20px] p-8 relative overflow-hidden transition-all duration-300;
+        background: linear-gradient(155deg, #ffffff 0%, #EFF8E6 60%, #E8F5DE 100%);
+        box-shadow: 0 14px 34px -16px rgba(26, 35, 50, 0.3);
     }
     .service-card::before {
         content: '';
@@ -235,7 +237,9 @@
 
     /* ---- Testimonials ---- */
     .testimonial-card {
-        @apply bg-white border border-gray-200 rounded-[20px] p-8 transition-all duration-300 relative;
+        @apply border border-gray-200 rounded-[20px] p-8 transition-all duration-300 relative;
+        background: linear-gradient(155deg, #ffffff 0%, #EEF7E4 60%, #E8F5DE 100%);
+        box-shadow: 0 14px 34px -16px rgba(26, 35, 50, 0.3);
     }
     .testimonial-card:hover {
         @apply border-primary-light;
@@ -269,6 +273,7 @@
     /* ---- FAQ ---- */
     .faq-item {
         @apply border border-gray-200 rounded-2xl overflow-hidden mb-3 transition-all duration-200;
+        background: linear-gradient(155deg, #ffffff 0%, #F2F9EB 100%);
     }
     .faq-item.open {
         @apply border-primary;
@@ -374,6 +379,99 @@
     }
     .marquee-wrap {
         @apply overflow-hidden;
+    }
+
+    /* ================= NEW: DEPTH & COLOR HELPERS =================
+       These fix the "too white" look by tinting plain white sections
+       and cards with soft brand-color gradients + decorative blobs,
+       reusing the existing green / dark navy palette only.
+       ================================================================ */
+
+    /* ---- Soft section backgrounds (replace flat bg-white / bg-gray-50) ---- */
+    .bg-soft {
+        background: linear-gradient(165deg, #ffffff 0%, #E8F5DE 55%, #DCF0CC 100%);
+    }
+    .bg-alt {
+        background: linear-gradient(165deg, #EEF2F8 0%, #D8E3EF 55%, #CBDAE9 100%);
+    }
+
+    /* ---- Decorative blobs for otherwise-flat light sections ---- */
+    .section-decor {
+        @apply relative overflow-hidden;
+    }
+    .section-decor::before {
+        content: '';
+        @apply absolute pointer-events-none;
+        top: -160px;
+        right: -160px;
+        width: 560px;
+        height: 560px;
+        border-radius: 9999px;
+        background: radial-gradient(circle, rgba(109, 190, 59, 0.30) 0%, rgba(109, 190, 59, 0.08) 55%, transparent 75%);
+    }
+    .section-decor::after {
+        content: '';
+        @apply absolute pointer-events-none;
+        bottom: -140px;
+        left: -140px;
+        width: 440px;
+        height: 440px;
+        border-radius: 9999px;
+        background: radial-gradient(circle, rgba(26, 35, 50, 0.18) 0%, rgba(26, 35, 50, 0.05) 55%, transparent 75%);
+    }
+    .section-decor > .container {
+        @apply relative;
+        z-index: 1;
+    }
+
+    /* ---- Extra floating accent dot (adds a second layer of color/interest) ---- */
+    .section-decor-dot {
+        @apply absolute pointer-events-none rounded-full;
+        top: 40%;
+        left: 6%;
+        width: 180px;
+        height: 180px;
+        background: radial-gradient(circle, rgba(109, 190, 59, 0.22) 0%, transparent 70%);
+        z-index: 0;
+    }
+
+    /* ---- Contact / loan form panel (replaces flat white box) ---- */
+    .form-panel {
+        @apply rounded-3xl p-8 relative overflow-hidden border;
+        background: linear-gradient(155deg, #ffffff 0%, #EFF8E6 55%, #E8F5DE 100%);
+        border-color: #CFE8B8;
+        box-shadow: 0 28px 60px -20px rgba(88, 160, 46, 0.4);
+    }
+    .form-panel::before {
+        content: '';
+        @apply absolute top-0 left-0 right-0 h-2;
+        background: linear-gradient(90deg, #6DBE3B, #1A2332);
+    }
+    .form-panel::after {
+        content: '';
+        @apply absolute pointer-events-none rounded-full;
+        top: -80px;
+        right: -80px;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(109, 190, 59, 0.25) 0%, transparent 70%);
+        z-index: 0;
+    }
+    .form-panel > * {
+        @apply relative;
+        z-index: 1;
+    }
+
+    /* ---- Trust / info strips (Apply Now sidebar) ---- */
+    .info-strip {
+        @apply flex items-start gap-4 p-4 rounded-2xl shadow-sm transition-all duration-200 border border-gray-100;
+        background: linear-gradient(135deg, #ffffff 0%, #EFF8E6 100%);
+        border-left: 4px solid #6DBE3B;
+    }
+    .info-strip:hover {
+        @apply -translate-y-0.5;
+        box-shadow: 0 16px 32px -10px rgba(109, 190, 59, 0.3);
+        border-left-color: #58A02E;
     }
 }
 

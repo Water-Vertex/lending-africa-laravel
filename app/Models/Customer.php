@@ -83,4 +83,8 @@ public function loanApplications(): HasMany
     {
         return $this->hasMany(CustomerByStaff::class);
     }
+    public function bankAccounts(): HasMany
+{
+    return $this->hasMany(CustomerBankAccount::class);
+}
 }
