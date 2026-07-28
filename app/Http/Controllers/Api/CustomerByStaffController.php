@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bank;
 use App\Models\Business;
+use App\Models\CoSigner;
 use App\Models\Customer;
+use App\Models\CustomerBankAccount;
 use App\Models\CustomerByStaff;
 use App\Models\CustomerDocument;
 use App\Models\LoanApplication;
@@ -19,8 +22,6 @@ class CustomerByStaffController extends Controller
 {
     /**
      * GET /api/staff/loan-products
-     * Active loan products for the "Loan Application" step of the form.
-     * Optional ?type=personal|sme to pre-filter.
      */
     public function loanProducts(Request $request): JsonResponse
     {
@@ -37,8 +38,18 @@ class CustomerByStaffController extends Controller
     }
 
     /**
+     * GET /api/staff/banks
+     */
+    public function banks(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data'    => Bank::where('status', 'active')->get(),
+        ]);
+    }
+
+    /**
      * POST /api/staff/check-email
-     * Check if email already exists in customers table.
      */
     public function checkEmail(Request $request): JsonResponse
     {
@@ -55,28 +66,23 @@ class CustomerByStaffController extends Controller
 
     /**
      * GET /api/staff/customers
-     * Get customers registered by the logged-in staff member.
      */
-     public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $perPage = $request->get('per_page', 15);
-        
-        // Get customers with all relations
+
         $customers = CustomerByStaff::with([
             'customer',
             'customer.business',
             'customer.documents',
-            'customer.loanApplications'  // ✅ This should work
+            'customer.bankAccounts',
+            'customer.bankAccounts.bank',
+            'customer.loanApplications',
+            'customer.loanApplications.coSigner',
         ])
         ->where('staff_id', auth()->id())
         ->orderBy('created_at', 'desc')
         ->paginate($perPage);
-
-        // ✅ Debug: Log to check if data exists
-        \Log::info('Customer data:', [
-            'count' => $customers->count(),
-            'first_loan_apps' => $customers->first()?->customer?->loanApplications
-        ]);
 
         return response()->json([
             'success' => true,
@@ -86,8 +92,8 @@ class CustomerByStaffController extends Controller
 
     /**
      * POST /api/staff/customers
-     * Create Customer, Business (SME only), Documents, Loan Application,
-     * and Customer-by-Staff record - all in one database transaction.
+     * Flow: Customer -> Business (SME) -> Bank Account -> Documents ->
+     *       Loan Application -> Co-signer -> Customer-by-Staff link
      */
     public function store(Request $request): JsonResponse
     {
@@ -96,7 +102,6 @@ class CustomerByStaffController extends Controller
 
         $isSme = $request->input('customer_type') === 'sme';
 
-        // Validation Rules
         $rules = [
             'customer_type'  => ['required', Rule::in(Customer::CUSTOMER_TYPES)],
             'first_name'     => 'required|string|max:100',
@@ -123,6 +128,29 @@ class CustomerByStaffController extends Controller
             'documents.*.file'                 => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'documents.*.verification_status'  => ['nullable', Rule::in(CustomerDocument::VERIFICATION_STATUSES)],
 
+            // Bank Details
+            'bank_id'         => ['required', 'exists:banks,id'],
+            'account_name'    => ['required', 'string', 'max:150'],
+            'account_number'  => ['required', 'string', 'max:50'],
+
+            // Co-signer
+            'cosigner_first_name'             => ['required', 'string', 'max:100'],
+            'cosigner_last_name'              => ['required', 'string', 'max:100'],
+            'cosigner_middle_name'            => ['nullable', 'string', 'max:100'],
+            'cosigner_date_of_birth'          => ['nullable', 'date', 'before:today'],
+            'cosigner_occupation'             => ['nullable', 'string', 'max:150'],
+            'cosigner_evidence_of_occupation' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'cosigner_email'                  => ['nullable', 'email', 'max:255'],
+            'cosigner_phone_primary'          => ['required', 'string', 'max:20'],
+            'cosigner_phone_secondary'        => ['nullable', 'string', 'max:20'],
+            'cosigner_address'                => ['nullable', 'string'],
+            'cosigner_city'                   => ['nullable', 'string', 'max:100'],
+            'cosigner_state'                  => ['nullable', 'string', 'max:100'],
+            'cosigner_country'                => ['nullable', 'string', 'max:100'],
+            'cosigner_bvn'                    => ['nullable', 'string', 'max:20'],
+            'cosigner_photo_id'               => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'cosigner_relationship'           => ['nullable', 'string', 'max:100'],
+
             // Loan Application
             'loan_product_id' => ['required', 'exists:loan_products,id'],
             'loan_amount'     => ['required', 'numeric', 'min:0'],
@@ -130,28 +158,30 @@ class CustomerByStaffController extends Controller
             'purpose'         => ['required', 'string', 'max:1000'],
         ];
 
-        // SME specific fields
         if ($isSme) {
             $rules = array_merge($rules, [
                 'business_name'                  => ['required', 'string', 'max:200'],
                 'registration_number'            => ['nullable', 'string', 'max:100'],
-                'tax_number'                     => ['nullable', 'string', 'max:100'],
-                'business_type'                  => ['nullable', 'string', 'max:100'],
-                'business_monthly_revenue'       => ['nullable', 'numeric', 'min:0'],
-                'business_monthly_expense'       => ['nullable', 'numeric', 'min:0'],
-                'business_address'               => ['nullable', 'string'],
-                'business_city'                  => ['nullable', 'string', 'max:100'],
-                'business_state'                 => ['nullable', 'string', 'max:100'],
-                'business_local_government_area' => ['nullable', 'string', 'max:100'],
+                'tax_number'                      => ['nullable', 'string', 'max:100'],
+                'business_type'                   => ['nullable', 'string', 'max:100'],
+                'business_monthly_revenue'        => ['nullable', 'numeric', 'min:0'],
+                'business_monthly_expense'        => ['nullable', 'numeric', 'min:0'],
+                'business_address'                => ['nullable', 'string'],
+                'business_city'                    => ['nullable', 'string', 'max:100'],
+                'business_state'                   => ['nullable', 'string', 'max:100'],
+                'business_local_government_area'  => ['nullable', 'string', 'max:100'],
             ]);
         }
 
         $validated = $request->validate($rules, [
-            'business_name.required' => 'Business name is required for SME customers.',
-            'loan_product_id.exists' => 'Selected loan product is invalid.',
+            'business_name.required'          => 'Business name is required for SME customers.',
+            'loan_product_id.exists'          => 'Selected loan product is invalid.',
+            'bank_id.exists'                  => 'Selected bank is invalid.',
+            'cosigner_first_name.required'    => 'Co-signer first name is required.',
+            'cosigner_last_name.required'     => 'Co-signer last name is required.',
+            'cosigner_phone_primary.required' => 'Co-signer phone number is required.',
         ]);
 
-        // Validate Loan Product
         $loanProduct = LoanProduct::where('id', $validated['loan_product_id'])
             ->where('status', 'active')
             ->first();
@@ -185,7 +215,7 @@ class CustomerByStaffController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1) Create Customer Record
+            // 1) Customer
             $customerData = collect($validated)->only([
                 'customer_type', 'first_name', 'last_name', 'middle_name', 'date_of_birth',
                 'gender', 'national_id', 'email', 'phone_primary', 'phone_secondary',
@@ -198,7 +228,7 @@ class CustomerByStaffController extends Controller
 
             $customer = Customer::create($customerData);
 
-            // 2) Create Business Record (only for SME customers)
+            // 2) Business (SME only)
             $business = null;
 
             if ($isSme) {
@@ -218,7 +248,15 @@ class CustomerByStaffController extends Controller
                 ]);
             }
 
-            // 3) Upload Customer Documents
+            // 3) Bank Account
+            $bankAccount = CustomerBankAccount::create([
+                'customer_id'    => $customer->id,
+                'bank_id'        => $validated['bank_id'],
+                'account_name'   => $validated['account_name'],
+                'account_number' => $validated['account_number'],
+            ]);
+
+            // 4) Documents
             foreach ($request->file('documents', []) as $index => $docFiles) {
                 $file = $docFiles['file'] ?? null;
 
@@ -235,7 +273,7 @@ class CustomerByStaffController extends Controller
                 ]);
             }
 
-            // 4) Create Loan Application
+            // 5) Loan Application
             $loanApplication = LoanApplication::create([
                 'application_no'  => LoanApplication::generateApplicationNo(),
                 'customer_id'     => $customer->id,
@@ -248,7 +286,40 @@ class CustomerByStaffController extends Controller
                 'application_date' => now()->toDateString(),
             ]);
 
-            // 5) Link Customer with Staff
+            // 6) Co-signer
+            $evidencePath = null;
+            if ($request->hasFile('cosigner_evidence_of_occupation')) {
+                $evidencePath = $request->file('cosigner_evidence_of_occupation')
+                    ->store('cosigner-documents', 'public');
+            }
+
+            $photoIdPath = null;
+            if ($request->hasFile('cosigner_photo_id')) {
+                $photoIdPath = $request->file('cosigner_photo_id')
+                    ->store('cosigner-documents', 'public');
+            }
+
+            $coSigner = CoSigner::create([
+                'application_id'         => $loanApplication->id,
+                'first_name'             => $validated['cosigner_first_name'],
+                'last_name'              => $validated['cosigner_last_name'],
+                'middle_name'            => $validated['cosigner_middle_name'] ?? null,
+                'date_of_birth'          => $validated['cosigner_date_of_birth'] ?? null,
+                'occupation'             => $validated['cosigner_occupation'] ?? null,
+                'evidence_of_occupation' => $evidencePath,
+                'email'                  => $validated['cosigner_email'] ?? null,
+                'phone_primary'          => $validated['cosigner_phone_primary'],
+                'phone_secondary'        => $validated['cosigner_phone_secondary'] ?? null,
+                'address'                => $validated['cosigner_address'] ?? null,
+                'city'                   => $validated['cosigner_city'] ?? null,
+                'state'                  => $validated['cosigner_state'] ?? null,
+                'country'                => $validated['cosigner_country'] ?? null,
+                'bvn'                    => $validated['cosigner_bvn'] ?? null,
+                'photo_id'               => $photoIdPath,
+                'relationship'           => $validated['cosigner_relationship'] ?? null,
+            ]);
+
+            // 7) Customer-by-Staff link
             CustomerByStaff::create([
                 'customer_id'   => $customer->id,
                 'customer_code' => $customer->customer_code,
@@ -262,8 +333,10 @@ class CustomerByStaffController extends Controller
                 'success' => true,
                 'message' => 'Customer "' . $customer->full_name . '" (' . $customer->customer_code . ') registered successfully. Loan application ' . $loanApplication->application_no . ' has been submitted.',
                 'data'    => [
-                    'customer'          => $customer->fresh(['documents', 'business']),
-                    'loan_application'  => $loanApplication,
+                    'customer'         => $customer->fresh(['documents', 'business']),
+                    'bank_account'     => $bankAccount,
+                    'co_signer'        => $coSigner,
+                    'loan_application' => $loanApplication,
                 ],
             ], 201);
 

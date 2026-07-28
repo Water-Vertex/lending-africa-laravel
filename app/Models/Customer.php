@@ -90,4 +90,9 @@ public function loanApplications(): HasMany
     {
         return $this->hasOne(Business::class)->latest();
     }
+
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(CustomerBankAccount::class);
+    }
 }

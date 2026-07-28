@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class LoanApplication extends Model
 {
@@ -41,6 +43,13 @@ class LoanApplication extends Model
     {
         return $this->belongsTo(LoanProduct::class);
     }
+
+
+     public function coSigner(): HasOne
+    {
+        return $this->hasOne(CoSigner::class, 'application_id');
+    }
+
 
     public static function generateApplicationNo(): string
     {

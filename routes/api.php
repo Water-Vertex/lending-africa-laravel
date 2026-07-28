@@ -151,6 +151,7 @@ Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class
         Route::get('/loan-products', [CustomerByStaffController::class, 'loanProducts']);
          Route::get('/check-email', [CustomerByStaffController::class, 'checkEmail']);
 
+       Route::get('/banks', [CustomerByStaffController::class, 'banks']);
         // Staff Customers
         Route::get('/customers', [CustomerByStaffController::class, 'index']);
         Route::post('/customers', [CustomerByStaffController::class, 'store']);
