@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CustomerByStaffMail;
 use App\Models\Bank;
 use App\Models\Business;
 use App\Models\CoSigner;
@@ -16,14 +17,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
+
 class CustomerByStaffController extends Controller
-{
-    /**
-     * GET /api/staff/loan-products
-     */
-    public function loanProducts(Request $request): JsonResponse
+{  public function loanProducts(Request $request): JsonResponse
     {
         $query = LoanProduct::where('status', 'active');
 
@@ -93,7 +93,7 @@ class CustomerByStaffController extends Controller
     /**
      * POST /api/staff/customers
      * Flow: Customer -> Business (SME) -> Bank Account -> Documents ->
-     *       Loan Application -> Co-signer -> Customer-by-Staff link
+     *       Loan Application -> Co-signer -> Customer-by-Staff link -> Email PDF
      */
     public function store(Request $request): JsonResponse
     {
@@ -328,6 +328,20 @@ class CustomerByStaffController extends Controller
             ]);
 
             DB::commit();
+
+            // 8) Send the loan application confirmation email with PDF attachment
+            try {
+                if (!empty($customer->email)) {
+                    Mail::to($customer->email)->send(
+                        new CustomerByStaffMail(
+                            $customer->fresh(['documents', 'business', 'bankAccounts.bank']),
+                            $loanApplication->fresh(['loanProduct', 'business', 'coSigner'])
+                        )
+                    );
+                }
+            } catch (\Exception $mailException) {
+                Log::error('Failed to send loan application email: ' . $mailException->getMessage());
+            }
 
             return response()->json([
                 'success' => true,

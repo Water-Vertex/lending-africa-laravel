@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Mail\UserAccountCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -44,17 +47,16 @@ class UserController extends Controller
         ]);
 
         $role = Role::find($request->role_id);
-        
+
         if ($role && $role->name === 'Branch Manager') {
-            
-            // ONLY CHECK: Same bank + same branch already has active branch manager
+
             if ($request->bank_id && $request->branch) {
                 $existingManager = User::where('bank_id', $request->bank_id)
                                       ->where('branch', $request->branch)
                                       ->whereHas('role', fn($q) => $q->where('name', 'Branch Manager'))
                                       ->where('status', 'active')
                                       ->exists();
-                
+
                 if ($existingManager) {
                     return response()->json([
                         'success' => false,
@@ -66,6 +68,8 @@ class UserController extends Controller
         }
 
         try {
+            $plainPassword = $request->password;
+
             $user = User::create([
                 'role_id'    => $request->role_id,
                 'bank_id'    => $request->bank_id,
@@ -74,14 +78,31 @@ class UserController extends Controller
                 'last_name'  => $request->last_name,
                 'email'      => $request->email,
                 'phone'      => $request->phone,
-                'password'   => Hash::make($request->password),
+                'password'   => Hash::make($plainPassword),
                 'status'     => $request->status,
             ]);
+
+            $user->load(['role', 'bank']);
+
+            // 🔥 Send account credentials email
+            try {
+                Mail::to($user->email)->send(new UserAccountCreated(
+                    $user->first_name . ' ' . $user->last_name,
+                    $user->email,
+                    $plainPassword,
+                    optional($user->role)->name,
+                     optional($user->bank)->name,
+                    'http://localhost:4200/login'
+                //    'https://portal.aiploan.com/login'
+                ));
+            } catch (\Exception $mailException) {
+                Log::error('User account email failed: ' . $mailException->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'User created successfully',
-                'data'    => $user->load(['role', 'bank'])
+                'data'    => $user
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -112,10 +133,9 @@ class UserController extends Controller
         ]);
 
         $role = Role::find($request->role_id);
-        
+
         if ($role && $role->name === 'Branch Manager') {
-            
-            // ONLY CHECK: Same bank + same branch already has active branch manager (excluding current)
+
             if ($request->bank_id && $request->branch) {
                 $existingManager = User::where('bank_id', $request->bank_id)
                                       ->where('branch', $request->branch)
@@ -123,7 +143,7 @@ class UserController extends Controller
                                       ->whereHas('role', fn($q) => $q->where('name', 'Branch Manager'))
                                       ->where('status', 'active')
                                       ->exists();
-                
+
                 if ($existingManager) {
                     return response()->json([
                         'success' => false,
@@ -148,16 +168,37 @@ class UserController extends Controller
                 'status'     => $request->status,
             ];
 
+            $newPlainPassword = null;
+
             if ($request->filled('password')) {
-                $data['password'] = Hash::make($request->password);
+                $newPlainPassword = $request->password;
+                $data['password'] = Hash::make($newPlainPassword);
             }
 
             $user->update($data);
+            $user->load(['role', 'bank']);
+
+            // 🔥 Send new credentials email only if password was changed
+            if ($newPlainPassword) {
+                try {
+                    Mail::to($user->email)->send(new UserAccountCreated(
+                        $user->first_name . ' ' . $user->last_name,
+                        $user->email,
+                        $newPlainPassword,
+                        optional($user->role)->name,
+                         optional($user->bank)->name,
+                         'http://localhost:4200/login'
+                //    'https://portal.aiploan.com/login'
+                    ));
+                } catch (\Exception $mailException) {
+                    Log::error('User password update email failed: ' . $mailException->getMessage());
+                }
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'User updated successfully',
-                'data'    => $user->load(['role', 'bank'])
+                'data'    => $user
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
