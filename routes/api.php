@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\LoanApplicationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LoanApplicationInquiryController;
 use App\Http\Controllers\Api\CustomerByStaffController;
+use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\PolicyController;
 
 // ============================================================
 // PUBLIC ROUTES (No Auth Required)
@@ -58,6 +60,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/loan-inquiries/stats', [LoanApplicationInquiryController::class, 'stats']);
         Route::get('/loan-inquiries/{id}', [LoanApplicationInquiryController::class, 'show']);
 
+
+                // Loan Applications
+        Route::get('/loan-applications', [App\Http\Controllers\Api\LoanApplicationController::class, 'index']);
+        Route::get('/loan-applications/stats', [App\Http\Controllers\Api\LoanApplicationController::class, 'stats']);
+        Route::get('/loan-applications/{id}', [App\Http\Controllers\Api\LoanApplicationController::class, 'show']);
+        Route::patch('/loan-applications/{id}/status', [App\Http\Controllers\Api\LoanApplicationController::class, 'updateStatus']);
+
         // Users
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
@@ -72,12 +81,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/collaterals/{id}', [CollateralController::class, 'update']);
         Route::delete('/collaterals/{id}', [CollateralController::class, 'destroy']);
 
-//    // Collateral Types (collateral_types table)
-//     Route::get('/admin/collateral-types',           [CollateralController::class, 'typesIndex']);
-//     Route::post('/admin/collateral-types',          [CollateralController::class, 'typesStore']);
-//     Route::get('/admin/collateral-types/{id}',      [CollateralController::class, 'typesShow']);
-//     Route::put('/admin/collateral-types/{id}',      [CollateralController::class, 'typesUpdate']);
-//     Route::delete('/admin/collateral-types/{id}',   [CollateralController::class, 'typesDestroy']);
 Route::get('/collaterals-form/loan-applications', [CollateralController::class, 'loanApplicationsList']);
     Route::get('/collaterals-form/collateral-types', [CollateralController::class, 'collateralTypesList']);
 
@@ -127,6 +130,14 @@ Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class
         Route::get('/staff/{id}', [StaffController::class, 'show']);
         Route::put('/staff/{id}', [StaffController::class, 'update']);
         Route::delete('/staff/{id}', [StaffController::class, 'destroy']);
+
+        //contact us
+     Route::get('/contacts', [ContactController::class, 'index']);
+     Route::get('/contacts/{id}', [ContactController::class, 'show']);
+
+
+
+     Route::apiResource('/policies', PolicyController::class);
     });
 
     // ---------- Staff Routes ----------
@@ -138,6 +149,7 @@ Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class
     Route::put('/profile', [StaffController::class, 'updateProfile']);
 
         Route::get('/loan-products', [CustomerByStaffController::class, 'loanProducts']);
+         Route::get('/check-email', [CustomerByStaffController::class, 'checkEmail']);
 
         // Staff Customers
         Route::get('/customers', [CustomerByStaffController::class, 'index']);

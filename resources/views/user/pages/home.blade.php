@@ -95,10 +95,10 @@
                             <label class="text-sm font-semibold text-gray-800">Loan Amount</label>
                             <span id="loan-amount-display" class="text-primary font-bold text-lg font-display">₦50,000</span>
                         </div>
-                        <input type="range" id="loan-amount-slider" class="range-slider" min="50000" max="200000" value="50000" step="5000">
-                        <div class="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>₦50,000</span><span>₦200,000</span>
-                        </div>
+                     <input type="range" id="loan-amount-slider" class="range-slider" min="50000" max="200000" value="50000" step="5000">
+<div class="flex justify-between text-xs text-gray-500 mt-1">
+    <span>₦50,000</span><span id="loan-amount-max-label">₦200,000</span>
+</div>
                     </div>
 
                     {{-- Tenure --}}
@@ -557,7 +557,7 @@
         <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: rgba(186, 232, 45, 0.15);">
             <i class="fas fa-file-signature text-primary"></i>
         </div>
-        <h3 class="font-display font-bold text-white text-xl">Loan Application Form</h3>
+        <h3 class="font-display font-bold text-white text-xl">Pre Loan Application Form</h3>
     </div>
 
     <form method="POST" action="{{ route('loan.application.store') }}" id="loan-application-form" class="space-y-5">
@@ -758,29 +758,42 @@
             {{-- Contact Form --}}
             <div class="lg:col-span-2 form-panel">
                 <h3 class="font-display font-bold text-dark text-xl mb-6">Send Us a Message</h3>
-                <form action="{{ route('contact.store') }}" method="POST" class="space-y-5">
+
+                {{-- Success / Error message container --}}
+                <div id="contact-form-alert" class="hidden px-4 py-3 rounded-xl mb-5 text-sm"></div>
+
+                <form action="{{ route('contact.store') }}" method="POST" id="contact-form" class="space-y-5">
                     @csrf
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-800 mb-1.5">Full Name *</label>
-                            <input type="text" name="name" placeholder="Your name" required class="contact-form-input" value="{{ old('name') }}">
+                            <input type="text" name="name" placeholder="Your name" required class="contact-form-input">
+                            <p class="text-red-500 text-xs mt-1 field-error" data-field="name"></p>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-800 mb-1.5">Email Address *</label>
-                            <input type="email" name="email" placeholder="your@email.com" required class="contact-form-input" value="{{ old('email') }}">
+                            <input type="email" name="email" placeholder="your@email.com" required class="contact-form-input">
+                            <p class="text-red-500 text-xs mt-1 field-error" data-field="email"></p>
                         </div>
                     </div>
+
                     <div>
-                        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Subject *</label>
-                        <input type="text" name="subject" placeholder="How can we help?" required class="contact-form-input" value="{{ old('subject') }}">
+                        <label class="block text-sm font-semibold text-gray-800 mb-1.5">Contact Number *</label>
+                        <input type="tel" name="phone" placeholder="+234 800 000 0000" required class="contact-form-input">
+                        <p class="text-red-500 text-xs mt-1 field-error" data-field="phone"></p>
                     </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-800 mb-1.5">Message *</label>
-                        <textarea name="message" rows="5" placeholder="Write your message here..." required class="contact-form-input resize-none">{{ old('message') }}</textarea>
+                        <textarea name="message" rows="5" placeholder="Write your message here..." required class="contact-form-input resize-none"></textarea>
+                        <p class="text-red-500 text-xs mt-1 field-error" data-field="message"></p>
                     </div>
-                    <button type="submit" class="btn-primary">
-                        Send Message <i class="fas fa-paper-plane text-sm"></i>
-                    </button>
+
+                   <button type="submit" id="contact-submit-btn" class="btn-primary">
+    <span id="contact-btn-text">Send Message</span>
+    <i class="fas fa-paper-plane text-sm" id="contact-btn-icon"></i>
+    <i class="fas fa-spinner fa-spin text-sm" id="contact-btn-spinner" style="display:none;"></i>
+</button>
                 </form>
             </div>
 
@@ -788,4 +801,81 @@
     </div>
 </section>
 
+@once
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form       = document.getElementById('contact-form');
+    const alertBox   = document.getElementById('contact-form-alert');
+    const submitBtn  = document.getElementById('contact-submit-btn');
+    const btnText    = document.getElementById('contact-btn-text');
+    const btnIcon    = document.getElementById('contact-btn-icon');
+    const btnSpinner = document.getElementById('contact-btn-spinner');
+
+    if (!form) return;
+
+    // Ensure correct initial state
+    btnSpinner.style.display = 'none';
+    btnIcon.style.display = 'inline-block';
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+        alertBox.style.display = 'none';
+        alertBox.textContent = '';
+
+        // Loader ON
+        submitBtn.disabled = true;
+        btnText.textContent = 'Sending...';
+        btnIcon.style.display = 'none';
+        btnSpinner.style.display = 'inline-block';
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: formData,
+        })
+        .then(async (response) => {
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                form.reset();
+                alertBox.textContent = data.message;
+                alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0;';
+
+                document.getElementById('contact').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } else if (response.status === 422 && data.errors) {
+                Object.keys(data.errors).forEach(field => {
+                    const errEl = document.querySelector(`.field-error[data-field="${field}"]`);
+                    if (errEl) errEl.textContent = data.errors[field][0];
+                });
+
+                alertBox.textContent = 'Please fix the errors below and try again.';
+                alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
+            } else {
+                alertBox.textContent = 'Something went wrong. Please try again.';
+                alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
+            }
+        })
+        .catch(() => {
+            alertBox.textContent = 'Network error. Please check your connection and try again.';
+            alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
+        })
+        .finally(() => {
+            // Loader OFF
+            submitBtn.disabled = false;
+            btnText.textContent = 'Send Message';
+            btnIcon.style.display = 'inline-block';
+            btnSpinner.style.display = 'none';
+        });
+    });
+});
+</script>
+@endonce
 @endsection

@@ -86,21 +86,32 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ===== Loan Type Tabs (Calculator) =====
-    document.querySelectorAll('.calc-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            // Update max amount based on tab
-            if (amountSlider) {
-                if (tab.dataset.type === 'sme') {
-                    amountSlider.max = 300000;
-                } else {
-                    amountSlider.max = 200000;
-                }
-                calcLoan();
+// ===== Loan Type Tabs (Calculator) =====
+document.querySelectorAll('.calc-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        // Update max amount based on tab
+        if (amountSlider) {
+            const maxLabel = document.getElementById('loan-amount-max-label');
+
+            if (tab.dataset.type === 'sme') {
+                amountSlider.max = 300000;
+                if (maxLabel) maxLabel.textContent = '₦300,000';
+            } else {
+                amountSlider.max = 200000;
+                if (maxLabel) maxLabel.textContent = '₦200,000';
             }
-        });
+
+            // Agar current slider value naye max se zyada hai to usko clamp karo
+            if (parseInt(amountSlider.value) > parseInt(amountSlider.max)) {
+                amountSlider.value = amountSlider.max;
+            }
+
+            calcLoan();
+        }
     });
+});
 
     // ===== Scroll Reveal (lightweight) =====
     const reveals = document.querySelectorAll('.reveal');

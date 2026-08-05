@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
+use App\Mail\LoanApplicationInquiryMail;
 use App\Models\LoanApplicationInquiry;
 use App\Models\LoanProduct;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -36,7 +38,7 @@ class LoanApplicationInquiryController extends Controller
                     'required',
                     'email',
                     'max:255',
-                    Rule::unique('loan_application_inquiries', 'email'),
+                    // Rule::unique('loan_application_inquiries', 'email'),
                 ],
 
                 'phone' => [
@@ -71,8 +73,8 @@ class LoanApplicationInquiryController extends Controller
                 ],
 
             ], [
-                'email.unique' =>
-                    'A loan application has already been submitted using this email address.',
+                // 'email.unique' =>
+                //     'A loan application has already been submitted using this email address.',
 
                 'phone.unique' =>
                     'A loan application has already been submitted using this phone number.',
@@ -84,7 +86,6 @@ class LoanApplicationInquiryController extends Controller
                     'Maximum loan amount is ₦' . number_format($loanProduct->maximum_amount, 0),
             ]);
         } catch (ValidationException $e) {
-            // Pehla error message uthao taake toast me short msg dikhe
             return response()->json([
                 'success' => false,
                 'message' => $e->validator->errors()->first(),
@@ -92,7 +93,7 @@ class LoanApplicationInquiryController extends Controller
             ], 422);
         }
 
-        LoanApplicationInquiry::create([
+        $inquiry = LoanApplicationInquiry::create([
             'first_name'     => $validated['first_name'],
             'last_name'      => $validated['last_name'],
             'email'          => $validated['email'],
@@ -105,6 +106,20 @@ class LoanApplicationInquiryController extends Controller
             'email_sent'     => false,
             'status'         => 'pending',
         ]);
+
+        // Email bhejo
+        try {
+            Mail::to($inquiry->email)
+                ->send(new LoanApplicationInquiryMail($inquiry));
+
+            $inquiry->update([
+                'email_sent'    => true,
+                'email_sent_at' => now(),
+                'status'        => 'email_sent',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Loan inquiry email failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'success' => true,
