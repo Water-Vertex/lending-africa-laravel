@@ -3,8 +3,16 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
+<<<<<<< HEAD
 use App\Models\Business;
 use App\Models\Customer;
+=======
+use App\Models\Bank;
+use App\Models\Business;
+use App\Models\CoSigner;
+use App\Models\Customer;
+use App\Models\CustomerBankAccount;
+>>>>>>> origin/Fizza
 use App\Models\CustomerDocument;
 use App\Models\LoanApplication;
 use App\Models\LoanProduct;
@@ -17,6 +25,7 @@ use Illuminate\View\View;
 class CustomerController extends Controller
 {
     /**
+<<<<<<< HEAD
      * Show the customer registration + loan application form.
      */
     public function create(): View
@@ -25,18 +34,36 @@ class CustomerController extends Controller
 
         return view('user.pages.customer-add', [
             'loanProducts' => $loanProducts,
+=======
+     * Show the customer registration + co-signer + loan application form.
+     */
+    public function create(): View
+    {
+        return view('user.pages.customer-add', [
+            'loanProducts' => LoanProduct::where('status', 'active')->get(),
+            'banks'        => Bank::where('status', 'active')->get(),
+>>>>>>> origin/Fizza
         ]);
     }
 
     /**
+<<<<<<< HEAD
      * Store Customer, Business (if SME), Documents, and Loan Application
      * all together in a single transaction.
+=======
+     * Store Customer, Business (if SME), Bank Account, Documents,
+     * Loan Application, and Co-Signer — all together in one transaction.
+>>>>>>> origin/Fizza
      */
     public function store(Request $request): RedirectResponse
     {
         $isSme = $request->input('customer_type') === 'sme';
 
         $rules = [
+<<<<<<< HEAD
+=======
+            // Customer
+>>>>>>> origin/Fizza
             'customer_type'  => ['required', Rule::in(Customer::CUSTOMER_TYPES)],
             'first_name'     => 'required|string|max:100',
             'last_name'      => 'required|string|max:100',
@@ -56,11 +83,41 @@ class CustomerController extends Controller
             'address'        => 'nullable|string',
             'status'         => ['nullable', Rule::in(Customer::STATUSES)],
 
+<<<<<<< HEAD
+=======
+            // Documents (customer KYC)
+>>>>>>> origin/Fizza
             'documents'                        => 'nullable|array',
             'documents.*.document_type'        => ['nullable', Rule::in(CustomerDocument::DOCUMENT_TYPES)],
             'documents.*.file'                 => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'documents.*.verification_status'  => ['nullable', Rule::in(CustomerDocument::VERIFICATION_STATUSES)],
 
+<<<<<<< HEAD
+=======
+            // Customer Bank Details
+            'bank_id'         => ['required', 'exists:banks,id'],
+            'account_name'    => ['required', 'string', 'max:200'],
+            'account_number'  => ['required', 'string', 'max:20'],
+
+            // Co-Signer (Guarantor)
+            'cosigner_first_name'             => ['required', 'string', 'max:100'],
+            'cosigner_last_name'              => ['required', 'string', 'max:100'],
+            'cosigner_middle_name'            => ['nullable', 'string', 'max:100'],
+            'cosigner_date_of_birth'          => ['nullable', 'date', 'before:today'],
+            'cosigner_occupation'             => ['nullable', 'string', 'max:150'],
+            'cosigner_evidence_of_occupation' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'cosigner_email'                  => ['nullable', 'email', 'max:255'],
+            'cosigner_phone_primary'          => ['required', 'string', 'max:20'],
+            'cosigner_phone_secondary'        => ['nullable', 'string', 'max:20'],
+            'cosigner_address'                => ['nullable', 'string'],
+            'cosigner_city'                   => ['nullable', 'string', 'max:100'],
+            'cosigner_state'                  => ['nullable', 'string', 'max:100'],
+            'cosigner_country'                => ['nullable', 'string', 'max:100'],
+            'cosigner_bvn'                     => ['nullable', 'string', 'max:20'],
+            'cosigner_photo_id'                => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'cosigner_relationship'            => ['nullable', 'string', 'max:100'],
+
+>>>>>>> origin/Fizza
             // Loan Application
             'loan_product_id' => ['required', 'exists:loan_products,id'],
             'loan_amount'     => ['required', 'numeric', 'min:0'],
@@ -86,14 +143,25 @@ class CustomerController extends Controller
         $validated = $request->validate($rules, [
             'business_name.required' => 'Business name is required for SME customers.',
             'loan_product_id.exists' => 'Selected loan product is invalid.',
+<<<<<<< HEAD
         ]);
 
         // Loan product ka type & amount range double-check (server-side safety)
+=======
+            'bank_id.required'       => 'Please select a bank for the customer account.',
+            'cosigner_first_name.required'    => 'Co-signer first name is required.',
+            'cosigner_last_name.required'     => 'Co-signer last name is required.',
+            'cosigner_phone_primary.required' => 'Co-signer phone number is required.',
+        ]);
+
+        // Loan product ka type & amount range double-check
+>>>>>>> origin/Fizza
         $loanProduct = LoanProduct::where('id', $validated['loan_product_id'])
             ->where('status', 'active')
             ->first();
 
         if (!$loanProduct) {
+<<<<<<< HEAD
             return back()
                 ->withInput()
                 ->withErrors(['loan_product_id' => 'Selected loan product is currently unavailable.']);
@@ -112,6 +180,20 @@ class CustomerController extends Controller
                     'loan_amount' => 'Loan amount must be between ₦' . number_format($loanProduct->minimum_amount, 0)
                         . ' and ₦' . number_format($loanProduct->maximum_amount, 0) . ' for this product.',
                 ]);
+=======
+            return back()->withInput()->withErrors(['loan_product_id' => 'Selected loan product is currently unavailable.']);
+        }
+
+        if ($loanProduct->loan_type !== $validated['customer_type']) {
+            return back()->withInput()->withErrors(['loan_product_id' => 'Selected loan product does not match the customer type.']);
+        }
+
+        if ($validated['loan_amount'] < $loanProduct->minimum_amount || $validated['loan_amount'] > $loanProduct->maximum_amount) {
+            return back()->withInput()->withErrors([
+                'loan_amount' => 'Loan amount must be between ₦' . number_format($loanProduct->minimum_amount, 0)
+                    . ' and ₦' . number_format($loanProduct->maximum_amount, 0) . ' for this product.',
+            ]);
+>>>>>>> origin/Fizza
         }
 
         try {
@@ -150,7 +232,19 @@ class CustomerController extends Controller
                 ]);
             }
 
+<<<<<<< HEAD
             // 3. Documents
+=======
+            // 3. Customer Bank Account
+            CustomerBankAccount::create([
+                'customer_id'    => $customer->id,
+                'bank_id'         => $validated['bank_id'],
+                'account_name'    => $validated['account_name'],
+                'account_number'  => $validated['account_number'],
+            ]);
+
+            // 4. Customer KYC Documents
+>>>>>>> origin/Fizza
             foreach ($request->file('documents', []) as $index => $docFiles) {
                 $file = $docFiles['file'] ?? null;
 
@@ -167,11 +261,19 @@ class CustomerController extends Controller
                 ]);
             }
 
+<<<<<<< HEAD
             // 4. Loan Application
             $loanApplication = LoanApplication::create([
                 'application_no'  => LoanApplication::generateApplicationNo(),
                 'customer_id'      => $customer->id,
                 'business_id'      => $business?->id, // personal ke liye null
+=======
+            // 5. Loan Application (co-signer se pehle create karna zaroori hai, FK ki wajah se)
+            $loanApplication = LoanApplication::create([
+                'application_no'  => LoanApplication::generateApplicationNo(),
+                'customer_id'      => $customer->id,
+                'business_id'      => $business?->id,
+>>>>>>> origin/Fizza
                 'loan_product_id'  => $loanProduct->id,
                 'loan_amount'      => $validated['loan_amount'],
                 'duration_months'  => $validated['duration_months'],
@@ -180,6 +282,40 @@ class CustomerController extends Controller
                 'application_date' => now()->toDateString(),
             ]);
 
+<<<<<<< HEAD
+=======
+            // 6. Co-Signer (Guarantor)
+            $photoIdPath = null;
+            if ($request->hasFile('cosigner_photo_id')) {
+                $photoIdPath = $request->file('cosigner_photo_id')->store('cosigner-documents', 'public');
+            }
+
+            $evidenceOfOccupationPath = null;
+            if ($request->hasFile('cosigner_evidence_of_occupation')) {
+                $evidenceOfOccupationPath = $request->file('cosigner_evidence_of_occupation')->store('cosigner-documents', 'public');
+            }
+
+            CoSigner::create([
+                'application_id'          => $loanApplication->id,
+                'first_name'               => $validated['cosigner_first_name'],
+                'last_name'                => $validated['cosigner_last_name'],
+                'middle_name'              => $validated['cosigner_middle_name'] ?? null,
+                'date_of_birth'            => $validated['cosigner_date_of_birth'] ?? null,
+                'occupation'               => $validated['cosigner_occupation'] ?? null,
+                'evidence_of_occupation'   => $evidenceOfOccupationPath,
+                'email'                    => $validated['cosigner_email'] ?? null,
+                'phone_primary'            => $validated['cosigner_phone_primary'],
+                'phone_secondary'          => $validated['cosigner_phone_secondary'] ?? null,
+                'address'                  => $validated['cosigner_address'] ?? null,
+                'city'                     => $validated['cosigner_city'] ?? null,
+                'state'                    => $validated['cosigner_state'] ?? null,
+                'country'                  => $validated['cosigner_country'] ?? null,
+                'bvn'                      => $validated['cosigner_bvn'] ?? null,
+                'photo_id'                 => $photoIdPath,
+                'relationship'             => $validated['cosigner_relationship'] ?? null,
+            ]);
+
+>>>>>>> origin/Fizza
             DB::commit();
 
             return redirect()

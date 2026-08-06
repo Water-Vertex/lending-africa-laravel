@@ -13,7 +13,7 @@ class Staff extends Authenticatable
 
     protected $fillable = [
         'staff_code', 'bank_id', 'branch_name', 'first_name', 'last_name',
-        'email', 'phone', 'designation', 'employee_id', 'password', 'status',
+        'email', 'phone', 'designation', 'employee_id', 'password', 'status','created_by',
     ];
 
     protected $hidden = ['password'];
@@ -37,4 +37,11 @@ class Staff extends Authenticatable
     {
         return $this->hasMany(CustomerByStaff::class);
     }
+
+
+     public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
 }

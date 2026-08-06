@@ -13,7 +13,7 @@ use App\Models\Staff;
 
 class AuthController extends Controller
 {
-    public function login(Request $request): JsonResponse
+   public function login(Request $request): JsonResponse
     {
         $request->validate([
             'email'    => 'required|email',
@@ -28,9 +28,8 @@ class AuthController extends Controller
         }
 
         /** @var User $user */
-        $user  = Auth::user();
+        $user = Auth::user();
 
-        // Only active users can login
         if ($user->status !== 'active') {
             Auth::logout();
             return response()->json([
@@ -39,9 +38,7 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Revoke old tokens
         $user->tokens()->delete();
-
         $token = $user->createToken('admin-token')->plainTextToken;
 
         return response()->json([
@@ -56,6 +53,9 @@ class AuthController extends Controller
                 'phone'      => $user->phone,
                 'role'       => $user->role?->name,
                 'status'     => $user->status,
+                // 👇 YEH 2 FIELDS ADD KARO
+                'bank_id'    => $user->bank_id,
+                'branch'     => $user->branch,
             ],
         ]);
     }

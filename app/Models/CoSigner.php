@@ -35,4 +35,6 @@ class CoSigner extends Model
     {
         return $this->belongsTo(LoanApplication::class, 'application_id');
     }
+
 }
+

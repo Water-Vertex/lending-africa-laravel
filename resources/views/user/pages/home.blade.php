@@ -95,10 +95,10 @@
                             <label class="text-sm font-semibold text-gray-800">Loan Amount</label>
                             <span id="loan-amount-display" class="text-primary font-bold text-lg font-display">₦50,000</span>
                         </div>
-                        <input type="range" id="loan-amount-slider" class="range-slider" min="50000" max="200000" value="50000" step="5000">
-                        <div class="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>₦50,000</span><span>₦200,000</span>
-                        </div>
+                     <input type="range" id="loan-amount-slider" class="range-slider" min="50000" max="200000" value="50000" step="5000">
+<div class="flex justify-between text-xs text-gray-500 mt-1">
+    <span>₦50,000</span><span id="loan-amount-max-label">₦200,000</span>
+</div>
                     </div>
 
                     {{-- Tenure --}}
@@ -140,6 +140,7 @@
     </div>
 </section>
 
+
 {{-- ============================================================
      STATS SECTION
 ============================================================ --}}
@@ -165,6 +166,7 @@
         </div>
     </div>
 </section>
+
 
 {{-- ============================================================
      LOAN TYPES SECTION
@@ -266,6 +268,7 @@
     </div>
 </section>
 
+
 {{-- ============================================================
      HOW IT WORKS
 ============================================================ --}}
@@ -308,6 +311,7 @@
         </div>
     </div>
 </section>
+
 
 {{-- ============================================================
      WHY CHOOSE US
@@ -406,6 +410,7 @@
     </div>
 </section>
 
+
 {{-- ============================================================
      ELIGIBILITY REQUIREMENTS
 ============================================================ --}}
@@ -450,6 +455,7 @@
         </div>
     </div>
 </section>
+
 
 {{-- ============================================================
      TESTIMONIALS
@@ -499,6 +505,7 @@
         </div>
     </div>
 </section>
+
 
 {{-- ============================================================
      APPLY NOW SECTION
@@ -550,7 +557,7 @@
         <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: rgba(186, 232, 45, 0.15);">
             <i class="fas fa-file-signature text-primary"></i>
         </div>
-        <h3 class="font-display font-bold text-white text-xl">Loan Application Form</h3>
+        <h3 class="font-display font-bold text-white text-xl">Pre Loan Application Form</h3>
     </div>
 
     <form method="POST" action="{{ route('loan.application.store') }}" id="loan-application-form" class="space-y-5">
@@ -621,6 +628,7 @@
     </div>
 </section>
 
+
 {{-- ============================================================
      FAQ SECTION
 ============================================================ --}}
@@ -680,6 +688,7 @@
     </div>
 </section>
 
+
 {{-- ============================================================
      CTA BANNER
 ============================================================ --}}
@@ -704,6 +713,7 @@
         </div>
     </div>
 </section>
+
 
 {{-- ============================================================
      CONTACT SECTION

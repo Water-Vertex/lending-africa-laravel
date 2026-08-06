@@ -52,7 +52,11 @@ return [
     |
     */
 
+    // 'url' => env('APP_URL', 'http://localhost'),
+
     'url' => env('APP_URL', 'http://localhost'),
+    // 'asset_url' => env('ASSET_URL', 'https://aiploan.com/public'),
+        // 'url' => env('APP_URL', 'https://www.aiploan.com/public'),
 
     /*
     |--------------------------------------------------------------------------

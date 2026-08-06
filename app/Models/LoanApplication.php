@@ -64,4 +64,8 @@ class LoanApplication extends Model
 {
     return $this->hasMany(Collateral::class, 'application_id');
 }
+public function coSigners(): \Illuminate\Database\Eloquent\Relations\HasMany
+{
+    return $this->hasMany(CoSigner::class, 'application_id');
+}
 }

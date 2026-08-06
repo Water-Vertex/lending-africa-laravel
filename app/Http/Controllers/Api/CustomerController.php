@@ -134,15 +134,32 @@ class CustomerController extends Controller
     /**
      * Display the specified customer.
      */
-    public function show(Customer $customer): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'data' => $customer->load('documents'),
-            'message' => 'Customer retrieved successfully.'
-        ]);
-    }
+ 
+    // public function show(Customer $customer): JsonResponse
+    // {
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $customer->load('documents'),
+    //         'message' => 'Customer retrieved successfully.'
+    //     ]);
+    // }
+public function show(Customer $customer): JsonResponse
+{
+    $customer->load([
+        'documents',
+        'businesses',
+        'bankAccounts.bank',
+        'loanApplications.loanProduct',
+        'loanApplications.business',
+        'loanApplications.coSigners',
+    ]);
 
+    return response()->json([
+        'success' => true,
+        'data' => $customer,
+        'message' => 'Customer retrieved successfully.'
+    ]);
+}
     /**
      * Update the specified customer and their documents.
      */

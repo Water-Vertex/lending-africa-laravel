@@ -132,7 +132,7 @@ class RoleController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete role',
+                'message' => 'Failed to delete role ,because it has associated users',
                 'error'   => $e->getMessage()
             ], 500);
         }
