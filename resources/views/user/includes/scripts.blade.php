@@ -48,42 +48,99 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ===== Loan Calculator =====
-    const amountSlider   = document.getElementById('loan-amount-slider');
-    const amountDisplay  = document.getElementById('loan-amount-display');
-    const tenureSlider   = document.getElementById('loan-tenure-slider');
-    const tenureDisplay  = document.getElementById('loan-tenure-display');
-    const monthlyDisplay = document.getElementById('monthly-payment');
-    const totalDisplay   = document.getElementById('total-payment');
-    const interestDisplay = document.getElementById('total-interest');
+// ===== Loan Calculator =====
+const ratesEl = document.getElementById('loan-rates-data');
 
-    function calcLoan() {
-        if (!amountSlider) return;
-        const amount  = parseInt(amountSlider.value);
-        const months  = parseInt(tenureSlider.value);
-        const rate    = 0.24 / 12; // 24% p.a. monthly
-        const emi     = (amount * rate * Math.pow(1 + rate, months)) / (Math.pow(1 + rate, months) - 1);
-        const total   = emi * months;
-        const interest = total - amount;
+const loanRates = {
+    personal: {
+        rate: ratesEl ? parseFloat(ratesEl.dataset.personalRate) : 20,
+        min:  ratesEl ? parseInt(ratesEl.dataset.personalMin)    : 50000,
+        max:  ratesEl ? parseInt(ratesEl.dataset.personalMax)    : 200000,
+    },
+    sme: {
+        rate: ratesEl ? parseFloat(ratesEl.dataset.smeRate) : 20,
+        min:  ratesEl ? parseInt(ratesEl.dataset.smeMin)    : 50000,
+        max:  ratesEl ? parseInt(ratesEl.dataset.smeMax)    : 300000,
+    },
+};
 
-        amountDisplay.textContent  = '₦' + amount.toLocaleString();
-        tenureDisplay.textContent  = months + ' Months';
-        monthlyDisplay.textContent = '₦' + Math.round(emi).toLocaleString();
-        totalDisplay.textContent   = '₦' + Math.round(total).toLocaleString();
-        interestDisplay.textContent = '₦' + Math.round(interest).toLocaleString();
+let currentLoanType = 'personal';
 
-        // Update slider track fill
-        const amountPct = ((amount - amountSlider.min) / (amountSlider.max - amountSlider.min)) * 100;
-        const tenurePct = ((months - tenureSlider.min) / (tenureSlider.max - tenureSlider.min)) * 100;
-        amountSlider.style.background = `linear-gradient(to right, #6DBE3B ${amountPct}%, #e5e7eb ${amountPct}%)`;
-        tenureSlider.style.background = `linear-gradient(to right, #6DBE3B ${tenurePct}%, #e5e7eb ${tenurePct}%)`;
+const amountSlider   = document.getElementById('loan-amount-slider');
+const amountDisplay  = document.getElementById('loan-amount-display');
+const tenureSlider   = document.getElementById('loan-tenure-slider');
+const tenureDisplay  = document.getElementById('loan-tenure-display');
+const monthlyDisplay = document.getElementById('monthly-payment');
+const totalDisplay   = document.getElementById('total-payment');
+const interestDisplay = document.getElementById('total-interest');
+
+function calcLoan() {
+    if (!amountSlider) return;
+
+    const amount  = parseInt(amountSlider.value);
+    const months  = parseInt(tenureSlider.value);
+    const annualRate = loanRates[currentLoanType].rate;
+    const rate    = annualRate / 100 / 12;
+
+    let emi;
+    if (rate === 0) {
+        emi = amount / months;
+    } else {
+        emi = (amount * rate * Math.pow(1 + rate, months)) / (Math.pow(1 + rate, months) - 1);
     }
 
-    if (amountSlider) {
-        amountSlider.addEventListener('input', calcLoan);
-        tenureSlider.addEventListener('input', calcLoan);
-        calcLoan();
+    const total    = emi * months;
+    const interest = total - amount;
+
+    amountDisplay.textContent   = '₦' + amount.toLocaleString();
+    tenureDisplay.textContent   = months + ' Months';
+    monthlyDisplay.textContent  = '₦' + Math.round(emi).toLocaleString();
+    totalDisplay.textContent    = '₦' + Math.round(total).toLocaleString();
+    interestDisplay.textContent = '₦' + Math.round(interest).toLocaleString();
+
+    const amountPct = ((amount - amountSlider.min) / (amountSlider.max - amountSlider.min)) * 100;
+    const tenurePct = ((months - tenureSlider.min) / (tenureSlider.max - tenureSlider.min)) * 100;
+    amountSlider.style.background = `linear-gradient(to right, #6DBE3B ${amountPct}%, #e5e7eb ${amountPct}%)`;
+    tenureSlider.style.background = `linear-gradient(to right, #6DBE3B ${tenurePct}%, #e5e7eb ${tenurePct}%)`;
+}
+
+function updateSliderForType(type) {
+    if (!amountSlider) return;
+    const config = loanRates[type];
+    const maxLabel = document.getElementById('loan-amount-max-label');
+
+    amountSlider.min   = config.min;
+    amountSlider.max   = config.max;
+    amountSlider.value = config.min;
+
+    if (maxLabel) maxLabel.textContent = '₦' + config.max.toLocaleString();
+
+    // Min label bhi update karo
+    const minLabel = amountSlider.previousElementSibling;
+    const labels   = amountSlider.nextElementSibling;
+    if (labels && labels.children[0]) {
+        labels.children[0].textContent = '₦' + config.min.toLocaleString();
     }
+
+    calcLoan();
+}
+
+if (amountSlider) {
+    amountSlider.addEventListener('input', calcLoan);
+    tenureSlider.addEventListener('input', calcLoan);
+    calcLoan();
+}
+
+// ===== Loan Type Tabs (Calculator) =====
+document.querySelectorAll('.calc-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        currentLoanType = tab.dataset.type;
+        updateSliderForType(currentLoanType);
+    });
+});
 
     // ===== Loan Type Tabs (Calculator) =====
 // ===== Loan Type Tabs (Calculator) =====

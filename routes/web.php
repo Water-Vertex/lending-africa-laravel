@@ -10,10 +10,8 @@ use App\Http\Controllers\Website\StaffProfileController;
 use App\Http\Controllers\Website\PolicyController;
 
 
-
 Route::get('/customer-add', [CustomerController::class, 'create'])->name('customer.create');
 Route::post('/customer-add', [CustomerController::class, 'store'])->name('customer.store');
-
 
 Route::prefix('staff')->name('staff.')->group(function () {
     Route::get('/customer-add', [CustomerController::class, 'create'])->name('customer.create');
@@ -26,7 +24,15 @@ Route::prefix('staff')->name('staff.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return view('user.pages.home');
+    $personalProduct = \App\Models\LoanProduct::where('loan_type', 'personal')
+        ->where('status', 'active')
+        ->first();
+
+    $smeProduct = \App\Models\LoanProduct::where('loan_type', 'sme')
+        ->where('status', 'active')
+        ->first();
+
+    return view('user.pages.home', compact('personalProduct', 'smeProduct'));
 })->name('home');
 
 

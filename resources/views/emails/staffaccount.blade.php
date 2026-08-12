@@ -196,7 +196,7 @@
               <p style="color:#2d3a4f; font-size:15px; line-height:1.6; margin:0 0 16px;">
                 A staff account has been created for you on the 
                 <strong style="color:#1A2332;">African Investment Partners</strong> Staff Portal
-                @if(!empty($bankName)) for <strong style="color:#1A2332;">{{ $bankName }}</strong> @endif.
+                
                 Use the credentials below to log in.
               </p>
 

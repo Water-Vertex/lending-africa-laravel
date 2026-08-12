@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::with(['role', 'bank'])->orderBy('id', 'desc')->get();
+            $users = User::with(['role' /* , 'bank' */])->orderBy('id', 'desc')->get();
 
             return response()->json([
                 'success' => true,
@@ -36,7 +36,7 @@ class UserController extends Controller
     {
         $request->validate([
             'role_id'    => 'required|exists:roles,id',
-            'bank_id'    => 'nullable|exists:banks,id',
+            // 'bank_id'    => 'nullable|exists:banks,id',
             'branch'     => 'nullable|string|max:100',
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
@@ -50,9 +50,9 @@ class UserController extends Controller
 
         if ($role && $role->name === 'Branch Manager') {
 
-            if ($request->bank_id && $request->branch) {
-                $existingManager = User::where('bank_id', $request->bank_id)
-                                      ->where('branch', $request->branch)
+            // 👇 ab bank_id ki condition hata di, sirf branch name check hoga
+            if ($request->branch) {
+                $existingManager = User::where('branch', $request->branch)
                                       ->whereHas('role', fn($q) => $q->where('name', 'Branch Manager'))
                                       ->where('status', 'active')
                                       ->exists();
@@ -72,7 +72,7 @@ class UserController extends Controller
 
             $user = User::create([
                 'role_id'    => $request->role_id,
-                'bank_id'    => $request->bank_id,
+                // 'bank_id'    => $request->bank_id,
                 'branch'     => $request->branch,
                 'first_name' => $request->first_name,
                 'last_name'  => $request->last_name,
@@ -82,7 +82,7 @@ class UserController extends Controller
                 'status'     => $request->status,
             ]);
 
-            $user->load(['role', 'bank']);
+            $user->load(['role' /* , 'bank' */]);
 
             // 🔥 Send account credentials email
             try {
@@ -91,9 +91,8 @@ class UserController extends Controller
                     $user->email,
                     $plainPassword,
                     optional($user->role)->name,
-                     optional($user->bank)->name,
-                    'http://localhost:4200/login'
-                //    'https://portal.aiploan.com/login'
+                    null, // bank name not needed for now
+                   'https://portal.aiploan.com/login'
                 ));
             } catch (\Exception $mailException) {
                 Log::error('User account email failed: ' . $mailException->getMessage());
@@ -117,7 +116,7 @@ class UserController extends Controller
     {
         $request->validate([
             'role_id'    => 'required|exists:roles,id',
-            'bank_id'    => 'nullable|exists:banks,id',
+            // 'bank_id'    => 'nullable|exists:banks,id',
             'branch'     => 'nullable|string|max:100',
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
@@ -136,9 +135,8 @@ class UserController extends Controller
 
         if ($role && $role->name === 'Branch Manager') {
 
-            if ($request->bank_id && $request->branch) {
-                $existingManager = User::where('bank_id', $request->bank_id)
-                                      ->where('branch', $request->branch)
+            if ($request->branch) {
+                $existingManager = User::where('branch', $request->branch)
                                       ->where('id', '!=', $id)
                                       ->whereHas('role', fn($q) => $q->where('name', 'Branch Manager'))
                                       ->where('status', 'active')
@@ -159,7 +157,7 @@ class UserController extends Controller
 
             $data = [
                 'role_id'    => $request->role_id,
-                'bank_id'    => $request->bank_id,
+                // 'bank_id'    => $request->bank_id,
                 'branch'     => $request->branch,
                 'first_name' => $request->first_name,
                 'last_name'  => $request->last_name,
@@ -176,7 +174,7 @@ class UserController extends Controller
             }
 
             $user->update($data);
-            $user->load(['role', 'bank']);
+            $user->load(['role' /* , 'bank' */]);
 
             // 🔥 Send new credentials email only if password was changed
             if ($newPlainPassword) {
@@ -186,9 +184,8 @@ class UserController extends Controller
                         $user->email,
                         $newPlainPassword,
                         optional($user->role)->name,
-                         optional($user->bank)->name,
-                         'http://localhost:4200/login'
-                //    'https://portal.aiploan.com/login'
+                        null, // bank name not needed for now
+                       'https://portal.aiploan.com/login'
                     ));
                 } catch (\Exception $mailException) {
                     Log::error('User password update email failed: ' . $mailException->getMessage());
@@ -212,7 +209,7 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-            $user = User::with(['role', 'bank'])->findOrFail($id);
+            $user = User::with(['role' /* , 'bank' */])->findOrFail($id);
 
             return response()->json([
                 'success' => true,

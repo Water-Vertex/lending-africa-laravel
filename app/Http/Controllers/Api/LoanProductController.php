@@ -1,41 +1,41 @@
 <?php
-
+ 
 namespace App\Http\Controllers\Api;
-
+ 
 use App\Http\Controllers\Controller;
 use App\Models\LoanProduct;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-
+ 
 class LoanProductController extends Controller
 {
     // GET /api/admin/loan-products
     public function index(Request $request): JsonResponse
     {
         $query = LoanProduct::query();
-
+ 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
-
+ 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
+ 
         if ($request->filled('loan_type')) {
             $query->where('loan_type', $request->loan_type);
         }
-
+ 
         $products = $query->latest()->get();
-
+ 
         return response()->json([
             'success' => true,
             'data'    => $products,
             'total'   => $products->count(),
         ]);
     }
-
+ 
     // POST /api/admin/loan-products
     public function store(Request $request): JsonResponse
     {
@@ -51,16 +51,16 @@ class LoanProductController extends Controller
             'description'     => 'nullable|string',
             'status'          => 'required|in:active,inactive',
         ]);
-
+ 
         $product = LoanProduct::create($validated);
-
+ 
         return response()->json([
             'success' => true,
             'message' => 'Loan product created successfully.',
             'data'    => $product,
         ], 201);
     }
-
+ 
     // GET /api/admin/loan-products/{id}
     public function show(LoanProduct $loanProduct): JsonResponse
     {
@@ -69,7 +69,7 @@ class LoanProductController extends Controller
             'data'    => $loanProduct,
         ]);
     }
-
+ 
     // PUT /api/admin/loan-products/{id}
     public function update(Request $request, LoanProduct $loanProduct): JsonResponse
     {
@@ -85,16 +85,16 @@ class LoanProductController extends Controller
             'description'     => 'nullable|string',
             'status'          => 'required|in:active,inactive',
         ]);
-
+ 
         $loanProduct->update($validated);
-
+ 
         return response()->json([
             'success' => true,
             'message' => 'Loan product updated successfully.',
             'data'    => $loanProduct->fresh(),
         ]);
     }
-
+ 
     // DELETE /api/admin/loan-products/{id}
     public function destroy(LoanProduct $loanProduct): JsonResponse
     {
@@ -105,26 +105,43 @@ class LoanProductController extends Controller
                 'message' => 'Cannot delete — this product has existing loan applications.',
             ], 422);
         }
-
+ 
         $loanProduct->delete();
-
+ 
         return response()->json([
             'success' => true,
             'message' => 'Loan product deleted successfully.',
         ]);
     }
-
+ 
     // PATCH /api/admin/loan-products/{id}/toggle-status
     public function toggleStatus(LoanProduct $loanProduct): JsonResponse
     {
         $loanProduct->update([
             'status' => $loanProduct->status === 'active' ? 'inactive' : 'active',
         ]);
-
+ 
         return response()->json([
             'success' => true,
             'message' => 'Status updated.',
             'data'    => $loanProduct->fresh(),
         ]);
     }
+    // GET /api/loan-products/public-rates
+public function publicRates(): JsonResponse
+{
+    $personal = LoanProduct::where('loan_type', 'personal')
+        ->where('status', 'active')
+        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'duration_months']);
+ 
+    $sme = LoanProduct::where('loan_type', 'sme')
+        ->where('status', 'active')
+        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'duration_months']);
+ 
+    return response()->json([
+        'success'  => true,
+        'personal' => $personal,
+        'sme'      => $sme,
+    ]);
+}
 }

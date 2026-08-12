@@ -1,23 +1,17 @@
 <?php
-
+ 
 namespace App\Http\Controllers\Website;
-
+ 
 use App\Http\Controllers\Controller;
-<<<<<<< HEAD
-use App\Models\LoanApplicationInquiry;
-use App\Models\LoanProduct;
-use Illuminate\Http\Request;
-=======
 use App\Mail\LoanApplicationInquiryMail;
 use App\Models\LoanApplicationInquiry;
 use App\Models\LoanProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
->>>>>>> origin/Fizza
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-
+ 
 class LoanApplicationInquiryController extends Controller
 {
     public function store(Request $request)
@@ -26,97 +20,80 @@ class LoanApplicationInquiryController extends Controller
         $loanProduct = LoanProduct::where('loan_type', $request->loan_type)
             ->where('status', 'active')
             ->first();
-
+ 
         if (!$loanProduct) {
             return response()->json([
                 'success' => false,
                 'message' => 'Selected loan type is currently unavailable.',
             ], 422);
         }
-
+ 
         // Validation
         try {
             $validated = $request->validate([
                 'first_name' => ['required', 'string', 'max:100'],
                 'last_name'  => ['required', 'string', 'max:100'],
-
+ 
                 'email' => [
                     'required',
                     'email',
                     'max:255',
-<<<<<<< HEAD
-                    Rule::unique('loan_application_inquiries', 'email'),
-=======
                     // Rule::unique('loan_application_inquiries', 'email'),
->>>>>>> origin/Fizza
                 ],
-
+ 
                 'phone' => [
                     'required',
                     'string',
                     'max:20',
                     Rule::unique('loan_application_inquiries', 'phone'),
                 ],
-
+ 
                 'loan_type' => [
                     'required',
                     Rule::in(['personal', 'sme']),
                 ],
-
+ 
                 'loan_amount' => [
                     'required',
                     'numeric',
                     'min:' . $loanProduct->minimum_amount,
                     'max:' . $loanProduct->maximum_amount,
                 ],
-
+ 
                 'preferred_bank' => [
                     'required',
                     'string',
                     'max:100',
                 ],
-
+ 
                 'loan_purpose' => [
                     'required',
                     'string',
                     'max:1000',
                 ],
-
+ 
             ], [
-<<<<<<< HEAD
-                'email.unique' =>
-                    'A loan application has already been submitted using this email address.',
-=======
                 // 'email.unique' =>
                 //     'A loan application has already been submitted using this email address.',
->>>>>>> origin/Fizza
-
+ 
                 'phone.unique' =>
                     'A loan application has already been submitted using this phone number.',
-
+ 
                 'loan_amount.min' =>
                     'Minimum loan amount is ₦' . number_format($loanProduct->minimum_amount, 0),
-
+ 
                 'loan_amount.max' =>
                     'Maximum loan amount is ₦' . number_format($loanProduct->maximum_amount, 0),
             ]);
         } catch (ValidationException $e) {
-<<<<<<< HEAD
-            // Pehla error message uthao taake toast me short msg dikhe
-=======
->>>>>>> origin/Fizza
             return response()->json([
                 'success' => false,
                 'message' => $e->validator->errors()->first(),
                 'errors'  => $e->errors(),
             ], 422);
         }
-
-<<<<<<< HEAD
-        LoanApplicationInquiry::create([
-=======
+ 
         $inquiry = LoanApplicationInquiry::create([
->>>>>>> origin/Fizza
             'first_name'     => $validated['first_name'],
             'last_name'      => $validated['last_name'],
             'email'          => $validated['email'],
@@ -129,14 +106,12 @@ class LoanApplicationInquiryController extends Controller
             'email_sent'     => false,
             'status'         => 'pending',
         ]);
-
-<<<<<<< HEAD
-=======
+ 
         // Email bhejo
         try {
             Mail::to($inquiry->email)
                 ->send(new LoanApplicationInquiryMail($inquiry));
-
+ 
             $inquiry->update([
                 'email_sent'    => true,
                 'email_sent_at' => now(),
@@ -145,8 +120,7 @@ class LoanApplicationInquiryController extends Controller
         } catch (\Exception $e) {
             \Log::error('Loan inquiry email failed: ' . $e->getMessage());
         }
-
->>>>>>> origin/Fizza
+ 
         return response()->json([
             'success' => true,
             'message' => 'Your loan application has been submitted successfully.',
