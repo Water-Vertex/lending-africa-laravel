@@ -22,13 +22,20 @@ class CustomerController extends Controller
     /**
      * Show the customer registration + co-signer + loan application form.
      */
-    public function create(): View
-    {
-        return view('user.pages.customer-add', [
-            'loanProducts' => LoanProduct::where('status', 'active')->get(),
-            'banks'        => Bank::where('status', 'active')->get(),
-        ]);
+  public function create(Request $request)
+{
+    $banks        = \App\Models\Bank::where('status', 'active')->get();
+    $loanProducts = \App\Models\LoanProduct::where('status', 'active')->get();
+
+    $prefillEmail = $request->query('email', '');
+
+    $inquiry = null;
+    if ($request->query('ref')) {
+        $inquiry = \App\Models\LoanApplicationInquiry::where('token', $request->query('ref'))->first();
     }
+
+    return view('user.pages.customer-add', compact('banks', 'loanProducts', 'prefillEmail', 'inquiry'));
+}
 
     /**
      * Store Customer, Business (if SME), Bank Account, Documents,

@@ -17,7 +17,9 @@ class CustomerController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Customer::with('documents');
+        $query = Customer::with(['documents', 'loanApplications']);
+
+        //$query = Customer::with('documents');
 
         // Filter by status
         if ($request->has('status')) {
@@ -242,30 +244,118 @@ public function show(Customer $customer): JsonResponse
     /**
      * Remove the specified customer and their documents.
      */
-    public function destroy(Customer $customer): JsonResponse
-    {
-        try {
-            DB::beginTransaction();
-            $customer->documents()->delete();
-            $customer->delete();
-            DB::commit();
+    // public function destroy(Customer $customer): JsonResponse
+    // {
+    //     try {
+    //         DB::beginTransaction();
+    //         $customer->documents()->delete();
+    //         $customer->delete();
+    //         DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Customer and their documents deleted successfully.'
-            ]);
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Customer and their documents deleted successfully.'
+    //         ]);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
 
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to delete customer.',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+// public function destroy(Customer $customer): JsonResponse
+// {
+//     try {
+//         DB::beginTransaction();
+
+//         // Pehle sari related records delete karo order mein
+        
+//         // 1. Loan approvals (loan applications ke through)
+//         $applicationIds = $customer->loanApplications()->pluck('id');
+//         if ($applicationIds->isNotEmpty()) {
+//             \App\Models\LoanApproval::whereIn('application_id', $applicationIds)->delete();
+//         }
+
+//         // 2. Co-signers
+//         if ($applicationIds->isNotEmpty()) {
+//             \App\Models\CoSigner::whereIn('loan_application_id', $applicationIds)->delete();
+//         }
+
+//         // 3. Loan applications
+//         $customer->loanApplications()->delete();
+
+//         // 4. Bank accounts
+//         $customer->bankAccounts()->delete();
+
+//         // 5. Documents
+//         $customer->documents()->delete();
+
+//         // 6. Business info
+//         $customer->businesses()->delete();
+
+//         // 7. Customer by staff record
+//         \App\Models\CustomerByStaff::where('customer_id', $customer->id)->delete();
+
+//         // 8. Finally customer delete
+//         $customer->delete();
+
+//         DB::commit();
+
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Customer and all related records deleted successfully.'
+//         ]);
+
+//     } catch (\Exception $e) {
+//         DB::rollBack();
+//         \Log::error('Customer delete failed: ' . $e->getMessage());
+
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Failed to delete customer.',
+//             'error'   => $e->getMessage()
+//         ], 500);
+//     }
+// }
+public function destroy(Customer $customer): JsonResponse
+{
+    try {
+        // Check karo k koi loan application hai
+        if ($customer->loanApplications()->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete customer.',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'This customer cannot be deleted because they have loan application(s) on record. Loan records must be retained for compliance purposes.',
+            ], 422);
         }
-    }
 
+        DB::beginTransaction();
+
+        // Sirf woh customers delete hon jinka koi loan application nahi
+        \App\Models\CustomerByStaff::where('customer_id', $customer->id)->delete();
+        $customer->bankAccounts()->delete();
+        $customer->documents()->delete();
+        $customer->businesses()->delete();
+        $customer->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer deleted successfully.'
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to delete customer.',
+        ], 500);
+    }
+}
     /**
      * Get customer statistics.
      */

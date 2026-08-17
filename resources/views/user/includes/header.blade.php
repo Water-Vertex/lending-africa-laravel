@@ -43,16 +43,17 @@
                         </div>
                     </div>
                 </li>
-                <li>
-                    <a href="#about" data-nav-section="about"
-                       class="nav-link px-4 py-2 text-sm font-medium text-dark hover:text-primary transition rounded-lg hover:bg-primary-xlight">
-                        About Us
-                    </a>
-                </li>
+              
                 <li>
                     <a href="#how-it-works" data-nav-section="how-it-works"
                        class="nav-link px-4 py-2 text-sm font-medium text-dark hover:text-primary transition rounded-lg hover:bg-primary-xlight">
                         How It Works
+                    </a>
+                </li>
+                  <li>
+                    <a href="#about" data-nav-section="about"
+                       class="nav-link px-4 py-2 text-sm font-medium text-dark hover:text-primary transition rounded-lg hover:bg-primary-xlight">
+                        About Us
                     </a>
                 </li>
                 <li>
@@ -69,12 +70,14 @@
                 </li>
             </ul>
 
-            <!-- Right Side -->
-          <div class="hidden lg:flex items-center gap-3">
-    <!-- <a href="http://localhost:4200/staff/login"   target="_blank" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
+              <!-- Right Side -->
+
+<!-- 
+               <a href="https://portal.aiploan.com/staff/login" target="_blank" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
         <i class="fas fa-sign-in-alt text-xs"></i> Staff Login
     </a> -->
-     <a href="{{ route('staff.customer.create') }}" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
+          <div class="hidden lg:flex items-center gap-3">
+    <a href="http://portal.aiploan.com/staff/login"   target="_blank" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
         <i class="fas fa-sign-in-alt text-xs"></i> Staff Login
     </a>
     <a href="#apply"

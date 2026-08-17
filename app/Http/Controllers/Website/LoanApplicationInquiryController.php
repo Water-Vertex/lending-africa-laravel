@@ -38,7 +38,7 @@ class LoanApplicationInquiryController extends Controller
                     'required',
                     'email',
                     'max:255',
-                    // Rule::unique('loan_application_inquiries', 'email'),
+                    Rule::unique('loan_application_inquiries', 'email'),
                 ],
 
                 'phone' => [
@@ -73,8 +73,8 @@ class LoanApplicationInquiryController extends Controller
                 ],
 
             ], [
-                // 'email.unique' =>
-                //     'A loan application has already been submitted using this email address.',
+                 'email.unique' =>
+                   'A loan application has already been submitted using this email address.',
 
                 'phone.unique' =>
                     'A loan application has already been submitted using this phone number.',

@@ -59,4 +59,19 @@ public function coSigners(): \Illuminate\Database\Eloquent\Relations\HasMany
 {
     return $this->hasMany(CoSigner::class, 'application_id');
 }
+
+// app/Models/LoanApplication.php mein yeh relation add karo
+
+public function customerByStaff()
+{
+    return $this->hasOneThrough(
+        \App\Models\CustomerByStaff::class,
+        \App\Models\Customer::class,
+        'id',           // customers.id
+        'customer_id',  // customer_by_staff.customer_id
+        'customer_id',  // loan_applications.customer_id
+        'id'            // customers.id
+    );
+}
+
 }

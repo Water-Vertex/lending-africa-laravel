@@ -127,4 +127,21 @@ class LoanProductController extends Controller
             'data'    => $loanProduct->fresh(),
         ]);
     }
+    // GET /api/loan-products/public-rates
+public function publicRates(): JsonResponse
+{
+    $personal = LoanProduct::where('loan_type', 'personal')
+        ->where('status', 'active')
+        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'duration_months']);
+
+    $sme = LoanProduct::where('loan_type', 'sme')
+        ->where('status', 'active')
+        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'duration_months']);
+
+    return response()->json([
+        'success'  => true,
+        'personal' => $personal,
+        'sme'      => $sme,
+    ]);
+}
 }

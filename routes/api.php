@@ -22,7 +22,8 @@ use App\Http\Controllers\Api\PolicyController;
 // ============================================================
 // PUBLIC ROUTES (No Auth Required)
 // ============================================================
-
+// Public - no auth required
+Route::get('/loan-products/public-rates', [LoanProductController::class, 'publicRates']);
 // Admin Login
 Route::post('admin/login', [AuthController::class, 'login']);
 
@@ -60,12 +61,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/loan-inquiries/stats', [LoanApplicationInquiryController::class, 'stats']);
         Route::get('/loan-inquiries/{id}', [LoanApplicationInquiryController::class, 'show']);
 
-
+// Loan Application Actions
+Route::post('/loan-applications/{id}/approve',               [LoanApplicationController::class, 'approve']);
+Route::post('/loan-applications/{id}/reject',                [LoanApplicationController::class, 'reject']);
+Route::post('/loan-applications/{id}/request-additional-info',[LoanApplicationController::class, 'requestAdditionalInfo']);
                 // Loan Applications
-        Route::get('/loan-applications', [App\Http\Controllers\Api\LoanApplicationController::class, 'index']);
-        Route::get('/loan-applications/stats', [App\Http\Controllers\Api\LoanApplicationController::class, 'stats']);
-        Route::get('/loan-applications/{id}', [App\Http\Controllers\Api\LoanApplicationController::class, 'show']);
-        Route::patch('/loan-applications/{id}/status', [App\Http\Controllers\Api\LoanApplicationController::class, 'updateStatus']);
+        // Route::get('/loan-applications', [App\Http\Controllers\Api\LoanApplicationController::class, 'index']);
+        // Route::get('/loan-applications/stats', [App\Http\Controllers\Api\LoanApplicationController::class, 'stats']);
+        // Route::get('/loan-applications/{id}', [App\Http\Controllers\Api\LoanApplicationController::class, 'show']);
+        // Route::patch('/loan-applications/{id}/status', [App\Http\Controllers\Api\LoanApplicationController::class, 'updateStatus']);
 
         // Users
         Route::get('/users', [UserController::class, 'index']);

@@ -22,8 +22,8 @@ return new class extends Migration
                 'rejected',
                 'additional_info_requested',
             ]);
-            $table->text('message')->nullable();   // reason / message to customer
-            $table->text('remarks')->nullable();   // internal admin notes
+            $table->text('message')->nullable();   
+            $table->text('remarks')->nullable();   
             $table->timestamp('actioned_at')->nullable();
             $table->timestamps();
         });
