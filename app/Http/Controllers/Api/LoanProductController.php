@@ -48,6 +48,7 @@ class LoanProductController extends Controller
             'processing_fee'  => 'nullable|numeric|min:0',
             'late_fee'        => 'nullable|numeric|min:0',
             'duration_months' => 'required|integer|min:1|max:360',
+            'minimum_duration_month'  => 'required|integer|min:1|lte:duration_months',
             'description'     => 'nullable|string',
             'status'          => 'required|in:active,inactive',
         ]);
@@ -82,6 +83,7 @@ class LoanProductController extends Controller
             'processing_fee'  => 'nullable|numeric|min:0',
             'late_fee'        => 'nullable|numeric|min:0',
             'duration_months' => 'required|integer|min:1|max:360',
+            'minimum_duration_month'  => 'required|integer|min:1|lte:duration_months',
             'description'     => 'nullable|string',
             'status'          => 'required|in:active,inactive',
         ]);
@@ -132,11 +134,11 @@ public function publicRates(): JsonResponse
 {
     $personal = LoanProduct::where('loan_type', 'personal')
         ->where('status', 'active')
-        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'duration_months']);
+        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'minimum_duration_month', 'duration_months']);
  
     $sme = LoanProduct::where('loan_type', 'sme')
         ->where('status', 'active')
-        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'duration_months']);
+        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'minimum_duration_month', 'duration_months']);
  
     return response()->json([
         'success'  => true,

@@ -15,6 +15,7 @@ class LoanProduct extends Model
         'processing_fee',
         'late_fee',
         'duration_months',
+        'minimum_duration_month', 
         'description',
         'status',
     ];

@@ -156,24 +156,20 @@
 
             {{-- Calculator ke liye dynamic rates --}}
 
+{{-- Calculator ke liye dynamic rates --}}
 <div id="loan-rates-data"
-
      data-personal-rate="{{ $personalProduct ? $personalProduct->interest_rate : 20 }}"
-
      data-personal-min="{{ $personalProduct ? $personalProduct->minimum_amount : 50000 }}"
-
      data-personal-max="{{ $personalProduct ? $personalProduct->maximum_amount : 200000 }}"
-
+     data-personal-min-duration="{{ $personalProduct ? $personalProduct->minimum_duration_month : 3 }}"
+     data-personal-max-duration="{{ $personalProduct ? $personalProduct->duration_months : 36 }}"
      data-sme-rate="{{ $smeProduct ? $smeProduct->interest_rate : 20 }}"
-
      data-sme-min="{{ $smeProduct ? $smeProduct->minimum_amount : 50000 }}"
-
      data-sme-max="{{ $smeProduct ? $smeProduct->maximum_amount : 300000 }}"
-
+     data-sme-min-duration="{{ $smeProduct ? $smeProduct->minimum_duration_month : 3 }}"
+     data-sme-max-duration="{{ $smeProduct ? $smeProduct->duration_months : 36 }}"
      style="display:none;">
-
 </div>
-
 
 
             {{-- Right: Loan Calculator Card --}}
@@ -199,52 +195,51 @@
                     </div>
 
 
-
-                    {{-- Amount --}}
-
-                    <div class="mb-6">
-
-                        <div class="flex justify-between items-center mb-3">
-
-                            <label class="text-sm font-semibold text-gray-800">Loan Amount</label>
-
-                            <span id="loan-amount-display" class="text-primary font-bold text-lg font-display">₦50,000</span>
-
-                        </div>
-
-                     <input type="range" id="loan-amount-slider" class="range-slider" min="50000" max="200000" value="50000" step="5000">
-
-<div class="flex justify-between text-xs text-gray-500 mt-1">
-
-    <span>₦50,000</span><span id="loan-amount-max-label">₦200,000</span>
-
+{{-- Amount --}}
+<div class="mb-6">
+    <div class="flex justify-between items-center mb-3">
+        <label class="text-sm font-semibold text-gray-800">Loan Amount</label>
+        <span id="loan-amount-display" class="text-primary font-bold text-lg font-display">
+            ₦{{ number_format($personalProduct ? $personalProduct->minimum_amount : 50000, 0) }}
+        </span>
+    </div>
+    <input type="range" id="loan-amount-slider" class="range-slider" 
+        min="{{ $personalProduct ? $personalProduct->minimum_amount : 50000 }}" 
+        max="{{ $personalProduct ? $personalProduct->maximum_amount : 200000 }}" 
+        value="{{ $personalProduct ? $personalProduct->minimum_amount : 50000 }}" 
+        step="1000">
+    <div class="flex justify-between text-xs text-gray-500 mt-1">
+        <span id="loan-amount-min-label">
+            ₦{{ number_format($personalProduct ? $personalProduct->minimum_amount : 50000, 0) }}
+        </span>
+        <span id="loan-amount-max-label">
+            ₦{{ number_format($personalProduct ? $personalProduct->maximum_amount : 200000, 0) }}
+        </span>
+    </div>
 </div>
 
-                    </div>
-
-
-
-                    {{-- Tenure --}}
-
-                    <div class="mb-8">
-
-                        <div class="flex justify-between items-center mb-3">
-
-                            <label class="text-sm font-semibold text-gray-800">Loan Tenure</label>
-
-                            <span id="loan-tenure-display" class="text-primary font-bold text-lg font-display">12 Months</span>
-
-                        </div>
-
-                        <input type="range" id="loan-tenure-slider" class="range-slider" min="3" max="36" value="12" step="3">
-
-                        <div class="flex justify-between text-xs text-gray-500 mt-1">
-
-                            <span>3 Months</span><span>36 Months</span>
-
-                        </div>
-
-                    </div>
+{{-- Tenure --}}
+<div class="mb-8">
+    <div class="flex justify-between items-center mb-3">
+        <label class="text-sm font-semibold text-gray-800">Loan Tenure</label>
+        <span id="loan-tenure-display" class="text-primary font-bold text-lg font-display">
+            {{ $personalProduct ? $personalProduct->minimum_duration_month : 3 }} Months
+        </span>
+    </div>
+    <input type="range" id="loan-tenure-slider" class="range-slider" 
+        min="{{ $personalProduct ? $personalProduct->minimum_duration_month : 3 }}" 
+        max="{{ $personalProduct ? $personalProduct->duration_months : 36 }}" 
+        value="{{ $personalProduct ? $personalProduct->minimum_duration_month : 3 }}" 
+        step="1">
+    <div class="flex justify-between text-xs text-gray-500 mt-1">
+        <span id="loan-tenure-min-label">
+            {{ $personalProduct ? $personalProduct->minimum_duration_month : 3 }} Months
+        </span>
+        <span id="loan-tenure-max-label">
+            {{ $personalProduct ? $personalProduct->duration_months : 36 }} Months
+        </span>
+    </div>
+</div>
 
 
 
@@ -424,7 +419,7 @@
 
             <p class="text-white font-bold font-display text-xl">
 
-                6 – {{ $personalProduct ? $personalProduct->duration_months : '36' }} Months
+              {{ $personalProduct ? $personalProduct->minimum_duration_month : 6 }} – {{ $personalProduct ? $personalProduct->duration_months : '36' }} Months
 
             </p>
 
@@ -512,7 +507,7 @@
 
             <p class="text-white font-bold font-display text-xl">
 
-                6 – {{ $smeProduct ? $smeProduct->duration_months : '36' }} Months
+               {{ $smeProduct ? $smeProduct->minimum_duration_month : 6 }} – {{ $smeProduct ? $smeProduct->duration_months : '36' }} Months
 
             </p>
 
@@ -1639,153 +1634,284 @@
 @once
 
 <script>
-
 document.addEventListener('DOMContentLoaded', function () {
 
-    const form       = document.getElementById('contact-form');
+    // ============================================================
+    // DATABASE SE VALUES LE RAHE HAIN
+    // ============================================================
+    const ratesData = document.getElementById('loan-rates-data');
+    
+    if (!ratesData) {
+        console.error('Loan rates data not found! Using default values.');
+    }
 
-    const alertBox   = document.getElementById('contact-form-alert');
+    // Personal Loan Values - Database se ya default
+    const personal = {
+        rate: ratesData ? parseFloat(ratesData.dataset.personalRate) || 20 : 20,
+        min: ratesData ? parseInt(ratesData.dataset.personalMin) || 50000 : 50000,
+        max: ratesData ? parseInt(ratesData.dataset.personalMax) || 200000 : 200000,
+        minDuration: ratesData ? parseInt(ratesData.dataset.personalMinDuration) || 3 : 3,
+        maxDuration: ratesData ? parseInt(ratesData.dataset.personalMaxDuration) || 36 : 36
+    };
 
-    const submitBtn  = document.getElementById('contact-submit-btn');
+    // SME Loan Values - Database se ya default
+    const sme = {
+        rate: ratesData ? parseFloat(ratesData.dataset.smeRate) || 20 : 20,
+        min: ratesData ? parseInt(ratesData.dataset.smeMin) || 50000 : 50000,
+        max: ratesData ? parseInt(ratesData.dataset.smeMax) || 300000 : 300000,
+        minDuration: ratesData ? parseInt(ratesData.dataset.smeMinDuration) || 3 : 3,
+        maxDuration: ratesData ? parseInt(ratesData.dataset.smeMaxDuration) || 36 : 36
+    };
 
-    const btnText    = document.getElementById('contact-btn-text');
+    console.log('📊 Personal Loan:', personal);
+    console.log('📊 SME Loan:', sme);
 
-    const btnIcon    = document.getElementById('contact-btn-icon');
-
+    // ============================================================
+    // ELEMENTS
+    // ============================================================
+    const form = document.getElementById('contact-form');
+    const alertBox = document.getElementById('contact-form-alert');
+    const submitBtn = document.getElementById('contact-submit-btn');
+    const btnText = document.getElementById('contact-btn-text');
+    const btnIcon = document.getElementById('contact-btn-icon');
     const btnSpinner = document.getElementById('contact-btn-spinner');
 
+    // Calculator Elements
+    const amountSlider = document.getElementById('loan-amount-slider');
+    const tenureSlider = document.getElementById('loan-tenure-slider');
+    const amountDisplay = document.getElementById('loan-amount-display');
+    const tenureDisplay = document.getElementById('loan-tenure-display');
+    const monthlyPayment = document.getElementById('monthly-payment');
+    const totalPayment = document.getElementById('total-payment');
+    const totalInterest = document.getElementById('total-interest');
+    const amountMaxLabel = document.getElementById('loan-amount-max-label');
 
+    let currentType = 'personal'; // 'personal' | 'sme'
 
+    // ============================================================
+    // FORMAT CURRENCY
+    // ============================================================
+    function formatCurrency(amount) {
+        return '₦' + Number(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    }
+
+    // ============================================================
+    // GET CURRENT VALUES
+    // ============================================================
+    function getCurrentValues() {
+        return currentType === 'personal' ? personal : sme;
+    }
+
+    // ============================================================
+    // UPDATE SLIDERS - DATABASE SE VALUES SET KARO
+    // ============================================================
+    function updateSliders() {
+        const values = getCurrentValues();
+        
+        // Amount slider
+        amountSlider.min = values.min;
+        amountSlider.max = values.max;
+        amountSlider.step = 1000;
+        amountSlider.value = values.min;
+        
+        // Tenure slider
+        tenureSlider.min = values.minDuration;
+        tenureSlider.max = values.maxDuration;
+        tenureSlider.step = 1;
+        tenureSlider.value = values.minDuration;
+        
+        // Labels update
+        if (amountMaxLabel) {
+            amountMaxLabel.textContent = formatCurrency(values.max);
+        }
+        const rangeLabels = document.querySelectorAll('.range-labels span');
+        if (rangeLabels.length >= 2) {
+            rangeLabels[0].textContent = formatCurrency(values.min);
+        }
+        
+        // Display update
+        if (amountDisplay) {
+            amountDisplay.textContent = formatCurrency(values.min);
+        }
+        if (tenureDisplay) {
+            tenureDisplay.textContent = values.minDuration + ' Months';
+        }
+        
+        // Calculate
+        calculateMonthlyPayment();
+    }
+
+    // ============================================================
+    // CALCULATE MONTHLY PAYMENT
+    // ============================================================
+    function calculateMonthlyPayment() {
+        const values = getCurrentValues();
+        const loanAmount = parseInt(amountSlider.value);
+        const tenureMonths = parseInt(tenureSlider.value);
+        const rate = values.rate / 100;
+
+        const monthlyRate = rate / 12;
+        let emi = 0;
+
+        if (monthlyRate === 0) {
+            emi = loanAmount / tenureMonths;
+        } else {
+            const factor = Math.pow(1 + monthlyRate, tenureMonths);
+            emi = (loanAmount * monthlyRate * factor) / (factor - 1);
+        }
+
+        const totalRepayment = emi * tenureMonths;
+        const totalInterestAmount = totalRepayment - loanAmount;
+
+        if (monthlyPayment) monthlyPayment.textContent = formatCurrency(emi);
+        if (totalPayment) totalPayment.textContent = formatCurrency(totalRepayment);
+        if (totalInterest) totalInterest.textContent = formatCurrency(totalInterestAmount);
+    }
+
+    // ============================================================
+    // SWITCH LOAN TYPE
+    // ============================================================
+    function switchLoanType(type) {
+        currentType = type;
+        
+        // Update buttons
+        document.querySelectorAll('.calc-tab').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeBtn = document.querySelector(`.calc-tab[data-type="${type}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+        
+        // Update sliders with database values
+        updateSliders();
+    }
+
+    // ============================================================
+    // UPDATE DISPLAY ON SLIDER CHANGE
+    // ============================================================
+    function updateDisplay() {
+        const amount = parseInt(amountSlider.value);
+        const tenure = parseInt(tenureSlider.value);
+        if (amountDisplay) amountDisplay.textContent = formatCurrency(amount);
+        if (tenureDisplay) tenureDisplay.textContent = tenure + ' Months';
+        calculateMonthlyPayment();
+    }
+
+    // ============================================================
+    // CALCULATOR EVENT LISTENERS
+    // ============================================================
+    
+    // Tab buttons
+    document.querySelectorAll('.calc-tab').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.dataset.type;
+            switchLoanType(type);
+        });
+    });
+
+    // Amount slider
+    if (amountSlider) {
+        amountSlider.addEventListener('input', function() {
+            updateDisplay();
+        });
+    }
+
+    // Tenure slider
+    if (tenureSlider) {
+        tenureSlider.addEventListener('input', function() {
+            updateDisplay();
+        });
+    }
+
+    // ============================================================
+    // INITIALIZE CALCULATOR - DATABASE SE START KARO
+    // ============================================================
+    updateSliders();
+    console.log('✅ Loan Calculator initialized with database values!');
+
+    // ============================================================
+    // CONTACT FORM (Pehle jaisa hi)
+    // ============================================================
     if (!form) return;
 
-
-
     // Ensure correct initial state
-
-    btnSpinner.style.display = 'none';
-
-    btnIcon.style.display = 'inline-block';
-
-
+    if (btnSpinner) btnSpinner.style.display = 'none';
+    if (btnIcon) btnIcon.style.display = 'inline-block';
 
     form.addEventListener('submit', function (e) {
-
         e.preventDefault();
 
-
-
         document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
-
-        alertBox.style.display = 'none';
-
-        alertBox.textContent = '';
-
-
+        if (alertBox) {
+            alertBox.style.display = 'none';
+            alertBox.textContent = '';
+        }
 
         // Loader ON
-
-        submitBtn.disabled = true;
-
-        btnText.textContent = 'Sending...';
-
-        btnIcon.style.display = 'none';
-
-        btnSpinner.style.display = 'inline-block';
-
-
+        if (submitBtn) submitBtn.disabled = true;
+        if (btnText) btnText.textContent = 'Sending...';
+        if (btnIcon) btnIcon.style.display = 'none';
+        if (btnSpinner) btnSpinner.style.display = 'inline-block';
 
         const formData = new FormData(form);
 
-
-
         fetch(form.action, {
-
             method: 'POST',
-
             headers: {
-
                 'Accept': 'application/json',
-
                 'X-Requested-With': 'XMLHttpRequest',
-
             },
-
             body: formData,
-
         })
-
         .then(async (response) => {
-
             const data = await response.json();
 
-
-
             if (response.ok && data.success) {
-
                 form.reset();
+                if (alertBox) {
+                    alertBox.textContent = data.message;
+                    alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0;';
+                }
 
-                alertBox.textContent = data.message;
-
-                alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0;';
-
-
-
-                document.getElementById('contact').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             } else if (response.status === 422 && data.errors) {
-
                 Object.keys(data.errors).forEach(field => {
-
                     const errEl = document.querySelector(`.field-error[data-field="${field}"]`);
-
                     if (errEl) errEl.textContent = data.errors[field][0];
-
                 });
 
-
-
-                alertBox.textContent = 'Please fix the errors below and try again.';
-
-                alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
-
+                if (alertBox) {
+                    alertBox.textContent = 'Please fix the errors below and try again.';
+                    alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
+                }
             } else {
-
-                alertBox.textContent = 'Something went wrong. Please try again.';
-
-                alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
-
+                if (alertBox) {
+                    alertBox.textContent = 'Something went wrong. Please try again.';
+                    alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
+                }
             }
-
         })
-
         .catch(() => {
-
-            alertBox.textContent = 'Network error. Please check your connection and try again.';
-
-            alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
-
+            if (alertBox) {
+                alertBox.textContent = 'Network error. Please check your connection and try again.';
+                alertBox.style.cssText = 'display:block; padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;';
+            }
         })
-
         .finally(() => {
-
             // Loader OFF
-
-            submitBtn.disabled = false;
-
-            btnText.textContent = 'Send Message';
-
-            btnIcon.style.display = 'inline-block';
-
-            btnSpinner.style.display = 'none';
-
+            if (submitBtn) submitBtn.disabled = false;
+            if (btnText) btnText.textContent = 'Send Message';
+            if (btnIcon) btnIcon.style.display = 'inline-block';
+            if (btnSpinner) btnSpinner.style.display = 'none';
         });
-
     });
 
 });
-
 </script>
 
 @endonce
