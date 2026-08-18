@@ -96,3 +96,4 @@ public function loanApplications(): HasMany
         return $this->hasMany(CustomerBankAccount::class);
     }
 }
+

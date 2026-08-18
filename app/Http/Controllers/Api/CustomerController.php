@@ -17,7 +17,9 @@ class CustomerController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Customer::with('documents');
+        $query = Customer::with(['documents', 'loanApplications']);
+
+        //$query = Customer::with('documents');
 
         // Filter by status
         if ($request->has('status')) {
@@ -240,33 +242,42 @@ public function show(Customer $customer): JsonResponse
         }
     }
 
-    /**
-     * Remove the specified customer and their documents.
-     */
-    public function destroy(Customer $customer): JsonResponse
-    {
-        try {
-            DB::beginTransaction();
-            $customer->documents()->delete();
-            $customer->delete();
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Customer and their documents deleted successfully.'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
+   
+public function destroy(Customer $customer): JsonResponse
+{
+    try {
+        // Check karo k koi loan application hai
+        if ($customer->loanApplications()->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete customer.',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'This customer cannot be deleted because they have loan application(s) on record. Loan records must be retained for compliance purposes.',
+            ], 422);
         }
-    }
 
+        DB::beginTransaction();
+
+        // Sirf woh customers delete hon jinka koi loan application nahi
+        \App\Models\CustomerByStaff::where('customer_id', $customer->id)->delete();
+        $customer->bankAccounts()->delete();
+        $customer->documents()->delete();
+        $customer->businesses()->delete();
+        $customer->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer deleted successfully.'
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to delete customer.',
+        ], 500);
+    }
+}
     /**
      * Get customer statistics.
      */

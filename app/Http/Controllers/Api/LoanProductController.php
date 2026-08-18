@@ -134,12 +134,14 @@ public function publicRates(): JsonResponse
 {
     $personal = LoanProduct::where('loan_type', 'personal')
         ->where('status', 'active')
-        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'minimum_duration_month', 'duration_months']);
- 
+
+        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'duration_months']);
+
     $sme = LoanProduct::where('loan_type', 'sme')
         ->where('status', 'active')
-        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'minimum_duration_month', 'duration_months']);
- 
+        ->first(['interest_rate', 'minimum_amount', 'maximum_amount', 'duration_months']);
+
+
     return response()->json([
         'success'  => true,
         'personal' => $personal,

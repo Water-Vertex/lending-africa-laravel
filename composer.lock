@@ -4,8 +4,12 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
 
     "content-hash": "30ede9cc2d9eecae449b0452a2292045",
+=======
+    "content-hash": "6d6c5eb5d0322f16396da931d05be970",
+>>>>>>> origin/Fizza
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",

@@ -9,7 +9,6 @@ use App\Http\Controllers\Website\CustomerByStaffController;
 use App\Http\Controllers\Website\StaffProfileController;
 use App\Http\Controllers\Website\PolicyController;
 
-
 Route::get('/customer-add', [CustomerController::class, 'create'])->name('customer.create');
 Route::post('/customer-add', [CustomerController::class, 'store'])->name('customer.store');
 

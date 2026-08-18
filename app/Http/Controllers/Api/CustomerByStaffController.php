@@ -273,18 +273,18 @@ class CustomerByStaffController extends Controller
                 ]);
             }
 
-            // 5) Loan Application
-            $loanApplication = LoanApplication::create([
-                'application_no'  => LoanApplication::generateApplicationNo(),
-                'customer_id'     => $customer->id,
-                'business_id'     => $business?->id,
-                'loan_product_id' => $loanProduct->id,
-                'loan_amount'     => $validated['loan_amount'],
-                'duration_months' => $validated['duration_months'],
-                'purpose'         => $validated['purpose'],
-                'status'          => 'submitted',
-                'application_date' => now()->toDateString(),
-            ]);
+           // 5) Loan Application (createWithAmount se loan_amounts bhi save hoga)
+$loanApplication = LoanApplication::createWithAmount([
+    'application_no'  => LoanApplication::generateApplicationNo(),
+    'customer_id'     => $customer->id,
+    'business_id'     => $business?->id,
+    'loan_product_id' => $loanProduct->id,
+    'loan_amount'     => $validated['loan_amount'],
+    'duration_months' => $validated['duration_months'],
+    'purpose'         => $validated['purpose'],
+    'status'          => 'submitted',
+    'application_date' => now()->toDateString(),
+], (float) $loanProduct->interest_rate);
 
             // 6) Co-signer
             $evidencePath = null;
