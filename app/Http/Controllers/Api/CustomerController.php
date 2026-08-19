@@ -155,9 +155,17 @@ public function show(Customer $customer): JsonResponse
         'loanApplications.coSigners',
     ]);
 
+    // Documents mein full URL add karo
+    $customer->documents->transform(function ($doc) {
+        $doc->file_url = $doc->file_path
+            ? asset('storage/' . $doc->file_path)
+            : null;
+        return $doc;
+    });
+
     return response()->json([
         'success' => true,
-        'data' => $customer,
+        'data'    => $customer,
         'message' => 'Customer retrieved successfully.'
     ]);
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\LoanApprovedMail;
 use App\Mail\LoanRejectedMail;
 use App\Mail\LoanAdditionalInfoMail;
+use App\Mail\LoanActionStaffMail;
 use App\Models\LoanApplication;
 use App\Models\LoanApproval;
 use Illuminate\Http\JsonResponse;
@@ -182,28 +183,23 @@ public function approve(Request $request, $id): JsonResponse
         }
 
         // Email to staff if submitted by staff
-        if ($application->customerByStaff && $application->customerByStaff->staff) {
-            $staffEmail = $application->customerByStaff->staff->email ?? null;
-            $debugLog('staffEmail resolved as: ' . var_export($staffEmail, true));
+      // Email to staff if submitted by staff
+if ($application->customerByStaff && $application->customerByStaff->staff) {
+    $staffEmail = $application->customerByStaff->staff->email ?? null;
 
-            if ($staffEmail) {
-                $debugLog('BEFORE Mail::send() to staff');
-                try {
-                    Mail::to($staffEmail)
-                        ->send(new LoanApprovedMail($application, $validated['message'] ?? ''));
-                    $debugLog('AFTER Mail::send() to staff - NO EXCEPTION THROWN');
-                } catch (\Throwable $e) {
-                    $debugLog('EXCEPTION on staff mail: ' . get_class($e) . ' - ' . $e->getMessage());
-                    $debugLog('TRACE: ' . $e->getTraceAsString());
-                    \Log::error('Loan approved email failed (staff): ' . $e->getMessage());
-                }
-            } else {
-                $debugLog('SKIPPED staff email - $staffEmail was empty/null/falsy');
-            }
-        } else {
-            $debugLog('No staff submission linked to this application (customerByStaff null, or staff relation null)');
+    if ($staffEmail) {
+        try {
+            Mail::to($staffEmail)
+                ->send(new LoanActionStaffMail(
+                    $application,
+                    'approved',
+                    $validated['message'] ?? ''
+                ));
+        } catch (\Exception $e) {
+            \Log::error('Loan approved staff email failed: ' . $e->getMessage());
         }
-
+    }
+}
         $debugLog('=== approve() finished for application id=' . $application->id);
 
         return response()->json([
@@ -252,17 +248,23 @@ public function approve(Request $request, $id): JsonResponse
         }
 
         // Email to staff
-        if ($application->customerByStaff && $application->customerByStaff->staff) {
-            $staffEmail = $application->customerByStaff->staff->email ?? null;
-            if ($staffEmail) {
-                try {
-                    Mail::to($staffEmail)
-                        ->send(new LoanRejectedMail($application, $validated['reason']));
-                } catch (\Exception $e) {
-                    \Log::error('Loan rejected email failed (staff): ' . $e->getMessage());
-                }
-            }
+// Email to staff
+if ($application->customerByStaff && $application->customerByStaff->staff) {
+    $staffEmail = $application->customerByStaff->staff->email ?? null;
+
+    if ($staffEmail) {
+        try {
+            Mail::to($staffEmail)
+                ->send(new LoanActionStaffMail(
+                    $application,
+                    'rejected',
+                    $validated['reason']
+                ));
+        } catch (\Exception $e) {
+            \Log::error('Loan rejected staff email failed: ' . $e->getMessage());
         }
+    }
+}
 
         return response()->json([
             'success' => true,
@@ -311,18 +313,23 @@ public function approve(Request $request, $id): JsonResponse
         }
 
         // Email to staff
-        if ($application->customerByStaff && $application->customerByStaff->staff) {
-            $staffEmail = $application->customerByStaff->staff->email ?? null;
-            if ($staffEmail) {
-                try {
-                    Mail::to($staffEmail)
-                        ->send(new LoanAdditionalInfoMail($application, $validated['message']));
-                } catch (\Exception $e) {
-                    \Log::error('Additional info email failed (staff): ' . $e->getMessage());
-                }
-            }
-        }
+     // Email to staff
+if ($application->customerByStaff && $application->customerByStaff->staff) {
+    $staffEmail = $application->customerByStaff->staff->email ?? null;
 
+    if ($staffEmail) {
+        try {
+            Mail::to($staffEmail)
+                ->send(new LoanActionStaffMail(
+                    $application,
+                    'additional_info_requested',
+                    $validated['message']
+                ));
+        } catch (\Exception $e) {
+            \Log::error('Additional info staff email failed: ' . $e->getMessage());
+        }
+    }
+}
         return response()->json([
             'success' => true,
             'message' => 'Message sent to customer successfully.',
