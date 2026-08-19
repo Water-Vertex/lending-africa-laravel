@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Models\Bank;
+use App\Mail\StaffAccountCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -14,11 +17,20 @@ class StaffController extends Controller
 {
     /**
      * Display a listing of staff.
+     * Branch Manager => only staff THEY created.
+     * Admin (or any other role) => all staff.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $staff = Staff::with('bank')->orderBy('id', 'desc')->get();
+            $admin = $request->user();
+            $query = Staff::with('bank')->orderBy('id', 'desc');
+
+            if ($admin && $admin->role && $admin->role->name === 'Branch Manager') {
+                $query->where('created_by', $admin->id);
+            }
+
+            $staff = $query->get();
 
             return response()->json([
                 'success' => true,
@@ -33,93 +45,42 @@ class StaffController extends Controller
         }
     }
 
-   
-  // 🔥 ORIGINAL - Get last staff code (global)
-    // public function getLastStaffCode()
-    // {
-    //     try {
-    //         $lastStaff = Staff::orderBy('id', 'desc')->first();
-            
-    //         if ($lastStaff) {
-    //             return response()->json([
-    //                 'success' => true,
-    //                 'data' => $lastStaff->staff_code
-    //             ], 200);
-    //         }
-            
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => 'STF0000'
-    //         ], 200);
-            
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to get last staff code',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
+    /**
+     * Get next staff code - RANDOM numeric combination
+     * Format: AIP + 4 random numbers (AIP7392, AIP1847, AIP9503, ...)
+     */
+    public function getNextStaffCode(Request $request)
+    {
+        try {
+            // Generate a random unique staff code
+            $staffCode = $this->generateRandomStaffCode();
 
-
-    public function getLastStaffCode(Request $request)
-{
-    try {
-        $bankId = $request->query('bank_id');
-
-        if (!$bankId) {
             return response()->json([
                 'success' => true,
-                'data' => null
+                'data' => $staffCode
             ], 200);
-        }
 
-        $bank = Bank::find($bankId);
-
-        if (!$bank) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Bank not found'
-            ], 404);
+                'message' => 'Failed to generate staff code',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $prefix = $this->getBankPrefix($bank->name);
-
-        $lastStaff = Staff::where('staff_code', 'like', $prefix . '%')
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $nextNumber = 1;
-        if ($lastStaff) {
-            $numPart = substr($lastStaff->staff_code, strlen($prefix));
-            $nextNumber = ((int) $numPart) + 1;
-        }
-
-        $nextCode = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-
-        return response()->json([
-            'success' => true,
-            'data' => $nextCode
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to get last staff code',
-            'error' => $e->getMessage()
-        ], 500);
     }
-  }
+
     /**
      * Store a newly created staff member.
-     * Auto-generates staff_code and password.
-     * Plain password is returned in the response so admin can share it manually.
+     * Auto-generates staff_code (AIP + 4 random numbers) and password.
+     * Sends account credentials via email.
+     * NO BANK DEPENDENCY - bank_id removed completely
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'bank_id'       => 'required|exists:banks,id',
-            'branch_name'   => 'nullable|string|max:255',
+        $admin = $request->user();
+
+        // Validation rules - NO bank_id required
+        $rules = [
             'first_name'    => 'required|string|max:255',
             'last_name'     => 'required|string|max:255',
             'email'         => 'required|email|unique:staff,email|max:255',
@@ -127,21 +88,26 @@ class StaffController extends Controller
             'designation'   => 'nullable|string|max:255',
             'employee_id'   => 'nullable|string|max:100',
             'status'        => 'required|in:active,inactive',
-        ]);
+            'branch_name'   => 'nullable|string|max:255',
+            'staff_code'    => 'nullable|string|max:50',
+            'password'      => 'nullable|string|min:6',
+        ];
+
+        $request->validate($rules);
 
         try {
-           $bank = Bank::findOrFail($request->bank_id);
-            $staffCode = $this->generateStaffCode($bank);
-            // 2) Generate random plain password
-            // $plainPassword = Str::random(4) . rand(10, 99) . Str::random(4);
-            $plainPassword = $request->filled('password') 
-    ? $request->password 
-    : Str::random(4) . rand(10, 99) . Str::random(4);
+            // Generate unique random staff code (if not provided)
+            $staffCode = $request->filled('staff_code') 
+                ? $request->staff_code 
+                : $this->generateRandomStaffCode();
 
-            // 3) Create staff record
+            $plainPassword = $request->filled('password')
+                ? $request->password
+                : Str::random(10);
+
             $staff = Staff::create([
                 'staff_code'    => $staffCode,
-                'bank_id'       => $request->bank_id,
+                'bank_id'       => null, // 👈 Set to null since bank is removed
                 'branch_name'   => $request->branch_name,
                 'first_name'    => $request->first_name,
                 'last_name'     => $request->last_name,
@@ -151,15 +117,32 @@ class StaffController extends Controller
                 'employee_id'   => $request->employee_id,
                 'password'      => Hash::make($plainPassword),
                 'status'        => $request->status,
+                'created_by'    => $admin->id,
             ]);
+
+            $staff->load('bank');
+
+            // Send account credentials email
+            try {
+                Mail::to($staff->email)->send(new StaffAccountCreated(
+                    $staff->first_name . ' ' . $staff->last_name,
+                    $staff->staff_code,
+                    $staff->email,
+                    $plainPassword,
+                    'Bank', // 👈 Default value since bank is removed
+                    'https://portal.aiploan.com/staff/login'
+                ));
+            } catch (\Exception $mailException) {
+                Log::error('Staff account email failed: ' . $mailException->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Staff created successfully',
-                'data'    => $staff->load('bank'),
+                'data'    => $staff,
                 'credentials' => [
                     'staff_code' => $staff->staff_code,
-                    'password'   => $plainPassword,   // Sirf yahin ek baar dikhega
+                    'password'   => $plainPassword,
                 ]
             ], 201);
         } catch (\Exception $e) {
@@ -172,12 +155,40 @@ class StaffController extends Controller
     }
 
     /**
+     * Generate a random unique staff code
+     * Format: AIP + 4 random numbers (0000-9999)
+     * Example: AIP7392, AIP1847, AIP9503
+     * Guaranteed to be unique
+     */
+    private function generateRandomStaffCode(): string
+    {
+        $prefix = 'AIP';
+        
+        do {
+            // Generate 4 random digits (0000 to 9999)
+            $randomNumber = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            $code = $prefix . $randomNumber;
+            
+        } while (Staff::where('staff_code', $code)->exists());
+
+        return $code;
+    }
+
+    /**
      * Display the specified staff member.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         try {
+            $admin = $request->user();
             $staff = Staff::with('bank')->findOrFail($id);
+
+            if ($admin && $admin->role && $admin->role->name === 'Branch Manager' && $staff->created_by !== $admin->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
 
             return response()->json([
                 'success' => true,
@@ -193,14 +204,30 @@ class StaffController extends Controller
 
     /**
      * Update the specified staff member.
-     * staff_code is never changed after creation.
-     * Optionally regenerate a new password (returned in response).
+     * NO BANK DEPENDENCY - bank_id/branch_name removed
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'bank_id'             => 'required|exists:banks,id',
-            'branch_name'         => 'nullable|string|max:255',
+        $admin = $request->user();
+        $isBranchManager = $admin && $admin->role && $admin->role->name === 'Branch Manager';
+
+        try {
+            $staff = Staff::findOrFail($id);
+
+            if ($isBranchManager && $staff->created_by !== $admin->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Staff not found'
+            ], 404);
+        }
+
+        $rules = [
             'first_name'          => 'required|string|max:255',
             'last_name'           => 'required|string|max:255',
             'email'               => [
@@ -213,15 +240,14 @@ class StaffController extends Controller
             'designation'         => 'nullable|string|max:255',
             'employee_id'         => 'nullable|string|max:100',
             'status'              => 'required|in:active,inactive',
+            'branch_name'         => 'nullable|string|max:255',
             'regenerate_password' => 'nullable|boolean',
-        ]);
+        ];
+
+        $request->validate($rules);
 
         try {
-            $staff = Staff::findOrFail($id);
-
             $data = [
-                'bank_id'       => $request->bank_id,
-                'branch_name'   => $request->branch_name,
                 'first_name'    => $request->first_name,
                 'last_name'     => $request->last_name,
                 'email'         => $request->email,
@@ -229,23 +255,40 @@ class StaffController extends Controller
                 'designation'   => $request->designation,
                 'employee_id'   => $request->employee_id,
                 'status'        => $request->status,
+                'branch_name'   => $request->branch_name,
             ];
 
             $newPlainPassword = null;
 
             if ($request->boolean('regenerate_password')) {
-                $newPlainPassword = Str::random(4) . rand(10, 99) . Str::random(4);
+                $newPlainPassword = Str::random(10);
                 $data['password'] = Hash::make($newPlainPassword);
             }
 
             $staff->update($data);
+            $staff->load('bank');
+
+            if ($newPlainPassword) {
+                try {
+                    Mail::to($staff->email)->send(new StaffAccountCreated(
+                        $staff->first_name . ' ' . $staff->last_name,
+                        $staff->staff_code,
+                        $staff->email,
+                        $newPlainPassword,
+                        'Bank',
+                        'https://portal.aiploan.com/staff/login'
+                    ));
+                } catch (\Exception $mailException) {
+                    Log::error('Staff password regenerate email failed: ' . $mailException->getMessage());
+                }
+            }
 
             $response = [
                 'success' => true,
                 'message' => $newPlainPassword
                     ? 'Staff updated and password regenerated successfully'
                     : 'Staff updated successfully',
-                'data'    => $staff->load('bank')
+                'data'    => $staff
             ];
 
             if ($newPlainPassword) {
@@ -268,10 +311,19 @@ class StaffController extends Controller
     /**
      * Remove the specified staff member.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
+            $admin = $request->user();
             $staff = Staff::findOrFail($id);
+
+            if ($admin && $admin->role && $admin->role->name === 'Branch Manager' && $staff->created_by !== $admin->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
             $staff->delete();
 
             return response()->json([
@@ -287,146 +339,85 @@ class StaffController extends Controller
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Helpers
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Generate the next sequential staff code, e.g. STF0001, STF0002...
+     * Get authenticated staff's own profile (self-service).
      */
-    // private function generateStaffCode(): string
-    // {
-    //     do {
-    //         $lastStaff = Staff::orderBy('id', 'desc')->first();
+    public function profile(Request $request)
+    {
+        try {
+            $staff = $request->user()->load('bank');
 
-    //         $nextNumber = $lastStaff
-    //             ? ((int) substr($lastStaff->staff_code, 3)) + 1
-    //             : 1;
-
-    //         $code = 'STF' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-    //     } while (Staff::where('staff_code', $code)->exists());
-
-    //     return $code;
-    // }
-
+            return response()->json([
+                'success' => true,
+                'data' => $staff
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch profile',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
- * Get bank's first letter as prefix, e.g. "Polaris Bank" -> P
- */
-private function getBankPrefix(string $bankName): string
-{
-    $clean = preg_replace('/[^A-Za-z]/', '', $bankName);
-    return $clean !== '' ? strtoupper(substr($clean, 0, 1)) : 'X';
-}
+     * Update authenticated staff's own profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $staff = $request->user();
 
-/**
- * Generate the next unique staff code for a given bank, e.g. P0001, Z0004...
- */
-private function generateStaffCode(Bank $bank): string
-{
-    $prefix = $this->getBankPrefix($bank->name);
+        $request->validate([
+            'branch_name'      => 'nullable|string|max:255',
+            'first_name'       => 'required|string|max:255',
+            'last_name'        => 'required|string|max:255',
+            'email'            => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('staff', 'email')->ignore($staff->id),
+            ],
+            'phone'            => 'nullable|string|max:20',
+            'designation'      => 'nullable|string|max:255',
+            'employee_id'      => 'nullable|string|max:100',
+            'current_password' => 'nullable|required_with:new_password|string',
+            'new_password'     => 'nullable|string|min:6|confirmed',
+        ]);
 
-    do {
-        $lastStaff = Staff::where('staff_code', 'like', $prefix . '%')
-            ->orderBy('id', 'desc')
-            ->first();
+        try {
+            $data = [
+                'branch_name'  => $request->branch_name,
+                'first_name'   => $request->first_name,
+                'last_name'    => $request->last_name,
+                'email'        => $request->email,
+                'phone'        => $request->phone,
+                'designation'  => $request->designation,
+                'employee_id'  => $request->employee_id,
+            ];
 
-        $nextNumber = 1;
-        if ($lastStaff) {
-            $numPart = substr($lastStaff->staff_code, strlen($prefix));
-            $nextNumber = ((int) $numPart) + 1;
-        }
-
-        $code = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-    } while (Staff::where('staff_code', $code)->exists());
-
-    return $code;
-}
-
-
-
-/**
- * Get authenticated staff's own profile (self-service).
- */
-public function profile(Request $request)
-{
-    try {
-        $staff = $request->user()->load('bank');
-
-        return response()->json([
-            'success' => true,
-            'data' => $staff
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to fetch profile',
-            'error' => $e->getMessage()
-        ], 500);
-    }
-}
-
-/**
- * Update authenticated staff's own profile.
- * staff_code aur bank_id yahan se kabhi update nahi honge.
- */
-public function updateProfile(Request $request)
-{
-    $staff = $request->user();
-
-    $request->validate([
-        'branch_name'      => 'nullable|string|max:255',
-        'first_name'       => 'required|string|max:255',
-        'last_name'        => 'required|string|max:255',
-        'email'            => [
-            'required',
-            'email',
-            'max:255',
-            Rule::unique('staff', 'email')->ignore($staff->id),
-        ],
-        'phone'            => 'nullable|string|max:20',
-        'designation'      => 'nullable|string|max:255',
-        'employee_id'      => 'nullable|string|max:100',
-        'current_password' => 'nullable|required_with:new_password|string',
-        'new_password'     => 'nullable|string|min:6|confirmed',
-    ]);
-
-    try {
-        $data = [
-            'branch_name'  => $request->branch_name,
-            'first_name'   => $request->first_name,
-            'last_name'    => $request->last_name,
-            'email'        => $request->email,
-            'phone'        => $request->phone,
-            'designation'  => $request->designation,
-            'employee_id'  => $request->employee_id,
-        ];
-
-        if ($request->filled('new_password')) {
-            if (!Hash::check($request->current_password, $staff->password)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Current password is incorrect'
-                ], 422);
+            if ($request->filled('new_password')) {
+                if (!Hash::check($request->current_password, $staff->password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Current password is incorrect'
+                    ], 422);
+                }
+                $data['password'] = Hash::make($request->new_password);
             }
-            $data['password'] = Hash::make($request->new_password);
+
+            $staff->update($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'data'    => $staff->fresh()->load('bank')
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update profile',
+                'error'   => $e->getMessage()
+            ], 500);
         }
-
-        $staff->update($data);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Profile updated successfully',
-            'data'    => $staff->fresh()->load('bank')
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to update profile',
-            'error'   => $e->getMessage()
-        ], 500);
     }
-}
 }

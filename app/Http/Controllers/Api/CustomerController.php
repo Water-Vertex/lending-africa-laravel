@@ -136,6 +136,7 @@ class CustomerController extends Controller
     /**
      * Display the specified customer.
      */
+ 
     // public function show(Customer $customer): JsonResponse
     // {
     //     return response()->json([
@@ -249,86 +250,7 @@ public function show(Customer $customer): JsonResponse
         }
     }
 
-    /**
-     * Remove the specified customer and their documents.
-     */
-    // public function destroy(Customer $customer): JsonResponse
-    // {
-    //     try {
-    //         DB::beginTransaction();
-    //         $customer->documents()->delete();
-    //         $customer->delete();
-    //         DB::commit();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Customer and their documents deleted successfully.'
-    //         ]);
-
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to delete customer.',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-// public function destroy(Customer $customer): JsonResponse
-// {
-//     try {
-//         DB::beginTransaction();
-
-//         // Pehle sari related records delete karo order mein
-        
-//         // 1. Loan approvals (loan applications ke through)
-//         $applicationIds = $customer->loanApplications()->pluck('id');
-//         if ($applicationIds->isNotEmpty()) {
-//             \App\Models\LoanApproval::whereIn('application_id', $applicationIds)->delete();
-//         }
-
-//         // 2. Co-signers
-//         if ($applicationIds->isNotEmpty()) {
-//             \App\Models\CoSigner::whereIn('loan_application_id', $applicationIds)->delete();
-//         }
-
-//         // 3. Loan applications
-//         $customer->loanApplications()->delete();
-
-//         // 4. Bank accounts
-//         $customer->bankAccounts()->delete();
-
-//         // 5. Documents
-//         $customer->documents()->delete();
-
-//         // 6. Business info
-//         $customer->businesses()->delete();
-
-//         // 7. Customer by staff record
-//         \App\Models\CustomerByStaff::where('customer_id', $customer->id)->delete();
-
-//         // 8. Finally customer delete
-//         $customer->delete();
-
-//         DB::commit();
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Customer and all related records deleted successfully.'
-//         ]);
-
-//     } catch (\Exception $e) {
-//         DB::rollBack();
-//         \Log::error('Customer delete failed: ' . $e->getMessage());
-
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Failed to delete customer.',
-//             'error'   => $e->getMessage()
-//         ], 500);
-//     }
-// }
+   
 public function destroy(Customer $customer): JsonResponse
 {
     try {

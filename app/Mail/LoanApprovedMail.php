@@ -40,11 +40,13 @@ class LoanApprovedMail extends Mailable
 
     public function attachments(): array
     {
-        // Generate a dummy agreement PDF for now. Real agreement content/template
-        // can replace resources/views/pdf/loan-agreement.blade.php later without
-        // changing anything here.
+        // Loan amount (Monthly / Total / Interest) load karo agar already load nahi
+        $loanAmount = $this->application->loanAmount
+            ?? $this->application->loanAmount()->first();
+
         $pdf = Pdf::loadView('pdf.loan-agreement', [
             'application' => $this->application,
+            'loanAmount'  => $loanAmount,
         ])->output();
 
         return [

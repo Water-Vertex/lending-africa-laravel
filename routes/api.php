@@ -18,11 +18,14 @@ use App\Http\Controllers\Api\LoanApplicationInquiryController;
 use App\Http\Controllers\Api\CustomerByStaffController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\PolicyController;
+use App\Http\Controllers\Api\StaffDashboardController;
 
 // ============================================================
 // PUBLIC ROUTES (No Auth Required)
 // ============================================================
+
 // Public - no auth required
+
 Route::get('/loan-products/public-rates', [LoanProductController::class, 'publicRates']);
 // Admin Login
 Route::post('admin/login', [AuthController::class, 'login']);
@@ -128,6 +131,7 @@ Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class
         Route::delete('/banks/{id}', [BankController::class, 'destroy']);
 
         // Staff
+        Route::get('/staff/next-code', [StaffController::class, 'getNextStaffCode']); 
         Route::get('/staff/last-code', [StaffController::class, 'getLastStaffCode']);
         Route::get('/staff', [StaffController::class, 'index']);
         Route::post('/staff', [StaffController::class, 'store']);
@@ -152,9 +156,13 @@ Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class
         Route::get('/profile', [StaffController::class, 'profile']);
     Route::put('/profile', [StaffController::class, 'updateProfile']);
 
+     Route::get('/dashboard/stats', [StaffDashboardController::class, 'stats']);
+
+
         Route::get('/loan-products', [CustomerByStaffController::class, 'loanProducts']);
          Route::get('/check-email', [CustomerByStaffController::class, 'checkEmail']);
 
+       Route::get('/banks', [CustomerByStaffController::class, 'banks']);
         // Staff Customers
         Route::get('/customers', [CustomerByStaffController::class, 'index']);
         Route::post('/customers', [CustomerByStaffController::class, 'store']);

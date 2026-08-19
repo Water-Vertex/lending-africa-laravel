@@ -84,10 +84,6 @@ public function loanApplications(): HasMany
     {
         return $this->hasMany(CustomerByStaff::class);
     }
-    public function bankAccounts(): HasMany
-{
-    return $this->hasMany(CustomerBankAccount::class);
-}
 
 
       public function business(): HasOne
@@ -95,24 +91,9 @@ public function loanApplications(): HasMany
         return $this->hasOne(Business::class)->latest();
     }
 
-//     public function loanApplications()
-// {
-//     return $this->hasMany(\App\Models\LoanApplication::class, 'customer_id');
-// }
-
-// public function bankAccounts()
-// {
-//     return $this->hasMany(\App\Models\CustomerBankAccount::class, 'customer_id');
-// }
-
-// public function businesses()
-// {
-//     return $this->hasMany(\App\Models\CustomerBusiness::class, 'customer_id');
-// }
-
-// public function documents()
-// {
-//     return $this->hasMany(\App\Models\CustomerDocument::class, 'customer_id');
-// }
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(CustomerBankAccount::class);
+    }
 }
 

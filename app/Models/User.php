@@ -13,8 +13,8 @@ class User extends Authenticatable
 
     protected $fillable = [
         'role_id',
-            'bank_id', 
-         'branch',
+        // 'bank_id', 
+        'branch',
         'first_name',
         'last_name',
         'email',
@@ -40,10 +40,11 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-     public function bank()
-    {
-        return $this->belongsTo(Bank::class);
-    }
+    // public function bank()
+    // {
+    //     return $this->belongsTo(Bank::class);
+    // }
+
     // Helper: full name
     public function getFullNameAttribute(): string
     {

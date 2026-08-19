@@ -250,6 +250,7 @@
     }
     .alert-premium-success .icon { background: #6DBE3B; color: white; }
     .alert-premium-error .icon { background: #ef4444; color: white; }
+
     @media (max-width: 640px) {
         .form-header { padding: 1.5rem; }
         .step-wizard { flex-direction: column; align-items: stretch; gap: 0.5rem; }
@@ -381,26 +382,21 @@
                         Contact Details
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- <div class="form-group">
-                            <label class="form-label-premium">Email Address</label>
-                            <input type="email" name="email" id="email" class="form-input-premium" value="{{ old('email') }}" placeholder="customer@example.com">
-                            <p class="field-error-msg" id="err-email"><i class="fas fa-circle-exclamation"></i> <span></span></p>
-                        </div> -->
                         <div>
-    <label class="block text-sm font-semibold text-white mb-1.5">Email Address</label>
-    <input type="email" 
-           name="email" 
-           placeholder="john@example.com" 
-           required 
-           class="contact-form-input {{ $prefillEmail ? 'bg-green-50' : '' }}" 
-           value="{{ old('email', $prefillEmail) }}"
-           {{ $prefillEmail ? 'readonly' : '' }}>
-    @if($prefillEmail)
-        <p style="font-size:0.72rem; color:#6DBE3B; margin-top:0.3rem;">
-            <i class="fas fa-check-circle"></i> Email pre-filled from your loan inquiry
-        </p>
-    @endif
-</div>
+                            <label class="block text-sm font-semibold text-white mb-1.5">Email Address</label>
+                            <input type="email" 
+                                   name="email" 
+                                   placeholder="john@example.com" 
+                                   required 
+                                   class="contact-form-input {{ $prefillEmail ? 'bg-green-50' : '' }}" 
+                                   value="{{ old('email', $prefillEmail) }}"
+                                   {{ $prefillEmail ? 'readonly' : '' }}>
+                            @if($prefillEmail)
+                                <p style="font-size:0.72rem; color:#6DBE3B; margin-top:0.3rem;">
+                                    <i class="fas fa-check-circle"></i> Email pre-filled from your loan inquiry
+                                </p>
+                            @endif
+                        </div>
                         <div class="form-group">
                             <label class="form-label-premium">National ID (NIN)</label>
                             <input type="text" name="national_id" id="national_id" class="form-input-premium" value="{{ old('national_id') }}" placeholder="e.g. 12345678901" maxlength="11" inputmode="numeric">
@@ -765,6 +761,8 @@
                                         data-type="{{ $product->loan_type }}"
                                         data-min="{{ $product->minimum_amount }}"
                                         data-max="{{ $product->maximum_amount }}"
+                                        data-minDuration="{{ $product->minimum_duration_month ?? $product->duration_months ?? 3 }}"
+                                        data-maxDuration="{{ $product->duration_months ?? 360 }}"
                                         data-duration="{{ $product->duration_months }}"
                                         {{ old('loan_product_id') == $product->id ? 'selected' : '' }}
                                     >
@@ -781,14 +779,46 @@
                             <p class="field-error-msg" id="err-loan_amount"><i class="fas fa-circle-exclamation"></i> <span></span></p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    
+                    {{-- DURATION DROPDOWN --}}
+                    <div class="grid grid-cols-1 gap-4 mt-4">
                         <div class="form-group">
                             <label class="form-label-premium">Duration (Months) <span class="text-red-500">*</span></label>
-                            <input type="number" name="duration_months" id="duration_months" required class="form-input-premium" value="{{ old('duration_months') }}" placeholder="e.g. 12" min="1" max="360" inputmode="numeric">
-                            <p class="field-hint">Between 1 and 360 months</p>
-                            <p class="field-error-msg" id="err-duration_months"><i class="fas fa-circle-exclamation"></i> <span></span></p>
+                            
+                            <select name="duration_months" id="duration_months" required class="form-input-premium">
+                                <option value="">Select duration</option>
+                                @foreach ($loanProducts as $product)
+                                    @php
+                                        $minDur = $product->minimum_duration_month ?? $product->duration_months ?? 3;
+                                        $maxDur = $product->duration_months ?? 12;
+                                        // Agar min > max ho toh swap karo
+                                        if ($minDur > $maxDur) {
+                                            $temp = $minDur;
+                                            $minDur = $maxDur;
+                                            $maxDur = $temp;
+                                        }
+                                    @endphp
+                                    @for ($i = $minDur; $i <= $maxDur; $i++)
+                                        <option 
+                                            value="{{ $i }}" 
+                                            class="duration-option" 
+                                            data-product-id="{{ $product->id }}"
+                                            style="display: none;"
+                                            {{ old('duration_months') == $i ? 'selected' : '' }}
+                                        >
+                                            {{ $i }} month{{ $i > 1 ? 's' : '' }}
+                                        </option>
+                                    @endfor
+                                @endforeach
+                            </select>
+                            
+                            <p class="field-hint" id="duration-hint">Select a loan product first</p>
+                            <p class="field-error-msg" id="err-duration_months">
+                                <i class="fas fa-circle-exclamation"></i> <span></span>
+                            </p>
                         </div>
                     </div>
+                    
                     <div class="form-group mt-4">
                         <label class="form-label-premium">Loan Purpose <span class="text-red-500">*</span></label>
                         <textarea name="purpose" id="purpose" required rows="3" class="form-input-premium resize-none" placeholder="Describe how the customer will use these funds (minimum 20 characters)">{{ old('purpose') }}</textarea>
@@ -853,12 +883,12 @@
 (function () {
 
     // ─── Nigerian Validation Rules ───────────────────────────────────────────
-    const NIGERIAN_PHONE_REGEX   = /^0[7-9][01]\d{8}$/;          // 11 digits, starts 070/080/090 etc
-    const BVN_REGEX              = /^\d{11}$/;                    // exactly 11 digits
-    const NIN_REGEX              = /^\d{11}$/;                    // exactly 11 digits
-    const NUBAN_REGEX            = /^\d{10}$/;                    // exactly 10 digits
-    const CAC_REGEX              = /^RC\d{6,7}$/i;               // RC + 6-7 digits
-    const TIN_REGEX              = /^\d{10}(\-\d{4})?$/;         // 10 digits or 10-4 format
+    const NIGERIAN_PHONE_REGEX   = /^0[7-9][01]\d{8}$/;
+    const BVN_REGEX              = /^\d{11}$/;
+    const NIN_REGEX              = /^\d{11}$/;
+    const NUBAN_REGEX            = /^\d{10}$/;
+    const CAC_REGEX              = /^RC\d{6,7}$/i;
+    const TIN_REGEX              = /^\d{10}(\-\d{4})?$/;
     const EMAIL_REGEX            = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const NAME_REGEX             = /^[a-zA-Z\s'\-]{2,100}$/;
     const MAX_FILE_MB            = 2;
@@ -895,7 +925,7 @@
         return input.files[0].size <= MAX_FILE_MB * 1024 * 1024;
     }
 
-    // ─── Individual field validators (return true = valid) ───────────────────
+    // ─── Individual field validators ──────────────────────────────────────────
     const validators = {
 
         first_name: (v) => NAME_REGEX.test(v.trim())
@@ -911,7 +941,7 @@
             : [false, 'Middle name should contain letters only'],
 
         date_of_birth: (v) => {
-            if (!v) return [true]; // optional
+            if (!v) return [true];
             const age = getAge(v);
             if (age < 18) return [false, 'Customer must be at least 18 years old'];
             if (age > 80) return [false, 'Customer cannot be older than 80 years'];
@@ -1180,7 +1210,64 @@
     attachLive('cosigner_city',            'err-cosigner_city',           validators.cosigner_city);
     attachLive('cosigner_address',         'err-cosigner_address',        validators.cosigner_address);
     attachLive('purpose',                  'err-purpose',                 validators.purpose);
-    attachLive('duration_months',          'err-duration_months',         validators.duration_months);
+
+    // ─── Duration Dropdown Functions ──────────────────────────────────────────
+    function filterDurationOptions(productId) {
+        const durationSelect = document.getElementById('duration_months');
+        const durationHint = document.getElementById('duration-hint');
+        if (!durationSelect) return;
+        
+        const options = durationSelect.querySelectorAll('.duration-option');
+        let firstVisible = null;
+        let count = 0;
+        
+        options.forEach(opt => {
+            if (opt.dataset.productId == productId) {
+                opt.style.display = '';
+                if (!firstVisible) firstVisible = opt;
+                count++;
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+        
+        // Select first visible option
+        if (firstVisible) {
+            firstVisible.selected = true;
+        }
+        
+        // Update hint with min/max values from selected product
+        const loanProductSelect = document.getElementById('loan_product_id');
+        const selectedProduct = loanProductSelect?.options[loanProductSelect.selectedIndex];
+        
+        if (durationHint) {
+            if (selectedProduct && selectedProduct.dataset.minDuration && selectedProduct.dataset.maxDuration) {
+                const minDur = selectedProduct.dataset.minDuration;
+                const maxDur = selectedProduct.dataset.maxDuration;
+                durationHint.textContent = `Select loan duration between ${minDur} and ${maxDur} months`;
+            } else {
+                durationHint.textContent = 'Select a loan product first';
+            }
+        }
+        
+        // Trigger validation
+        const [ok, msg] = validators.duration_months(durationSelect.value);
+        markInput(durationSelect, ok);
+        ok ? clearErr('err-duration_months') : showErr('err-duration_months', msg);
+    }
+
+    function updateDurationDropdown() {
+        const loanProductSelect = document.getElementById('loan_product_id');
+        const selected = loanProductSelect?.options[loanProductSelect.selectedIndex];
+        
+        if (selected && selected.value) {
+            filterDurationOptions(selected.value);
+        } else {
+            // Hide all options
+            const options = document.querySelectorAll('.duration-option');
+            options.forEach(opt => opt.style.display = 'none');
+        }
+    }
 
     // ─── Step 1 full validate ────────────────────────────────────────────────
     function validateStep1() {
@@ -1329,7 +1416,6 @@
             clone.querySelectorAll('[name]').forEach(el => { el.name = el.name.replace('__INDEX__', docIndex); });
             const row = document.createElement('div');
             row.appendChild(clone);
-            // file size live check
             row.querySelector('.doc-file-input')?.addEventListener('change', function () {
                 const errEl = this.closest('.form-group')?.querySelector('.doc-file-error');
                 if (!fileSizeOk(this)) {
@@ -1367,16 +1453,20 @@
         const loanProductSelect = document.getElementById('loan_product_id');
         const loanAmountEl      = document.getElementById('loan_amount');
         const loanHint          = document.getElementById('loan-amount-hint');
-        const durationEl        = document.getElementById('duration_months');
+        const durationSelect    = document.getElementById('duration_months');
 
         function filterProducts() {
             if (!typeSelect || !loanProductSelect) return;
             const type = typeSelect.value;
             loanProductSelect.querySelectorAll('option[data-type]').forEach(opt => {
                 opt.hidden = opt.dataset.type !== type;
-                if (opt.selected && opt.dataset.type !== type) opt.selected = false;
+                if (opt.selected && opt.dataset.type !== type) {
+                    opt.selected = false;
+                }
             });
             updateLimits();
+            // Update duration dropdown after product filter
+            setTimeout(updateDurationDropdown, 50);
         }
 
         function updateLimits() {
@@ -1384,14 +1474,18 @@
             if (sel?.dataset.min) {
                 if (loanAmountEl) { loanAmountEl.min = sel.dataset.min; loanAmountEl.max = sel.dataset.max; }
                 if (loanHint) loanHint.textContent = `Min: ₦${Number(sel.dataset.min).toLocaleString()} — Max: ₦${Number(sel.dataset.max).toLocaleString()}`;
-                if (durationEl && !durationEl.value && sel.dataset.duration) durationEl.value = sel.dataset.duration;
             } else {
                 if (loanHint) loanHint.textContent = 'Select a loan product first';
             }
         }
 
         typeSelect?.addEventListener('change', filterProducts);
-        loanProductSelect?.addEventListener('change', updateLimits);
+        loanProductSelect?.addEventListener('change', function() {
+            updateLimits();
+            updateDurationDropdown();
+        });
+        
+        // Initial load
         filterProducts();
 
         // Live loan amount validation with min/max from selected product

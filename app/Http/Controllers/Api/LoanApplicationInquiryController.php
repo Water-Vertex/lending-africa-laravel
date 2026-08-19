@@ -1,11 +1,11 @@
 <?php
-
+ 
 namespace App\Http\Controllers\Api;
-
+ 
 use App\Http\Controllers\Controller;
 use App\Models\LoanApplicationInquiry;
 use Illuminate\Http\Request;
-
+ 
 class LoanApplicationInquiryController extends Controller
 {
     /**
@@ -14,7 +14,7 @@ class LoanApplicationInquiryController extends Controller
     public function index(Request $request)
     {
         $query = LoanApplicationInquiry::query();
-
+ 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -24,19 +24,19 @@ class LoanApplicationInquiryController extends Controller
                   ->orWhere('phone', 'like', "%{$search}%");
             });
         }
-
+ 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
+ 
         if ($request->filled('loan_type')) {
             $query->where('loan_type', $request->loan_type);
         }
-
+ 
         $perPage = (int) $request->get('per_page', 15);
-
+ 
         $inquiries = $query->latest()->paginate($perPage);
-
+ 
         return response()->json([
             'success' => true,
             'data'    => $inquiries->items(),
@@ -48,20 +48,20 @@ class LoanApplicationInquiryController extends Controller
             ],
         ]);
     }
-
+ 
     /**
      * Single inquiry detail (agar admin ne kabhi row expand/detail dekhna ho).
      */
     public function show($id)
     {
         $inquiry = LoanApplicationInquiry::findOrFail($id);
-
+ 
         return response()->json([
             'success' => true,
             'data'    => $inquiry,
         ]);
     }
-
+ 
     /**
      * Dashboard-style stats cards ke liye.
      */
