@@ -9,9 +9,9 @@ use App\Http\Controllers\Website\CustomerByStaffController;
 use App\Http\Controllers\Website\StaffProfileController;
 use App\Http\Controllers\Website\PolicyController;
 
-Route::get('/customer-add', [CustomerController::class, 'create'])->name('customer.create');
-Route::post('/customer-add', [CustomerController::class, 'store'])->name('customer.store');
-
+// Customer Edit Form — token se access
+Route::get('/customer-edit/{token}', [CustomerController::class, 'editByToken'])->name('customer.edit.token');
+Route::post('/customer-edit/{token}', [CustomerController::class, 'updateByToken'])->name('customer.update.token');
 Route::prefix('staff')->name('staff.')->group(function () {
     Route::get('/customer-add', [CustomerController::class, 'create'])->name('customer.create');
     Route::post('/customer-add', [CustomerController::class, 'store'])->name('customer.store');

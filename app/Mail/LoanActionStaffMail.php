@@ -15,8 +15,8 @@ class LoanActionStaffMail extends Mailable
 
     public function __construct(
         public LoanApplication $application,
-        public string $action,        // 'approved' | 'rejected' | 'additional_info_requested'
-        public string $message = ''
+        public string $action,
+        public string $actionMessage = ''
     ) {}
 
     public function envelope(): Envelope
@@ -36,9 +36,9 @@ class LoanActionStaffMail extends Mailable
         return new Content(
             view: 'emails.loan-action-staff',
             with: [
-                'application' => $this->application,
-                'action'      => $this->action,
-                'message'     => $this->message,
+                'application'   => $this->application,
+                'action'        => $this->action,
+                'actionMessage' => $this->actionMessage,
             ],
         );
     }

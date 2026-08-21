@@ -80,9 +80,7 @@
         <i class="fas fa-sign-in-alt text-xs"></i> Staff Login
     </a>
 
-    <!-- <a href="{{ route('customer.create') }}" target="_blank" class="text-sm font-semibold text-gray-800 hover:text-primary transition flex items-center gap-1.5">
-        <i class="fas fa-sign-in-alt text-xs"></i> Staff Login
-    </a> -->
+
     <a href="#apply"
        class="bg-primary hover:bg-primary-dark text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
         Apply for Loan

@@ -47,7 +47,37 @@
                                 </td>
                             </tr>
                         </table>
-
+{{-- Edit Form CTA --}}
+@if($editUrl)
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4; border-radius:12px; border:1px solid #bbf7d0; margin-bottom:24px;">
+    <tr>
+        <td style="padding:20px 24px;">
+            <p style="margin:0 0 8px; color:#15803d; font-size:14px; font-weight:700;">
+                🔗 Update Your Application
+            </p>
+            <p style="margin:0 0 16px; color:#166534; font-size:13px; line-height:1.6;">
+                Click the button below to open your pre-filled application form. Your existing information will already be filled in — simply update what is needed and resubmit.
+            </p>
+            <p style="margin:0 0 8px; color:#166534; font-size:12px; font-weight:600;">
+                ⚠️ This link is valid for 7 days only.
+            </p>
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>
+                        <a href="{{ $editUrl }}"
+                           style="display:inline-block; background:linear-gradient(135deg,#6DBE3B,#58A02E); color:#ffffff; text-decoration:none; padding:12px 28px; border-radius:10px; font-size:14px; font-weight:700;">
+                            Update My Application →
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <p style="margin:12px 0 0; color:#94a3b8; font-size:11px; word-break:break-all;">
+                Or copy this link: {{ $editUrl }}
+            </p>
+        </td>
+    </tr>
+</table>
+@endif
                         <!-- Application Ref -->
                         <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:24px;">
                             <tr>

@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 
 class CustomerController extends Controller
 {
@@ -265,4 +267,274 @@ $loanApplication = LoanApplication::createWithAmount([
                 ->withErrors(['error' => 'Failed to create customer: ' . $e->getMessage()]);
         }
     }
+
+
+// Edit form — token se customer dhundho
+public function editByToken(string $token)
+{
+    $customer = Customer::where('edit_token', $token)
+        ->where('edit_token_expires_at', '>', now())
+        ->with([
+            'businesses',
+            'bankAccounts.bank',
+            'documents',
+            'loanApplications' => fn($q) => $q->latest()->with('loanProduct'),
+        ])
+        ->first();
+
+    if (!$customer) {
+        abort(404, 'This link has expired or is invalid. Please contact AIP.');
+    }
+
+    $banks        = \App\Models\Bank::where('status', 'active')->get();
+    $loanProducts = \App\Models\LoanProduct::where('status', 'active')->get();
+
+    return view('user.pages.customer-edit', compact('customer', 'banks', 'loanProducts', 'token'));
+}
+
+// Update — form resubmit
+public function updateByToken(Request $request, string $token)
+{
+    $customer = Customer::where('edit_token', $token)
+        ->where('edit_token_expires_at', '>', now())
+        ->with(['businesses', 'bankAccounts', 'loanApplications'])
+        ->first();
+
+    if (!$customer) {
+        return response()->json([
+            'success' => false,
+            'message' => 'This link has expired or is invalid.'
+        ], 404);
+    }
+
+    // Validation
+    $validated = $request->validate([
+        'first_name'        => 'required|string|max:100',
+        'last_name'         => 'required|string|max:100',
+        'middle_name'       => 'nullable|string|max:100',
+        'date_of_birth'     => 'nullable|date',
+        'gender'            => 'nullable|in:male,female,other',
+        'email'             => 'nullable|email|max:255',
+        'national_id'       => 'nullable|string|max:11',
+        'phone_primary'     => 'required|string|max:11',
+        'phone_secondary'   => 'nullable|string|max:11',
+        'occupation'        => 'nullable|string|max:150',
+        'monthly_income'    => 'nullable|numeric|min:0',
+        'country'           => 'nullable|string|max:100',
+        'state'             => 'required|string|max:100',
+        'city'              => 'required|string|max:100',
+        'local_government_area' => 'nullable|string|max:150',
+        'address'           => 'required|string|max:500',
+        // Bank
+        'bank_id'           => 'required|exists:banks,id',
+        'account_name'      => 'required|string|max:200',
+        'account_number'    => 'required|string|max:10',
+        // Co-signer
+        'cosigner_first_name'    => 'required|string|max:100',
+        'cosigner_last_name'     => 'required|string|max:100',
+        'cosigner_middle_name'   => 'nullable|string|max:100',
+        'cosigner_date_of_birth' => 'nullable|date',
+        'cosigner_relationship'  => 'required|string|max:100',
+        'cosigner_bvn'           => 'required|string|max:11',
+        'cosigner_email'         => 'nullable|email|max:255',
+        'cosigner_occupation'    => 'required|string|max:150',
+        'cosigner_phone_primary' => 'required|string|max:11',
+        'cosigner_phone_secondary' => 'nullable|string|max:11',
+        'cosigner_country'       => 'nullable|string|max:100',
+        'cosigner_state'         => 'required|string|max:100',
+        'cosigner_city'          => 'required|string|max:100',
+        'cosigner_address'       => 'required|string|max:500',
+        // Business (SME)
+        'business_name'          => 'nullable|string|max:200',
+        'business_type'          => 'nullable|string|max:100',
+        'registration_number'    => 'nullable|string|max:20',
+        'tax_number'             => 'nullable|string|max:14',
+        'business_monthly_revenue' => 'nullable|numeric|min:0',
+        'business_monthly_expense' => 'nullable|numeric|min:0',
+        'business_state'         => 'nullable|string|max:100',
+        'business_city'          => 'nullable|string|max:100',
+        'business_address'       => 'nullable|string|max:500',
+        // Documents
+        'documents'              => 'nullable|array',
+        'documents.*.file'       => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        'documents.*.document_type'       => 'nullable|string',
+        'documents.*.verification_status' => 'nullable|string',
+        // Loan
+        'loan_product_id'  => 'required|exists:loan_products,id',
+        'loan_amount'      => 'required|numeric|min:0',
+        'duration_months'  => 'required|integer|min:1|max:360',
+        'purpose'          => 'required|string|min:20|max:1000',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        // Customer update
+        $customer->update([
+            'first_name'      => $validated['first_name'],
+            'last_name'       => $validated['last_name'],
+            'middle_name'     => $validated['middle_name'] ?? null,
+            'date_of_birth'   => $validated['date_of_birth'] ?? null,
+            'gender'          => $validated['gender'] ?? null,
+            'email'           => $validated['email'] ?? $customer->email,
+            'national_id'     => $validated['national_id'] ?? null,
+            'phone_primary'   => $validated['phone_primary'],
+            'phone_secondary' => $validated['phone_secondary'] ?? null,
+            'occupation'      => $validated['occupation'] ?? null,
+            'monthly_income'  => $validated['monthly_income'] ?? null,
+            'country'         => $validated['country'] ?? 'Nigeria',
+            'state'           => $validated['state'],
+            'city'            => $validated['city'],
+            'local_government_area' => $validated['local_government_area'] ?? null,
+            'address'         => $validated['address'],
+        ]);
+
+        // Bank account update
+        $bankAccount = $customer->bankAccounts()->first();
+        if ($bankAccount) {
+            $bankAccount->update([
+                'bank_id'        => $validated['bank_id'],
+                'account_name'   => $validated['account_name'],
+                'account_number' => $validated['account_number'],
+            ]);
+        } else {
+            $customer->bankAccounts()->create([
+                'bank_id'        => $validated['bank_id'],
+                'account_name'   => $validated['account_name'],
+                'account_number' => $validated['account_number'],
+            ]);
+        }
+
+        // Co-signer update
+        $coSigner = \App\Models\CoSigner::whereHas('loanApplication', function($q) use ($customer) {
+            $q->where('customer_id', $customer->id);
+        })->first();
+
+        $coSignerData = [
+            'first_name'     => $validated['cosigner_first_name'],
+            'last_name'      => $validated['cosigner_last_name'],
+            'middle_name'    => $validated['cosigner_middle_name'] ?? null,
+            'date_of_birth'  => $validated['cosigner_date_of_birth'] ?? null,
+            'relationship'   => $validated['cosigner_relationship'],
+            'bvn'            => $validated['cosigner_bvn'],
+            'email'          => $validated['cosigner_email'] ?? null,
+            'occupation'     => $validated['cosigner_occupation'],
+            'phone_primary'  => $validated['cosigner_phone_primary'],
+            'phone_secondary'=> $validated['cosigner_phone_secondary'] ?? null,
+            'country'        => $validated['cosigner_country'] ?? 'Nigeria',
+            'state'          => $validated['cosigner_state'],
+            'city'           => $validated['cosigner_city'],
+            'address'        => $validated['cosigner_address'],
+        ];
+
+        if ($coSigner) {
+            $coSigner->update($coSignerData);
+        }
+
+        // Business update (SME)
+        if ($customer->customer_type === 'sme' && !empty($validated['business_name'])) {
+            $business = $customer->businesses()->first();
+            $businessData = [
+                'business_name'    => $validated['business_name'],
+                'business_type'    => $validated['business_type'] ?? null,
+                'registration_number' => $validated['registration_number'] ?? null,
+                'tax_number'       => $validated['tax_number'] ?? null,
+                'monthly_revenue'  => $validated['business_monthly_revenue'] ?? null,
+                'monthly_expense'  => $validated['business_monthly_expense'] ?? null,
+                'state'            => $validated['business_state'] ?? null,
+                'city'             => $validated['business_city'] ?? null,
+                'address'          => $validated['business_address'] ?? null,
+            ];
+            if ($business) {
+                $business->update($businessData);
+            }
+        }
+
+        // Documents — new files upload
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $index => $docData) {
+                if (!empty($docData['file'])) {
+                    $path = $docData['file']->store('customer-documents', 'public');
+                    $customer->documents()->create([
+                        'document_type'       => $docData['document_type'] ?? 'other',
+                        'file_path'           => $path,
+                        'verification_status' => 'pending',
+                    ]);
+                }
+            }
+        }
+
+        // Loan application update
+    //     $loanApp = $customer->loanApplications()->latest()->first();
+    //     if ($loanApp) {
+    //         $loanApp->update([
+    //             'loan_product_id' => $validated['loan_product_id'],
+    //             'loan_amount'     => $validated['loan_amount'],
+    //             'duration_months' => $validated['duration_months'],
+    //             'purpose'         => $validated['purpose'],
+    //             'status'          => 'submitted', // resubmit pe submitted
+    //         ]);
+    //     }
+
+    //     // Token expire karo — ek baar use ho
+    //     $customer->update([
+    //         'edit_token'            => null,
+    //         'edit_token_expires_at' => null,
+    //     ]);
+
+    //     DB::commit();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Your information has been updated successfully. Our team will review your application.',
+    //     ]);
+
+    // } catch (\Exception $e) {
+    //     DB::rollBack();
+    //     \Log::error('Customer edit by token failed: ' . $e->getMessage());
+    //     return response()->json([
+    //         'success' => false,
+    //         'message' => 'Update failed. Please try again.',
+    //     ], 500);
+    // Loan application update
+$loanApp = $customer->loanApplications()->latest()->first();
+if ($loanApp) {
+    $loanApp->update([
+        'loan_product_id' => $validated['loan_product_id'],
+        'loan_amount'     => $validated['loan_amount'],
+        'duration_months' => $validated['duration_months'],
+        'purpose'         => $validated['purpose'],
+        'status'          => 'resubmitted',
+    ]);
+}
+
+// Token expire karo
+$customer->update([
+    'edit_token'            => null,
+    'edit_token_expires_at' => null,
+]);
+
+DB::commit();
+
+// Admin ko email bhejo
+try {
+    $loanApp->load(['customer', 'loanProduct']);
+    Mail::to('info@aiploan.com')
+        ->send(new \App\Mail\LoanResubmittedAdminMail($loanApp));
+} catch (\Exception $e) {
+    \Log::error('Resubmit admin email failed: ' . $e->getMessage());
+}
+
+return response()->json([
+    'success' => true,
+    'message' => 'Your information has been updated successfully. Our team will review your application.',
+]);
+    }catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Customer edit by token failed: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Update failed. Please try again.',
+        ], 500);
+}
+}
 }
