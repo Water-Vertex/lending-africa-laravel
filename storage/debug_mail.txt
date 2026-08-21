@@ -69,3 +69,255 @@
 [2026-08-18 12:24:02] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
 [2026-08-18 12:24:02] No staff submission linked to this application (customerByStaff null, or staff relation null)
 [2026-08-18 12:24:02] === approve() finished for application id=45
+[2026-08-19 11:55:36] === approve() called for application id=45 by user=1
+[2026-08-19 11:55:36] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 11:55:36] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-19 11:55:36] BEFORE Mail::send() to customer
+[2026-08-19 11:55:44] EXCEPTION on customer mail: Symfony\Component\Mailer\Exception\TransportException - Connection could not be established with host "ssl://aiploan.com:465": stream_socket_client(): php_network_getaddresses: getaddrinfo for aiploan.com failed: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. 
+[2026-08-19 11:55:44] TRACE: #0 [internal function]: Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream->Symfony\Component\Mailer\Transport\Smtp\Stream\{closure}(2, 'stream_socket_c...', 'D:\\lending-wate...', 157)
+#1 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\Stream\SocketStream.php(157): stream_socket_client('ssl://aiploan.c...', 0, '', 60.0, 4, Resource id #966)
+#2 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(268): Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream->initialize()
+#3 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(200): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->start()
+#4 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\AbstractTransport.php(69): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->doSend(Object(Symfony\Component\Mailer\SentMessage))
+#5 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(138): Symfony\Component\Mailer\Transport\AbstractTransport->send(Object(Symfony\Component\Mime\Email), Object(Symfony\Component\Mailer\DelayedEnvelope))
+#6 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(584): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->send(Object(Symfony\Component\Mime\Email), Object(Symfony\Component\Mailer\DelayedEnvelope))
+#7 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(331): Illuminate\Mail\Mailer->sendSymfonyMessage(Object(Symfony\Component\Mime\Email))
+#8 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailable.php(207): Illuminate\Mail\Mailer->send('emails.loan-app...', Array, Object(Closure))
+#9 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Support\Traits\Localizable.php(19): Illuminate\Mail\Mailable->Illuminate\Mail\{closure}()
+#10 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailable.php(200): Illuminate\Mail\Mailable->withLocale(NULL, Object(Closure))
+#11 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(353): Illuminate\Mail\Mailable->send(Object(Illuminate\Mail\Mailer))
+#12 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(300): Illuminate\Mail\Mailer->sendMailable(Object(App\Mail\LoanApprovedMail))
+#13 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\PendingMail.php(123): Illuminate\Mail\Mailer->send(Object(App\Mail\LoanApprovedMail))
+#14 D:\lending-watervertex\lending-laravel\app\Http\Controllers\Api\LoanApplicationController.php(173): Illuminate\Mail\PendingMail->send(Object(App\Mail\LoanApprovedMail))
+#15 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\ControllerDispatcher.php(46): App\Http\Controllers\Api\LoanApplicationController->approve(Object(Illuminate\Http\Request), '45')
+#16 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Route.php(265): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(App\Http\Controllers\Api\LoanApplicationController), 'approve')
+#17 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Route.php(211): Illuminate\Routing\Route->runController()
+#18 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(822): Illuminate\Routing\Route->run()
+#19 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Routing\Router->Illuminate\Routing\{closure}(Object(Illuminate\Http\Request))
+#20 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#21 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Routing\Middleware\SubstituteBindings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#22 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php(63): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#23 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Auth\Middleware\Authenticate->handle(Object(Illuminate\Http\Request), Object(Closure), 'sanctum')
+#24 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(137): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#25 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(821): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#26 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(800): Illuminate\Routing\Router->runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#27 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(764): Illuminate\Routing\Router->runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#28 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(753): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#29 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(200): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#30 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Kernel->Illuminate\Foundation\Http\{closure}(Object(Illuminate\Http\Request))
+#31 D:\lending-watervertex\lending-laravel\app\Http\Middleware\Cors.php(27): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#32 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): App\Http\Middleware\Cors->handle(Object(Illuminate\Http\Request), Object(Closure))
+#33 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#34 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#35 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull->handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#37 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php(51): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#38 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\TrimStrings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#39 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#40 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\ValidatePostSize->handle(Object(Illuminate\Http\Request), Object(Closure))
+#41 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php(109): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#42 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance->handle(Object(Illuminate\Http\Request), Object(Closure))
+#43 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php(74): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#44 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\HandleCors->handle(Object(Illuminate\Http\Request), Object(Closure))
+#45 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php(58): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#46 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\TrustProxies->handle(Object(Illuminate\Http\Request), Object(Closure))
+#47 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks.php(22): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#48 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks->handle(Object(Illuminate\Http\Request), Object(Closure))
+#49 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePathEncoding.php(26): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#50 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\ValidatePathEncoding->handle(Object(Illuminate\Http\Request), Object(Closure))
+#51 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(137): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#52 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(175): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#53 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(144): Illuminate\Foundation\Http\Kernel->sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#54 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Application.php(1220): Illuminate\Foundation\Http\Kernel->handle(Object(Illuminate\Http\Request))
+#55 D:\lending-watervertex\lending-laravel\public\index.php(20): Illuminate\Foundation\Application->handleRequest(Object(Illuminate\Http\Request))
+#56 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php(23): require_once('D:\\lending-wate...')
+#57 {main}
+[2026-08-19 11:55:45] === approve() finished for application id=45
+[2026-08-19 12:00:11] === approve() called for application id=42 by user=1
+[2026-08-19 12:00:11] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 12:00:11] customerEmail resolved as: 'midhaahsan896@gmail.com'
+[2026-08-19 12:00:11] BEFORE Mail::send() to customer
+[2026-08-19 12:00:12] EXCEPTION on customer mail: Symfony\Component\Mailer\Exception\TransportException - Connection could not be established with host "ssl://aiploan.com:465": stream_socket_client(): php_network_getaddresses: getaddrinfo for aiploan.com failed: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. 
+[2026-08-19 12:00:12] TRACE: #0 [internal function]: Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream->Symfony\Component\Mailer\Transport\Smtp\Stream\{closure}(2, 'stream_socket_c...', 'D:\\lending-wate...', 157)
+#1 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\Stream\SocketStream.php(157): stream_socket_client('ssl://aiploan.c...', 0, '', 60.0, 4, Resource id #962)
+#2 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(268): Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream->initialize()
+#3 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(200): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->start()
+#4 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\AbstractTransport.php(69): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->doSend(Object(Symfony\Component\Mailer\SentMessage))
+#5 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(138): Symfony\Component\Mailer\Transport\AbstractTransport->send(Object(Symfony\Component\Mime\Email), Object(Symfony\Component\Mailer\DelayedEnvelope))
+#6 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(584): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->send(Object(Symfony\Component\Mime\Email), Object(Symfony\Component\Mailer\DelayedEnvelope))
+#7 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(331): Illuminate\Mail\Mailer->sendSymfonyMessage(Object(Symfony\Component\Mime\Email))
+#8 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailable.php(207): Illuminate\Mail\Mailer->send('emails.loan-app...', Array, Object(Closure))
+#9 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Support\Traits\Localizable.php(19): Illuminate\Mail\Mailable->Illuminate\Mail\{closure}()
+#10 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailable.php(200): Illuminate\Mail\Mailable->withLocale(NULL, Object(Closure))
+#11 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(353): Illuminate\Mail\Mailable->send(Object(Illuminate\Mail\Mailer))
+#12 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(300): Illuminate\Mail\Mailer->sendMailable(Object(App\Mail\LoanApprovedMail))
+#13 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\PendingMail.php(123): Illuminate\Mail\Mailer->send(Object(App\Mail\LoanApprovedMail))
+#14 D:\lending-watervertex\lending-laravel\app\Http\Controllers\Api\LoanApplicationController.php(173): Illuminate\Mail\PendingMail->send(Object(App\Mail\LoanApprovedMail))
+#15 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\ControllerDispatcher.php(46): App\Http\Controllers\Api\LoanApplicationController->approve(Object(Illuminate\Http\Request), '42')
+#16 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Route.php(265): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(App\Http\Controllers\Api\LoanApplicationController), 'approve')
+#17 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Route.php(211): Illuminate\Routing\Route->runController()
+#18 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(822): Illuminate\Routing\Route->run()
+#19 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Routing\Router->Illuminate\Routing\{closure}(Object(Illuminate\Http\Request))
+#20 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#21 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Routing\Middleware\SubstituteBindings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#22 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php(63): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#23 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Auth\Middleware\Authenticate->handle(Object(Illuminate\Http\Request), Object(Closure), 'sanctum')
+#24 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(137): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#25 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(821): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#26 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(800): Illuminate\Routing\Router->runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#27 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(764): Illuminate\Routing\Router->runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#28 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(753): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#29 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(200): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#30 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Kernel->Illuminate\Foundation\Http\{closure}(Object(Illuminate\Http\Request))
+#31 D:\lending-watervertex\lending-laravel\app\Http\Middleware\Cors.php(27): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#32 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): App\Http\Middleware\Cors->handle(Object(Illuminate\Http\Request), Object(Closure))
+#33 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#34 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#35 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull->handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#37 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php(51): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#38 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\TrimStrings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#39 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#40 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\ValidatePostSize->handle(Object(Illuminate\Http\Request), Object(Closure))
+#41 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php(109): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#42 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance->handle(Object(Illuminate\Http\Request), Object(Closure))
+#43 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php(74): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#44 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\HandleCors->handle(Object(Illuminate\Http\Request), Object(Closure))
+#45 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php(58): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#46 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\TrustProxies->handle(Object(Illuminate\Http\Request), Object(Closure))
+#47 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks.php(22): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#48 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks->handle(Object(Illuminate\Http\Request), Object(Closure))
+#49 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePathEncoding.php(26): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#50 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\ValidatePathEncoding->handle(Object(Illuminate\Http\Request), Object(Closure))
+#51 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(137): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#52 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(175): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#53 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(144): Illuminate\Foundation\Http\Kernel->sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#54 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Application.php(1220): Illuminate\Foundation\Http\Kernel->handle(Object(Illuminate\Http\Request))
+#55 D:\lending-watervertex\lending-laravel\public\index.php(20): Illuminate\Foundation\Application->handleRequest(Object(Illuminate\Http\Request))
+#56 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php(23): require_once('D:\\lending-wate...')
+#57 {main}
+[2026-08-19 12:00:12] === approve() finished for application id=42
+[2026-08-19 12:33:48] === approve() called for application id=45 by user=1
+[2026-08-19 12:33:48] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 12:33:48] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-19 12:33:48] BEFORE Mail::send() to customer
+[2026-08-19 12:34:09] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 12:34:09] === approve() finished for application id=45
+[2026-08-19 12:41:32] === approve() called for application id=45 by user=1
+[2026-08-19 12:41:32] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 12:41:32] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-19 12:41:32] BEFORE Mail::send() to customer
+[2026-08-19 12:41:46] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 12:41:46] === approve() finished for application id=45
+[2026-08-19 12:44:49] === approve() called for application id=45 by user=1
+[2026-08-19 12:44:49] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 12:44:49] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-19 12:44:49] BEFORE Mail::send() to customer
+[2026-08-19 12:45:06] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 12:45:06] === approve() finished for application id=45
+[2026-08-19 12:59:55] === approve() called for application id=45 by user=1
+[2026-08-19 12:59:55] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 12:59:55] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-19 12:59:55] BEFORE Mail::send() to customer
+[2026-08-19 13:00:09] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 13:00:09] === approve() finished for application id=45
+[2026-08-19 13:02:43] === approve() called for application id=42 by user=1
+[2026-08-19 13:02:43] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 13:02:43] customerEmail resolved as: 'midhaahsan896@gmail.com'
+[2026-08-19 13:02:43] BEFORE Mail::send() to customer
+[2026-08-19 13:02:54] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 13:02:56] === approve() finished for application id=42
+[2026-08-19 15:40:44] === approve() called for application id=42 by user=1
+[2026-08-19 15:40:44] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 15:40:44] customerEmail resolved as: 'midhaahsan896@gmail.com'
+[2026-08-19 15:40:44] BEFORE Mail::send() to customer
+[2026-08-19 15:41:04] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 15:41:06] === approve() finished for application id=42
+[2026-08-19 15:48:36] === approve() called for application id=42 by user=1
+[2026-08-19 15:48:36] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 15:48:36] customerEmail resolved as: 'midhaahsan896@gmail.com'
+[2026-08-19 15:48:36] BEFORE Mail::send() to customer
+[2026-08-19 15:48:50] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 15:48:51] === approve() finished for application id=42
+[2026-08-19 15:52:02] === approve() called for application id=42 by user=1
+[2026-08-19 15:52:02] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 15:52:02] customerEmail resolved as: 'midhaahsan896@gmail.com'
+[2026-08-19 15:52:02] BEFORE Mail::send() to customer
+[2026-08-19 15:52:16] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 15:52:18] === approve() finished for application id=42
+[2026-08-19 16:06:30] === approve() called for application id=45 by user=1
+[2026-08-19 16:06:30] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 16:06:30] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-19 16:06:30] BEFORE Mail::send() to customer
+[2026-08-19 16:06:32] EXCEPTION on customer mail: Symfony\Component\Mailer\Exception\TransportException - Connection could not be established with host "ssl://aiploan.com:465": stream_socket_client(): php_network_getaddresses: getaddrinfo for aiploan.com failed: This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server. 
+[2026-08-19 16:06:32] TRACE: #0 [internal function]: Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream->Symfony\Component\Mailer\Transport\Smtp\Stream\{closure}(2, 'stream_socket_c...', 'D:\\lending-wate...', 157)
+#1 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\Stream\SocketStream.php(157): stream_socket_client('ssl://aiploan.c...', 0, '', 60.0, 4, Resource id #972)
+#2 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(268): Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream->initialize()
+#3 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(200): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->start()
+#4 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\AbstractTransport.php(69): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->doSend(Object(Symfony\Component\Mailer\SentMessage))
+#5 D:\lending-watervertex\lending-laravel\vendor\symfony\mailer\Transport\Smtp\SmtpTransport.php(138): Symfony\Component\Mailer\Transport\AbstractTransport->send(Object(Symfony\Component\Mime\Email), Object(Symfony\Component\Mailer\DelayedEnvelope))
+#6 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(584): Symfony\Component\Mailer\Transport\Smtp\SmtpTransport->send(Object(Symfony\Component\Mime\Email), Object(Symfony\Component\Mailer\DelayedEnvelope))
+#7 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(331): Illuminate\Mail\Mailer->sendSymfonyMessage(Object(Symfony\Component\Mime\Email))
+#8 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailable.php(207): Illuminate\Mail\Mailer->send('emails.loan-app...', Array, Object(Closure))
+#9 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Support\Traits\Localizable.php(19): Illuminate\Mail\Mailable->Illuminate\Mail\{closure}()
+#10 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailable.php(200): Illuminate\Mail\Mailable->withLocale(NULL, Object(Closure))
+#11 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(353): Illuminate\Mail\Mailable->send(Object(Illuminate\Mail\Mailer))
+#12 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\Mailer.php(300): Illuminate\Mail\Mailer->sendMailable(Object(App\Mail\LoanApprovedMail))
+#13 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Mail\PendingMail.php(123): Illuminate\Mail\Mailer->send(Object(App\Mail\LoanApprovedMail))
+#14 D:\lending-watervertex\lending-laravel\app\Http\Controllers\Api\LoanApplicationController.php(173): Illuminate\Mail\PendingMail->send(Object(App\Mail\LoanApprovedMail))
+#15 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\ControllerDispatcher.php(46): App\Http\Controllers\Api\LoanApplicationController->approve(Object(Illuminate\Http\Request), '45')
+#16 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Route.php(265): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(App\Http\Controllers\Api\LoanApplicationController), 'approve')
+#17 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Route.php(211): Illuminate\Routing\Route->runController()
+#18 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(822): Illuminate\Routing\Route->run()
+#19 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Routing\Router->Illuminate\Routing\{closure}(Object(Illuminate\Http\Request))
+#20 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#21 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Routing\Middleware\SubstituteBindings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#22 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php(63): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#23 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Auth\Middleware\Authenticate->handle(Object(Illuminate\Http\Request), Object(Closure), 'sanctum')
+#24 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(137): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#25 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(821): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#26 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(800): Illuminate\Routing\Router->runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#27 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(764): Illuminate\Routing\Router->runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#28 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Routing\Router.php(753): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#29 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(200): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#30 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Kernel->Illuminate\Foundation\Http\{closure}(Object(Illuminate\Http\Request))
+#31 D:\lending-watervertex\lending-laravel\app\Http\Middleware\Cors.php(27): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#32 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): App\Http\Middleware\Cors->handle(Object(Illuminate\Http\Request), Object(Closure))
+#33 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#34 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#35 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull->handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#37 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php(51): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#38 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\TrimStrings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#39 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#40 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\ValidatePostSize->handle(Object(Illuminate\Http\Request), Object(Closure))
+#41 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php(109): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#42 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance->handle(Object(Illuminate\Http\Request), Object(Closure))
+#43 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php(74): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#44 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\HandleCors->handle(Object(Illuminate\Http\Request), Object(Closure))
+#45 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php(58): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#46 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\TrustProxies->handle(Object(Illuminate\Http\Request), Object(Closure))
+#47 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks.php(22): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#48 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks->handle(Object(Illuminate\Http\Request), Object(Closure))
+#49 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePathEncoding.php(26): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#50 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\ValidatePathEncoding->handle(Object(Illuminate\Http\Request), Object(Closure))
+#51 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(137): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}(Object(Illuminate\Http\Request))
+#52 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(175): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#53 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(144): Illuminate\Foundation\Http\Kernel->sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#54 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\Application.php(1220): Illuminate\Foundation\Http\Kernel->handle(Object(Illuminate\Http\Request))
+#55 D:\lending-watervertex\lending-laravel\public\index.php(20): Illuminate\Foundation\Application->handleRequest(Object(Illuminate\Http\Request))
+#56 D:\lending-watervertex\lending-laravel\vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php(23): require_once('D:\\lending-wate...')
+#57 {main}
+[2026-08-19 16:06:32] === approve() finished for application id=45
+[2026-08-19 16:09:15] === approve() called for application id=45 by user=1
+[2026-08-19 16:09:15] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 16:09:15] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-19 16:09:15] BEFORE Mail::send() to customer
+[2026-08-19 16:09:28] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 16:09:28] === approve() finished for application id=45
+[2026-08-19 16:13:22] === approve() called for application id=45 by user=1
+[2026-08-19 16:13:22] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-19 16:13:22] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-19 16:13:22] BEFORE Mail::send() to customer
+[2026-08-19 16:13:34] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-19 16:13:34] === approve() finished for application id=45

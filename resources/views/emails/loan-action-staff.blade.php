@@ -121,7 +121,7 @@
                                         @else Additional Info Required
                                         @endif
                                     </p>
-                                    <p style="margin:0; color:#78350f; font-size:14px; line-height:1.7;">{{ $message }}</p>
+                                    <p style="margin:0; color:#78350f; font-size:14px; line-height:1.7;">{{ $actionMessage }}</p>
                                 </td>
                             </tr>
                         </table>

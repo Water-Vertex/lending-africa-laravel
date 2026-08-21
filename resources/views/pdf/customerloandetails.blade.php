@@ -126,5 +126,18 @@
     </table>
     @endif
 
+    {{-- Loan Calculation / Amortization section --}}
+@if($loanApplication->loanAmount)
+<div class="section-title">Loan Calculation Breakdown</div>
+<table>
+    <tr><td class="label">Principal Amount</td><td>₦{{ number_format($loanApplication->loanAmount->loan_amount, 2) }}</td></tr>
+    <tr><td class="label">Interest Rate (Annual)</td><td>{{ number_format($loanApplication->loanAmount->interest_rate, 2) }}%</td></tr>
+    <tr><td class="label">Duration</td><td>{{ $loanApplication->loanAmount->duration_months }} months</td></tr>
+    <tr><td class="label">Monthly Payment (EMI)</td><td>₦{{ number_format($loanApplication->loanAmount->monthly_payment, 2) }}</td></tr>
+    <tr><td class="label">Total Payment</td><td>₦{{ number_format($loanApplication->loanAmount->total_payment, 2) }}</td></tr>
+    <tr><td class="label">Total Interest</td><td>₦{{ number_format($loanApplication->loanAmount->total_interest, 2) }}</td></tr>
+</table>
+@endif
+
 </body>
 </html>
