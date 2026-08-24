@@ -37,4 +37,3 @@ class CoSigner extends Model
     }
 
 }
-

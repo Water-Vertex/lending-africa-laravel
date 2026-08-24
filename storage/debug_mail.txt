@@ -321,3 +321,15 @@
 [2026-08-19 16:13:22] BEFORE Mail::send() to customer
 [2026-08-19 16:13:34] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
 [2026-08-19 16:13:34] === approve() finished for application id=45
+[2026-08-21 15:58:48] === approve() called for application id=45 by user=1
+[2026-08-21 15:58:48] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-21 15:58:48] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-21 15:58:48] BEFORE Mail::send() to customer
+[2026-08-21 15:59:00] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-21 15:59:00] === approve() finished for application id=45
+[2026-08-21 16:56:58] === approve() called for application id=45 by user=1
+[2026-08-21 16:56:58] MAIL CONFIG: {"default":"smtp","mailer":{"transport":"smtp","scheme":null,"host":"aiploan.com","port":"465","username":"info@aiploan.com","password":")62B#]IO*rG)]{cy","timeout":null,"local_domain":"localhost","stream":{"ssl":{"allow_self_signed":true,"verify_peer":false,"verify_peer_name":false}}},"from":{"address":"info@aiploan.com","name":"African Investment Partners"}}
+[2026-08-21 16:56:58] customerEmail resolved as: 'medha.ehsan2021@gmail.com'
+[2026-08-21 16:56:58] BEFORE Mail::send() to customer
+[2026-08-21 16:57:15] AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)
+[2026-08-21 16:57:15] === approve() finished for application id=45

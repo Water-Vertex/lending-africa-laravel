@@ -15,43 +15,51 @@ class CustomerController extends Controller
     /**
      * Display a listing of customers.
      */
-    public function index(Request $request): JsonResponse
-    {
-        $query = Customer::with(['documents', 'loanApplications']);
+ public function index(Request $request): JsonResponse
+{
+    $query = Customer::with(['documents', 'loanApplications']);
 
-        //$query = Customer::with('documents');
-
-        // Filter by status
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by customer type
-        if ($request->has('customer_type')) {
-            $query->where('customer_type', $request->customer_type);
-        }
-
-        // Search by name or email
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'LIKE', "%{$search}%")
-                  ->orWhere('last_name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%")
-                  ->orWhere('phone_primary', 'LIKE', "%{$search}%")
-                  ->orWhere('customer_code', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $perPage = $request->get('per_page', 15);
-        $customers = $query->paginate($perPage);
-
-        return response()->json([
-            'success' => true,
-            'data' => $customers,
-            'message' => 'Customers retrieved successfully.'
-        ]);
+    // Filter by status
+    if ($request->has('status')) {
+        $query->where('status', $request->status);
     }
+
+    // Filter by customer type
+    if ($request->has('customer_type')) {
+        $query->where('customer_type', $request->customer_type);
+    }
+
+    // Search by name or email
+    if ($request->has('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('first_name', 'LIKE', "%{$search}%")
+              ->orWhere('last_name', 'LIKE', "%{$search}%")
+              ->orWhere('email', 'LIKE', "%{$search}%")
+              ->orWhere('phone_primary', 'LIKE', "%{$search}%")
+              ->orWhere('customer_code', 'LIKE', "%{$search}%");
+        });
+    }
+
+    // 🔥 SORTING - LATEST FIRST
+    // Option 1: (Recommended)
+    $query->latest(); // created_at ke hisaab se desc
+    
+    // Option 2: (Alternative)
+    // $query->orderBy('id', 'desc');
+    
+    // Option 3: (Custom field)
+    // $query->orderBy('created_at', 'desc');
+
+    $perPage = $request->get('per_page', 15);
+    $customers = $query->paginate($perPage);
+
+    return response()->json([
+        'success' => true,
+        'data' => $customers,
+        'message' => 'Customers retrieved successfully.'
+    ]);
+}
 
     /**
      * Store a newly created customer with documents in one go.
@@ -133,37 +141,63 @@ class CustomerController extends Controller
         }
     }
 
-    /**
-     * Display the specified customer.
-     */
- 
-    // public function show(Customer $customer): JsonResponse
-    // {
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => $customer->load('documents'),
-    //         'message' => 'Customer retrieved successfully.'
-    //     ]);
-    // }
+
+// public function show(Customer $customer): JsonResponse
+// {
+//     $customer->load([
+//         'documents',
+//         'businesses',
+//         'bankAccounts.bank',
+//         'loanApplications.loanProduct',
+//         'loanApplications.business',
+//         'loanApplications.coSigners',
+//     ]);
+
+//     // Documents mein full URL add karo
+//     $customer->documents->transform(function ($doc) {
+//         $doc->file_url = $doc->file_path
+//             ? asset('storage/' . $doc->file_path)
+//             : null;
+//         return $doc;
+//     });
+
+//     return response()->json([
+//         'success' => true,
+//         'data'    => $customer,
+//         'message' => 'Customer retrieved successfully.'
+//     ]);
+// }
+
 public function show(Customer $customer): JsonResponse
 {
-    $customer->load([
-        'documents',
-        'businesses',
-        'bankAccounts.bank',
-        'loanApplications.loanProduct',
-        'loanApplications.business',
-        'loanApplications.coSigners',
-    ]);
+$customer->load([
+    'documents',
+    'businesses',
+    'bankAccounts.bank',
+    'loanApplications.loanProduct',
+    'loanApplications.business',
+    'loanApplications.coSigners',  // sirf yeh — koi .documents nahi
+]);
 
-    // Documents mein full URL add karo
-    $customer->documents->transform(function ($doc) {
-        $doc->file_url = $doc->file_path
-            ? asset('storage/' . $doc->file_path)
+// Customer documents file_url
+$customer->documents->transform(function ($doc) {
+    $doc->file_url = $doc->file_path
+        ? asset('storage/' . $doc->file_path)
+        : null;
+    return $doc;
+});
+
+// Co-signer file URLs
+$customer->loanApplications->each(function ($app) {
+    $app->coSigners->each(function ($coSigner) {
+        $coSigner->photo_id_url = $coSigner->photo_id
+            ? asset('storage/' . $coSigner->photo_id)
             : null;
-        return $doc;
+        $coSigner->evidence_of_occupation_url = $coSigner->evidence_of_occupation
+            ? asset('storage/' . $coSigner->evidence_of_occupation)
+            : null;
     });
-
+});
     return response()->json([
         'success' => true,
         'data'    => $customer,
