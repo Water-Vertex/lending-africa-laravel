@@ -8,7 +8,13 @@ use App\Http\Controllers\Website\CustomerController;
 use App\Http\Controllers\Website\CustomerByStaffController;
 use App\Http\Controllers\Website\StaffProfileController;
 use App\Http\Controllers\Website\PolicyController;
+use App\Http\Controllers\Website\AgreementController;
+use App\Http\Controllers\Api\FaqController;
 
+Route::get('/api/faqs', [App\Http\Controllers\Api\FaqController::class, 'index']);
+// Agreement submission — customer facing
+Route::get('/loan-agreement/{token}',  [AgreementController::class, 'show'])->name('agreement.show');
+Route::post('/loan-agreement/{token}', [AgreementController::class, 'submit'])->name('agreement.submit');
 // Customer Edit Form — token se access
 Route::get('/customer-edit/{token}', [CustomerController::class, 'editByToken'])->name('customer.edit.token');
 Route::post('/customer-edit/{token}', [CustomerController::class, 'updateByToken'])->name('customer.update.token');

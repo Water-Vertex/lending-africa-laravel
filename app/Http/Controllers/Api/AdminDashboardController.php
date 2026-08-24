@@ -46,6 +46,11 @@ class AdminDashboardController extends Controller
         // ── Documents ──
         $totalDocuments     = CustomerDocument::count();
         $pendingDocs        = CustomerDocument::where('verification_status', 'pending')->count();
+// Agreement stats
+$agreementsPending   = \App\Models\LoanAgreement::where('status', 'pending')->count();
+$agreementsSubmitted = \App\Models\LoanAgreement::where('status', 'submitted')->count();
+$agreementsExpired   = \App\Models\LoanAgreement::where('status', 'expired')->count();
+
 
         return response()->json([
             'success' => true,
@@ -56,6 +61,10 @@ class AdminDashboardController extends Controller
                 'blacklisted'         => $blacklisted,
                 'personal_customers'  => $personalCustomers,
                 'sme_customers'       => $smeCustomers,
+                // data array mein add karo:
+'agreements_pending'   => $agreementsPending,
+'agreements_submitted' => $agreementsSubmitted,
+'agreements_expired'   => $agreementsExpired,
 
                 // Loan Applications
                 'total_applications'  => $totalApplications,

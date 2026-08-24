@@ -114,4 +114,8 @@ class LoanApplication extends Model
 
         return $application;
     }
+    public function agreement()
+{
+    return $this->hasOne(\App\Models\LoanAgreement::class);
+}
 }

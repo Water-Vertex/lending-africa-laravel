@@ -17,7 +17,9 @@ class LoanApprovedMail extends Mailable
 
     public function __construct(
         public LoanApplication $application,
-        public string $adminMessage = ''
+        public string $adminMessage = '',
+        public string $submitUrl = ''
+
     ) {}
 
     public function envelope(): Envelope
@@ -27,26 +29,46 @@ class LoanApprovedMail extends Mailable
         );
     }
 
-    public function content(): Content
+    // public function content(): Content
+    // {
+    //     return new Content(
+    //         view: 'emails.loan-approved',
+    //         with: [
+    //             'application'  => $this->application,
+    //             'adminMessage' => $this->adminMessage,
+    //         ],
+    //     );
+    // }
+public function content(): Content
     {
         return new Content(
             view: 'emails.loan-approved',
             with: [
                 'application'  => $this->application,
                 'adminMessage' => $this->adminMessage,
+                'submitUrl'    => $this->submitUrl,
+              //  'pdfUrl'       => url('/loan-agreement/' . $this->submitUrl),
             ],
         );
     }
 
+
     public function attachments(): array
     {
-        // Loan amount (Monthly / Total / Interest) load karo agar already load nahi
         $loanAmount = $this->application->loanAmount
             ?? $this->application->loanAmount()->first();
+
+        // fetch agrement as per the loan type 
+        $loanType = $this->application->loanProduct->loan_type ?? null;
+
+        $agreement = $loanType
+            ? \App\Models\LoanAgreementTemplate::where('loan_type', $loanType)->latest()->first()
+            : null;
 
         $pdf = Pdf::loadView('pdf.loan-agreement', [
             'application' => $this->application,
             'loanAmount'  => $loanAmount,
+            'agreement'   => $agreement,
         ])->output();
 
         return [
@@ -54,4 +76,5 @@ class LoanApprovedMail extends Mailable
                 ->withMime('application/pdf'),
         ];
     }
+    
 }

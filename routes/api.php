@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\CustomerByStaffController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\PolicyController;
 use App\Http\Controllers\Api\StaffDashboardController;
+use App\Http\Controllers\Api\LoanAgreementTemplateController;
 
 // ============================================================
 // PUBLIC ROUTES (No Auth Required)
@@ -68,12 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/loan-applications/{id}/approve',               [LoanApplicationController::class, 'approve']);
 Route::post('/loan-applications/{id}/reject',                [LoanApplicationController::class, 'reject']);
 Route::post('/loan-applications/{id}/request-additional-info',[LoanApplicationController::class, 'requestAdditionalInfo']);
-                // Loan Applications
-        // Route::get('/loan-applications', [App\Http\Controllers\Api\LoanApplicationController::class, 'index']);
-        // Route::get('/loan-applications/stats', [App\Http\Controllers\Api\LoanApplicationController::class, 'stats']);
-        // Route::get('/loan-applications/{id}', [App\Http\Controllers\Api\LoanApplicationController::class, 'show']);
-        // Route::patch('/loan-applications/{id}/status', [App\Http\Controllers\Api\LoanApplicationController::class, 'updateStatus']);
-
+               
         // Users
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
@@ -144,6 +140,8 @@ Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class
      Route::get('/contacts/{id}', [ContactController::class, 'show']);
 
 
+//loan agrement work
+      Route::apiResource('loan-agreement-templates', LoanAgreementTemplateController::class);
 
      Route::apiResource('/policies', PolicyController::class);
     });
@@ -166,5 +164,10 @@ Route::patch('/loan-applications/{id}/status', [LoanApplicationController::class
         // Staff Customers
         Route::get('/customers', [CustomerByStaffController::class, 'index']);
         Route::post('/customers', [CustomerByStaffController::class, 'store']);
+
+        // Staff Customers — Edit
+    Route::get('/customers/{id}', [CustomerByStaffController::class, 'show']);
+    Route::post('/customers/{id}/update', [CustomerByStaffController::class, 'update']);
+    Route::delete('/customers/{customerId}/documents/{documentId}', [CustomerByStaffController::class, 'removeDocument']);
     });
 });

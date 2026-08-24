@@ -8,6 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+            if (!Schema::hasTable('loan_agreement_templates')) {
+
         Schema::create('loan_agreement_templates', function (Blueprint $table) {
             $table->id();
             $table->string('loan_type'); // 'sme' | 'personal'
@@ -16,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
+    }
     public function down(): void
     {
         Schema::dropIfExists('loan_agreement_templates');
