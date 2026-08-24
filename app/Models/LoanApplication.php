@@ -30,15 +30,16 @@ class LoanApplication extends Model
         'application_date' => 'date',
     ];
 
-    const STATUSES = [
-        'draft',
-        'submitted',
-        'under_review',
-        'approved',
-        'rejected',
-        'disbursed',
-        'closed',
-    ];
+   const STATUSES = [
+    'draft',
+    'submitted',
+    'under_review',
+    'resubmitted',
+    'approved',
+    'rejected',
+    'disbursed',
+    'closed',
+];
 
     public function customer(): BelongsTo
     {
@@ -113,4 +114,8 @@ class LoanApplication extends Model
 
         return $application;
     }
+    public function agreement()
+{
+    return $this->hasOne(\App\Models\LoanAgreement::class);
+}
 }

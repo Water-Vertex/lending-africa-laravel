@@ -17,7 +17,9 @@ class LoanApprovedMail extends Mailable
 
     public function __construct(
         public LoanApplication $application,
-        public string $adminMessage = ''
+        public string $adminMessage = '',
+        public string $submitUrl = ''
+
     ) {}
 
     public function envelope(): Envelope
@@ -27,33 +29,29 @@ class LoanApprovedMail extends Mailable
         );
     }
 
-    public function content(): Content
+    // public function content(): Content
+    // {
+    //     return new Content(
+    //         view: 'emails.loan-approved',
+    //         with: [
+    //             'application'  => $this->application,
+    //             'adminMessage' => $this->adminMessage,
+    //         ],
+    //     );
+    // }
+public function content(): Content
     {
         return new Content(
             view: 'emails.loan-approved',
             with: [
                 'application'  => $this->application,
                 'adminMessage' => $this->adminMessage,
+                'submitUrl'    => $this->submitUrl,
+              //  'pdfUrl'       => url('/loan-agreement/' . $this->submitUrl),
             ],
         );
     }
 
-    // public function attachments(): array
-    // {
-    //     // Loan amount (Monthly / Total / Interest) load karo agar already load nahi
-    //     $loanAmount = $this->application->loanAmount
-    //         ?? $this->application->loanAmount()->first();
-
-    //     $pdf = Pdf::loadView('pdf.loan-agreement', [
-    //         'application' => $this->application,
-    //         'loanAmount'  => $loanAmount,
-    //     ])->output();
-
-    //     return [
-    //         Attachment::fromData(fn () => $pdf, 'Loan-Agreement-' . $this->application->application_no . '.pdf')
-    //             ->withMime('application/pdf'),
-    //     ];
-    // }
 
     public function attachments(): array
     {
@@ -78,7 +76,5 @@ class LoanApprovedMail extends Mailable
                 ->withMime('application/pdf'),
         ];
     }
-
-
     
 }

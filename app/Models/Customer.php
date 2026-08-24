@@ -31,6 +31,8 @@ class Customer extends Model
         'local_government_area',
         'address',
         'status',
+        'edit_token',
+        'edit_token_expires_at',
     ];
 
     protected $casts = [

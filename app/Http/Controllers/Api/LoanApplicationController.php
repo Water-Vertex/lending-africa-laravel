@@ -13,14 +13,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Support\Str;
 class LoanApplicationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->input('per_page', 15);
 
-        $query = LoanApplication::with(['customer', 'business', 'loanProduct'])
+        $query = LoanApplication::with(['customer', 'business', 'loanProduct','agreement', 
+])
             ->latest('id');
 
         if ($request->filled('search')) {
@@ -82,12 +83,17 @@ class LoanApplicationController extends Controller
             'business',
             'loanProduct',
             'coSigners',
-            'customerByStaff.staff',   // staff info agar staff ne submit ki thi
+            'customerByStaff.staff', 
+            'agreement',           
         ])->find($id);
-
-        if (! $application) {
+           if (! $application) {
             return response()->json(['success' => false, 'message' => 'Not found'], 404);
         }
+
+if ($application->agreement && $application->agreement->signed_file_path) {
+    $application->agreement->signed_file_url = asset('storage/' . $application->agreement->signed_file_path);
+}
+     
 
         // Check karo k staff ne submit ki thi ya customer ne khud
         $submittedByStaff = $application->customerByStaff !== null;
@@ -121,93 +127,162 @@ class LoanApplicationController extends Controller
     }
 
     // ── Approve ──────────────────────────────────────────────────────────────
-public function approve(Request $request, $id): JsonResponse
-    {
-        $application = LoanApplication::with([
-            'customer',
-            'loanProduct',
-            'customerByStaff.staff',
-        ])->find($id);
+    public function approve(Request $request, $id): JsonResponse
+{
+    $application = LoanApplication::with([
+        'customer',
+        'loanProduct',
+        'customerByStaff.staff',
+    ])->find($id);
 
-        if (! $application) {
-            return response()->json(['success' => false, 'message' => 'Application not found'], 404);
-        }
+    if (!$application) {
+        return response()->json(['success' => false, 'message' => 'Application not found'], 404);
+    }
 
-        $validated = $request->validate([
-            'message' => 'nullable|string|max:2000',
-        ]);
+    $validated = $request->validate([
+        'message' => 'nullable|string|max:2000',
+    ]);
 
-        // Update status
-        $application->update(['status' => 'approved']);
+    $application->update(['status' => 'approved']);
 
-        // Log approval
-        LoanApproval::create([
-            'application_id' => $application->id,
-            'actioned_by'    => auth()->id(),
-            'action'         => 'approved',
-            'message'        => $validated['message'] ?? null,
-            'actioned_at'    => now(),
-        ]);
+    LoanApproval::create([
+        'application_id' => $application->id,
+        'actioned_by'    => auth()->id(),
+        'action'         => 'approved',
+        'message'        => $validated['message'] ?? null,
+        'actioned_at'    => now(),
+    ]);
 
-        $debugFile = storage_path('debug_mail.txt');
-        $debugLog  = function (string $line) use ($debugFile) {
-            // Direct file write, does not depend on Log facade / permissions on storage/logs
-            @file_put_contents($debugFile, '[' . now()->toDateTimeString() . '] ' . $line . "\n", FILE_APPEND);
-        };
+    // Agreement token generate karo
+    $agreementToken = Str::random(64);
+    $agreement = \App\Models\LoanAgreement::create([
+        'loan_application_id'        => $application->id,
+        'customer_id'                => $application->customer_id,
+        'agreement_token'            => $agreementToken,
+        'agreement_token_expires_at' => now()->addDays(7),
+        'agreement_sent'             => true,
+        'agreement_sent_at'          => now(),
+        'status'                     => 'pending',
+    ]);
 
-        $debugLog('=== approve() called for application id=' . $application->id . ' by user=' . (auth()->id() ?? 'GUEST/NULL'));
-        $debugLog('MAIL CONFIG: ' . json_encode([
-            'default'    => config('mail.default'),
-            'mailer'     => config('mail.mailers.' . config('mail.default')),
-            'from'       => config('mail.from'),
-        ]));
+    $submitUrl = url('/loan-agreement/' . $agreementToken);
 
-        // Email to customer
-        $customerEmail = $application->customer->email ?? null;
-        $debugLog('customerEmail resolved as: ' . var_export($customerEmail, true));
-
-        if ($customerEmail) {
-            $debugLog('BEFORE Mail::send() to customer');
-            try {
-                Mail::to($customerEmail)
-                    ->send(new LoanApprovedMail($application, $validated['message'] ?? ''));
-                $debugLog('AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)');
-            } catch (\Throwable $e) {
-                // Catching \Throwable instead of \Exception so we also catch Errors (e.g. TypeError, missing class, etc.)
-                $debugLog('EXCEPTION on customer mail: ' . get_class($e) . ' - ' . $e->getMessage());
-                $debugLog('TRACE: ' . $e->getTraceAsString());
-                \Log::error('Loan approved email failed (customer): ' . $e->getMessage());
-            }
-        } else {
-            $debugLog('SKIPPED customer email - $customerEmail was empty/null/falsy');
-        }
-
-        // Email to staff if submitted by staff
-      // Email to staff if submitted by staff
-if ($application->customerByStaff && $application->customerByStaff->staff) {
-    $staffEmail = $application->customerByStaff->staff->email ?? null;
-
-    if ($staffEmail) {
+    // Customer email — approved + agreement PDF + submit link
+    $customerEmail = $application->customer->email ?? null;
+    if ($customerEmail) {
         try {
-            Mail::to($staffEmail)
-                ->send(new LoanActionStaffMail(
-                    $application,
-                    'approved',
-                    $validated['message'] ?? ''
-                ));
+            Mail::to($customerEmail)
+                ->send(new LoanApprovedMail($application, $validated['message'] ?? '', $submitUrl));
         } catch (\Exception $e) {
-            \Log::error('Loan approved staff email failed: ' . $e->getMessage());
+            \Log::error('Loan approved email failed (customer): ' . $e->getMessage());
         }
     }
-}
-        $debugLog('=== approve() finished for application id=' . $application->id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Loan application approved and email sent.',
-            'data'    => $application->fresh(),
-        ]);
+    // Staff email
+    if ($application->customerByStaff && $application->customerByStaff->staff) {
+        $staffEmail = $application->customerByStaff->staff->email ?? null;
+        if ($staffEmail) {
+            try {
+                Mail::to($staffEmail)
+                    ->send(new LoanActionStaffMail($application, 'approved', $validated['message'] ?? ''));
+            } catch (\Exception $e) {
+                \Log::error('Loan approved email failed (staff): ' . $e->getMessage());
+            }
+        }
     }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Loan application approved and email sent.',
+        'data'    => $application->fresh(),
+    ]);
+}
+// public function approve(Request $request, $id): JsonResponse
+//     {
+//         $application = LoanApplication::with([
+//             'customer',
+//             'loanProduct',
+//             'customerByStaff.staff',
+//         ])->find($id);
+
+//         if (! $application) {
+//             return response()->json(['success' => false, 'message' => 'Application not found'], 404);
+//         }
+
+//         $validated = $request->validate([
+//             'message' => 'nullable|string|max:2000',
+//         ]);
+
+//         // Update status
+//         $application->update(['status' => 'approved']);
+
+//         // Log approval
+//         LoanApproval::create([
+//             'application_id' => $application->id,
+//             'actioned_by'    => auth()->id(),
+//             'action'         => 'approved',
+//             'message'        => $validated['message'] ?? null,
+//             'actioned_at'    => now(),
+//         ]);
+
+//         $debugFile = storage_path('debug_mail.txt');
+//         $debugLog  = function (string $line) use ($debugFile) {
+//             // Direct file write, does not depend on Log facade / permissions on storage/logs
+//             @file_put_contents($debugFile, '[' . now()->toDateTimeString() . '] ' . $line . "\n", FILE_APPEND);
+//         };
+
+//         $debugLog('=== approve() called for application id=' . $application->id . ' by user=' . (auth()->id() ?? 'GUEST/NULL'));
+//         $debugLog('MAIL CONFIG: ' . json_encode([
+//             'default'    => config('mail.default'),
+//             'mailer'     => config('mail.mailers.' . config('mail.default')),
+//             'from'       => config('mail.from'),
+//         ]));
+
+//         // Email to customer
+//         $customerEmail = $application->customer->email ?? null;
+//         $debugLog('customerEmail resolved as: ' . var_export($customerEmail, true));
+
+//         if ($customerEmail) {
+//             $debugLog('BEFORE Mail::send() to customer');
+//             try {
+//                 Mail::to($customerEmail)
+//                     ->send(new LoanApprovedMail($application, $validated['message'] ?? ''));
+//                 $debugLog('AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)');
+//             } catch (\Throwable $e) {
+//                 // Catching \Throwable instead of \Exception so we also catch Errors (e.g. TypeError, missing class, etc.)
+//                 $debugLog('EXCEPTION on customer mail: ' . get_class($e) . ' - ' . $e->getMessage());
+//                 $debugLog('TRACE: ' . $e->getTraceAsString());
+//                 \Log::error('Loan approved email failed (customer): ' . $e->getMessage());
+//             }
+//         } else {
+//             $debugLog('SKIPPED customer email - $customerEmail was empty/null/falsy');
+//         }
+
+//       // Email to staff if submitted by staff
+// if ($application->customerByStaff && $application->customerByStaff->staff) {
+//     $staffEmail = $application->customerByStaff->staff->email ?? null;
+
+//     if ($staffEmail) {
+//         try {
+//             Mail::to($staffEmail)
+//                 ->send(new LoanActionStaffMail(
+//                     $application,
+//                     'approved',
+//                     $validated['message'] ?? ''
+//                 ));
+//         } catch (\Exception $e) {
+//             \Log::error('Loan approved staff email failed: ' . $e->getMessage());
+//         }
+//     }
+// }
+//         $debugLog('=== approve() finished for application id=' . $application->id);
+
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Loan application approved and email sent.',
+//             'data'    => $application->fresh(),
+//         ]);
+//     }
 
     // ── Reject ───────────────────────────────────────────────────────────────
     public function reject(Request $request, $id): JsonResponse
@@ -247,7 +322,6 @@ if ($application->customerByStaff && $application->customerByStaff->staff) {
             }
         }
 
-        // Email to staff
 // Email to staff
 if ($application->customerByStaff && $application->customerByStaff->staff) {
     $staffEmail = $application->customerByStaff->staff->email ?? null;
@@ -273,69 +347,135 @@ if ($application->customerByStaff && $application->customerByStaff->staff) {
         ]);
     }
 
-    // ── Additional Info Required ──────────────────────────────────────────────
-    public function requestAdditionalInfo(Request $request, $id): JsonResponse
-    {
-        $application = LoanApplication::with([
-            'customer',
-            'loanProduct',
-            'customerByStaff.staff',
-        ])->find($id);
+//     // ── Additional Info Required ──────────────────────────────────────────────
+//     public function requestAdditionalInfo(Request $request, $id): JsonResponse
+//     {
+//         $application = LoanApplication::with([
+//             'customer',
+//             'loanProduct',
+//             'customerByStaff.staff',
+//         ])->find($id);
 
-        if (! $application) {
-            return response()->json(['success' => false, 'message' => 'Application not found'], 404);
+//         if (! $application) {
+//             return response()->json(['success' => false, 'message' => 'Application not found'], 404);
+//         }
+
+//         $validated = $request->validate([
+//             'message' => 'required|string|min:10|max:2000',
+//         ]);
+
+//         // Status under_review pe rakho ya pending — additional info pending
+//         $application->update(['status' => 'under_review']);
+
+//         LoanApproval::create([
+//             'application_id' => $application->id,
+//             'actioned_by'    => auth()->id(),
+//             'action'         => 'additional_info_requested',
+//             'message'        => $validated['message'],
+//             'actioned_at'    => now(),
+//         ]);
+
+//         // Email to customer
+//         $customerEmail = $application->customer->email ?? null;
+//         if ($customerEmail) {
+//             try {
+//                 Mail::to($customerEmail)
+//                     ->send(new LoanAdditionalInfoMail($application, $validated['message']));
+//             } catch (\Exception $e) {
+//                 \Log::error('Additional info email failed (customer): ' . $e->getMessage());
+//             }
+//         }
+
+//         // Email to staff
+//      // Email to staff
+// if ($application->customerByStaff && $application->customerByStaff->staff) {
+//     $staffEmail = $application->customerByStaff->staff->email ?? null;
+
+//     if ($staffEmail) {
+//         try {
+//             Mail::to($staffEmail)
+//                 ->send(new LoanActionStaffMail(
+//                     $application,
+//                     'additional_info_requested',
+//                     $validated['message']
+//                 ));
+//         } catch (\Exception $e) {
+//             \Log::error('Additional info staff email failed: ' . $e->getMessage());
+//         }
+//     }
+// }
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Message sent to customer successfully.',
+//             'data'    => $application->fresh(),
+//         ]);
+//     }
+
+public function requestAdditionalInfo(Request $request, $id): JsonResponse
+{
+    $application = LoanApplication::with([
+        'customer',
+        'loanProduct',
+        'customerByStaff.staff',
+    ])->find($id);
+
+    if (!$application) {
+        return response()->json(['success' => false, 'message' => 'Application not found'], 404);
+    }
+
+    $validated = $request->validate([
+        'message' => 'required|string|min:10|max:2000',
+    ]);
+
+    $application->update(['status' => 'under_review']);
+
+    LoanApproval::create([
+        'application_id' => $application->id,
+        'actioned_by'    => auth()->id(),
+        'action'         => 'additional_info_requested',
+        'message'        => $validated['message'],
+        'actioned_at'    => now(),
+    ]);
+
+    // Token generate karo — 7 din valid
+    $token = Str::random(64);
+    $application->customer->update([
+        'edit_token'            => $token,
+        'edit_token_expires_at' => now()->addDays(7),
+    ]);
+
+    $editUrl = url('/customer-edit/' . $token);
+
+    // Customer email
+    $customerEmail = $application->customer->email ?? null;
+    if ($customerEmail) {
+        try {
+            Mail::to($customerEmail)
+                ->send(new LoanAdditionalInfoMail($application, $validated['message'], $editUrl));
+        } catch (\Exception $e) {
+            \Log::error('Additional info email failed (customer): ' . $e->getMessage());
         }
+    }
 
-        $validated = $request->validate([
-            'message' => 'required|string|min:10|max:2000',
-        ]);
-
-        // Status under_review pe rakho ya pending — additional info pending
-        $application->update(['status' => 'under_review']);
-
-        LoanApproval::create([
-            'application_id' => $application->id,
-            'actioned_by'    => auth()->id(),
-            'action'         => 'additional_info_requested',
-            'message'        => $validated['message'],
-            'actioned_at'    => now(),
-        ]);
-
-        // Email to customer
-        $customerEmail = $application->customer->email ?? null;
-        if ($customerEmail) {
+    // Staff email
+    if ($application->customerByStaff && $application->customerByStaff->staff) {
+        $staffEmail = $application->customerByStaff->staff->email ?? null;
+        if ($staffEmail) {
             try {
-                Mail::to($customerEmail)
-                    ->send(new LoanAdditionalInfoMail($application, $validated['message']));
+                Mail::to($staffEmail)
+                    ->send(new LoanActionStaffMail($application, 'additional_info_requested', $validated['message']));
             } catch (\Exception $e) {
-                \Log::error('Additional info email failed (customer): ' . $e->getMessage());
+                \Log::error('Additional info staff email failed: ' . $e->getMessage());
             }
         }
-
-        // Email to staff
-     // Email to staff
-if ($application->customerByStaff && $application->customerByStaff->staff) {
-    $staffEmail = $application->customerByStaff->staff->email ?? null;
-
-    if ($staffEmail) {
-        try {
-            Mail::to($staffEmail)
-                ->send(new LoanActionStaffMail(
-                    $application,
-                    'additional_info_requested',
-                    $validated['message']
-                ));
-        } catch (\Exception $e) {
-            \Log::error('Additional info staff email failed: ' . $e->getMessage());
-        }
     }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Message sent to customer successfully.',
+        'data'    => $application->fresh(),
+    ]);
 }
-        return response()->json([
-            'success' => true,
-            'message' => 'Message sent to customer successfully.',
-            'data'    => $application->fresh(),
-        ]);
-    }
 
     public function destroy($id): JsonResponse
 {
@@ -359,4 +499,5 @@ if ($application->customerByStaff && $application->customerByStaff->staff) {
 
     return response()->json(['success' => true, 'message' => 'Application deleted successfully.']);
 }
+
 }

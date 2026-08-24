@@ -1293,115 +1293,125 @@
 
 ============================================================ --}}
 
-<section class="section-pad bg-alt section-decor" id="faq">
+{{-- FAQ Section --}}
+<section id="faq" class="py-20 bg-white">
+    <div class="container mx-auto px-4 max-w-4xl">
 
-    <div class="container">
+        {{-- Section Header --}}
+        <div class="text-center mb-12">
+            <span class="inline-block bg-primary/10 text-primary font-semibold text-xs tracking-widest uppercase px-4 py-2 rounded-full mb-4">FAQ</span>
+            <h2 class="font-display font-bold text-3xl sm:text-4xl text-dark mb-4">Frequently Asked Questions</h2>
+            <p class="text-gray-500 text-lg max-w-2xl mx-auto">Everything you need to know about our loan products and process.</p>
+        </div>
 
-        <div class="section-decor-dot"></div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
-
-
-
-            {{-- Left --}}
-
-            <div>
-
-                <div class="section-badge"><i class="fas fa-circle-question text-xs"></i> FAQs</div>
-
-                <h2 class="section-title mb-4">Frequently Asked<br>Questions</h2>
-
-                <p class="section-subtitle mb-8">Have a question? We've got answers. If you can't find what you're looking for, reach out to our support team.</p>
-
-
-
-                <div class="bg-primary-xlight rounded-2xl p-6 border border-primary-light">
-
-                    <div class="flex items-center gap-3 mb-3">
-
-                        <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-
-                            <i class="fas fa-headset text-white"></i>
-
-                        </div>
-
-                        <h4 class="font-semibold text-dark">Still have questions?</h4>
-
-                    </div>
-
-                    <p class="text-gray-500 text-sm leading-relaxed mb-4">Our support team is available Monday – Friday, 8am to 6pm to answer your queries.</p>
-
-                    <a href="#contact" class="btn-primary text-sm px-5 py-3">
-
-                        Contact Support <i class="fas fa-arrow-right text-xs"></i>
-
-                    </a>
-
-                </div>
-
+        {{-- FAQ Items — dynamically loaded --}}
+        <div id="faq-container" class="space-y-4">
+            {{-- Loading state --}}
+            <div id="faq-loading" class="space-y-4">
+                @for($i = 0; $i < 4; $i++)
+                <div class="animate-pulse bg-gray-100 rounded-2xl h-16"></div>
+                @endfor
             </div>
 
-
-
-            {{-- Right - FAQ Accordion --}}
-
-            <div>
-
-                @php
-
-                $faqs = [
-
-                    ['q' => 'How long does loan approval take?',                   'a' => 'Most applications are reviewed and decided within 2 to 5 business days. Once approved, disbursement is processed shortly after to your Polaris or Zenith Bank account.'],
-
-                    ['q' => 'What documents do I need to apply?',                  'a' => 'You will need: a valid government-issued ID, 3 months bank statements, proof of income (payslip or business revenue record), and your BVN. SME applicants may also need business registration documents.'],
-
-                    ['q' => 'Is there any collateral required?',                   'a' => 'Personal loans under ₦50,000 require no collateral. Larger amounts and SME loans may require a co-signer or collateral depending on your credit profile.'],
-
-                    ['q' => 'What is the minimum and maximum loan amount?',        'a' => 'Personal loans range from ₦50,000 to ₦200,000. SME business loans range from ₦50,000 to ₦300,000.'],
-
-                    ['q' => 'Can I repay my loan early?',                          'a' => 'Yes! Early repayment is allowed and encouraged. There is no penalty for paying off your loan before the due date, and you save on interest.'],
-
-                    ['q' => 'Which banks does AIP work with?',                     'a' => 'AIP exclusively partners with Polaris Bank and Zenith Bank for loan disbursement and repayment processing in Nigeria.'],
-
-                    ['q' => 'What happens if I miss a repayment?',                 'a' => 'A late fee will be applied on overdue installments. We encourage customers to contact us before missing a payment so we can discuss restructuring options.'],
-
-                ];
-
-                @endphp
-
-
-
-                <div class="space-y-0">
-
-                    @foreach($faqs as $i => $faq)
-
-                    <div class="faq-item {{ $i === 0 ? 'open' : '' }}">
-
-                        <button class="faq-question">
-
-                            {{ $faq['q'] }}
-
-                            <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
-
-                        </button>
-
-                        <div class="faq-answer">{{ $faq['a'] }}</div>
-
-                    </div>
-
-                    @endforeach
-
-                </div>
-
+            {{-- Error state --}}
+            <div id="faq-error" style="display:none;" class="text-center py-8">
+                <p class="text-gray-400 text-sm">Could not load FAQs. Please refresh the page.</p>
             </div>
 
-
-
+            {{-- FAQ list --}}
+            <div id="faq-list" style="display:none;" class="space-y-4"></div>
         </div>
 
     </div>
-
 </section>
+
+<script>
+(function() {
+    async function loadFaqs() {
+        const loading = document.getElementById('faq-loading');
+        const error   = document.getElementById('faq-error');
+        const list    = document.getElementById('faq-list');
+
+        try {
+            const res  = await fetch('/api/faqs');
+            const data = await res.json();
+
+            loading.style.display = 'none';
+
+            if (!data.success || !data.data.length) {
+                error.style.display = 'block';
+                return;
+            }
+
+            data.data.forEach((faq, index) => {
+                const item = document.createElement('div');
+                item.className = 'faq-item border border-gray-200 rounded-2xl overflow-hidden';
+                item.innerHTML = `
+                    <button
+                        class="w-full flex items-center justify-between px-6 py-5 text-left bg-white hover:bg-gray-50 transition-colors duration-200 faq-trigger"
+                        data-index="${index}"
+                        aria-expanded="false">
+                        <span class="font-semibold text-dark text-sm sm:text-base pr-4">${escapeHtml(faq.question)}</span>
+                        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center transition-transform duration-300 faq-icon">
+                            <i class="fas fa-chevron-down text-primary text-xs"></i>
+                        </span>
+                    </button>
+                    <div class="faq-answer overflow-hidden max-h-0 transition-all duration-300 ease-in-out">
+                        <div class="px-6 pb-5 pt-2 text-gray-500 text-sm leading-relaxed border-t border-gray-100">
+                            ${escapeHtml(faq.answer)}
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+
+            // Accordion logic
+            list.querySelectorAll('.faq-trigger').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const item    = this.closest('.faq-item');
+                    const answer  = item.querySelector('.faq-answer');
+                    const icon    = item.querySelector('.faq-icon');
+                    const isOpen  = this.getAttribute('aria-expanded') === 'true';
+
+                    // Close all
+                    list.querySelectorAll('.faq-item').forEach(i => {
+                        i.querySelector('.faq-answer').style.maxHeight = '0px';
+                        i.querySelector('.faq-trigger').setAttribute('aria-expanded', 'false');
+                        i.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+                        i.querySelector('.faq-item')?.classList?.remove('border-primary');
+                    });
+
+                    // Open clicked
+                    if (!isOpen) {
+                        const content       = answer.querySelector('div');
+                        answer.style.maxHeight = content.scrollHeight + 'px';
+                        this.setAttribute('aria-expanded', 'true');
+                        icon.style.transform   = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            list.style.display = 'block';
+
+        } catch (e) {
+            loading.style.display = 'none';
+            error.style.display   = 'block';
+        }
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadFaqs);
+    } else {
+        loadFaqs();
+    }
+})();
+</script>
 
 
 

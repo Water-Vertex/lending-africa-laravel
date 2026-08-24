@@ -25,11 +25,7 @@ class LoanApplicationInquiryMail extends Mailable
    // LoanApplicationInquiryMail.php mein content() update karo:
 public function content(): Content
 {
-    $inquiry = $this->inquiry;
-    
-    $applicationUrl = url(route('customer.create', [], false)) 
-        . '?email=' . urlencode($inquiry->email)
-        . '&ref=' . $inquiry->token;
+    $applicationUrl = url('/customer-add');
 
     return new Content(
         view: 'emails.loan-application-inquiry',

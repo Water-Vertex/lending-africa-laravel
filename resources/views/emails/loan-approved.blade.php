@@ -78,12 +78,34 @@
                         @endif
 
                     <!-- Agreement Notice -->
+{{-- Agreement CTA --}}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:24px;">
     <tr>
         <td style="padding:20px 24px;">
-            <p style="margin:0 0 8px; color:#1a2332; font-size:14px; font-weight:700;">📄 Next Step: Sign Your Loan Agreement</p>
-            <p style="margin:0; color:#475569; font-size:13px; line-height:1.6;">
-                Your loan agreement is attached to this email as a PDF. Please review, sign, and return it to us. Disbursement will begin after your signed agreement is received.
+            <p style="margin:0 0 8px; color:#1a2332; font-size:14px; font-weight:700;">📄 Next Steps – Sign Your Loan Agreement</p>
+            <p style="margin:0 0 8px; color:#475569; font-size:13px; line-height:1.6;">
+                Your loan agreement is attached to this email as a PDF. Please:
+            </p>
+            <ol style="margin:0 0 16px; padding-left:20px; color:#475569; font-size:13px; line-height:1.8;">
+                <li>Download and read the attached agreement carefully</li>
+                <li>Print and sign it, or sign digitally</li>
+                <li>Upload your signed copy using the button below</li>
+            </ol>
+            <p style="margin:0 0 12px; color:#ef4444; font-size:12px; font-weight:600;">
+                ⚠️ This link expires in 7 days. After expiry, your loan approval will be cancelled.
+            </p>
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>
+                        <a href="{{ $submitUrl }}"
+                           style="display:inline-block; background:linear-gradient(135deg,#6DBE3B,#58A02E); color:#ffffff; text-decoration:none; padding:12px 28px; border-radius:10px; font-size:14px; font-weight:700;">
+                            Submit Signed Agreement →
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <p style="margin:12px 0 0; color:#94a3b8; font-size:11px; word-break:break-all;">
+                Or copy: {{ $submitUrl }}
             </p>
         </td>
     </tr>

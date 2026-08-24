@@ -15,7 +15,8 @@ class LoanAdditionalInfoMail extends Mailable
 
     public function __construct(
         public LoanApplication $application,
-        public string $additionalMessage  
+        public string $message,
+        public string $editUrl = ''
     ) {}
 
     public function envelope(): Envelope
@@ -25,19 +26,16 @@ class LoanAdditionalInfoMail extends Mailable
         );
     }
 
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.loan-additional-info',
-            with: [
-                'application' => $this->application,
-                'additionalMessage'     => $this->additionalMessage,
-            ],
-        );
-    }
-
-    public function attachments(): array
-    {
-        return [];
-    }
+   public function content(): Content
+{
+    return new Content(
+        view: 'emails.loan-additional-info',
+        with: [
+            'application'       => $this->application,
+            'message'           => $this->message,
+            'additionalMessage' => $this->message,  
+            'editUrl'           => $this->editUrl,
+        ],
+    );
+}
 }
