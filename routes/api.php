@@ -33,6 +33,8 @@ Route::post('admin/login', [AuthController::class, 'login']);
 
 // Staff Login
 Route::post('staff/login', [AuthController::class, 'staffLogin']);
+Route::post('staff/forgot-password', [StaffController::class, 'forgotPassword']);
+Route::post('staff/reset-password', [StaffController::class, 'resetPassword']);
 
 // ============================================================
 // AUTHENTICATED ROUTES (Sanctum Auth Required)

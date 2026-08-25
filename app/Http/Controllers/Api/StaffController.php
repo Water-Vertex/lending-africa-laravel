@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Models\Bank;
+use App\Models\StaffForgetPassword;
 use App\Mail\StaffAccountCreated;
+use App\Mail\StaffForgotPasswordMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class StaffController extends Controller
@@ -107,7 +110,7 @@ class StaffController extends Controller
 
             $staff = Staff::create([
                 'staff_code'    => $staffCode,
-                'bank_id'       => null, // 👈 Set to null since bank is removed
+                'bank_id'       => null,
                 'branch_name'   => $request->branch_name,
                 'first_name'    => $request->first_name,
                 'last_name'     => $request->last_name,
@@ -129,8 +132,8 @@ class StaffController extends Controller
                     $staff->staff_code,
                     $staff->email,
                     $plainPassword,
-                    'Bank', // 👈 Default value since bank is removed
-                    'https://portal.aiploan.com/staff/login'
+                    'Bank',
+                    'https://portal.aiploan.com/staff/login'  // ✅ Live Link
                 ));
             } catch (\Exception $mailException) {
                 Log::error('Staff account email failed: ' . $mailException->getMessage());
@@ -276,7 +279,7 @@ class StaffController extends Controller
                         $staff->email,
                         $newPlainPassword,
                         'Bank',
-                        'https://portal.aiploan.com/staff/login'
+                        'https://portal.aiploan.com/staff/login'  // ✅ Live Link
                     ));
                 } catch (\Exception $mailException) {
                     Log::error('Staff password regenerate email failed: ' . $mailException->getMessage());
@@ -416,6 +419,143 @@ class StaffController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update profile',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ============================================================
+    // ✅ FORGOT PASSWORD (STAFF) - LIVE LINK
+    // ============================================================
+
+    /**
+     * Send password reset link to staff email
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        try {
+            $staff = Staff::where('email', $request->email)->first();
+
+            if (!$staff) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This staff email does not exist in our system.'
+                ], 404);
+            }
+
+            // Remove any previous reset tokens
+            StaffForgetPassword::where('email', $staff->email)->delete();
+
+            // Generate secure token
+            $plainToken = Str::random(64);
+
+            StaffForgetPassword::create([
+                'email'      => $staff->email,
+                'token'      => hash('sha256', $plainToken),
+                'expires_at' => Carbon::now()->addMinutes(15),
+            ]);
+
+            // ✅ LIVE RESET LINK
+            $resetLink = 'https://portal.aiploan.com/staff/reset-password?token=' . $plainToken . '&email=' . urlencode($staff->email);
+
+            try {
+                Mail::to($staff->email)->send(new StaffForgotPasswordMail(
+                    $staff->first_name . ' ' . $staff->last_name,
+                    $resetLink,
+                    15
+                ));
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Password reset link has been sent to your email.'
+                ], 200);
+
+            } catch (\Exception $mailException) {
+                Log::error('Staff forgot password email failed: ' . $mailException->getMessage());
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send email. Please try again.'
+                ], 500);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Staff forgotPassword error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process request',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ============================================================
+    // ✅ RESET PASSWORD (STAFF)
+    // ============================================================
+
+    /**
+     * Reset staff password using token
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'token'    => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        try {
+            $record = StaffForgetPassword::where('email', $request->email)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if (!$record || !hash_equals($record->token, hash('sha256', $request->token))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or expired reset link'
+                ], 422);
+            }
+
+            if (Carbon::now()->greaterThan($record->expires_at)) {
+                $record->delete();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This reset link has expired. Please request a new one.'
+                ], 422);
+            }
+
+            $staff = Staff::where('email', $request->email)->first();
+
+            if (!$staff) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Staff account not found'
+                ], 404);
+            }
+
+            $staff->password = Hash::make($request->password);
+            $staff->save();
+
+            // Delete token so it cannot be reused
+            $record->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password changed successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Staff resetPassword error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reset password',
                 'error'   => $e->getMessage()
             ], 500);
         }
