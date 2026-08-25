@@ -147,23 +147,34 @@ class CustomerController extends Controller
     // }
 public function show(Customer $customer): JsonResponse
 {
-    $customer->load([
-        'documents',
-        'businesses',
-        'bankAccounts.bank',
-        'loanApplications.loanProduct',
-        'loanApplications.business',
-        'loanApplications.coSigners',
-    ]);
+$customer->load([
+    'documents',
+    'businesses',
+    'bankAccounts.bank',
+    'loanApplications.loanProduct',
+    'loanApplications.business',
+    'loanApplications.coSigners',  // sirf yeh — koi .documents nahi
+]);
 
-    // Documents mein full URL add karo
-    $customer->documents->transform(function ($doc) {
-        $doc->file_url = $doc->file_path
-            ? asset('storage/' . $doc->file_path)
+// Customer documents file_url
+$customer->documents->transform(function ($doc) {
+    $doc->file_url = $doc->file_path
+        ? asset('storage/' . $doc->file_path)
+        : null;
+    return $doc;
+});
+
+// Co-signer file URLs
+$customer->loanApplications->each(function ($app) {
+    $app->coSigners->each(function ($coSigner) {
+        $coSigner->photo_id_url = $coSigner->photo_id
+            ? asset('storage/' . $coSigner->photo_id)
             : null;
-        return $doc;
+        $coSigner->evidence_of_occupation_url = $coSigner->evidence_of_occupation
+            ? asset('storage/' . $coSigner->evidence_of_occupation)
+            : null;
     });
-
+});
     return response()->json([
         'success' => true,
         'data'    => $customer,

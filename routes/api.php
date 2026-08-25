@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\LoanApplicationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\LoanApplicationInquiryController;
 use App\Http\Controllers\Api\CustomerByStaffController;
 use App\Http\Controllers\Api\ContactController;
@@ -26,7 +27,8 @@ use App\Http\Controllers\Api\LoanAgreementTemplateController;
 // ============================================================
 
 // Public - no auth required
-
+Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendResetLink']);
+Route::post('/auth/reset-password',  [PasswordResetController::class, 'resetPassword']);
 Route::get('/loan-products/public-rates', [LoanProductController::class, 'publicRates']);
 // Admin Login
 Route::post('admin/login', [AuthController::class, 'login']);
