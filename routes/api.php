@@ -90,14 +90,14 @@ Route::get('/collaterals-form/loan-applications', [CollateralController::class, 
     Route::get('/collaterals-form/collateral-types', [CollateralController::class, 'collateralTypesList']);
 
     Route::apiResource('customers', CustomerController::class);
-    Route::put('/admin/reset-password', [ProfileController::class, 'changePassword']);
+    Route::put('/reset-password', [ProfileController::class, 'changePassword']);
 
 
 Route::get('/faqs', [FaqController::class, 'index']);
 Route::post('/faqs', [FaqController::class, 'store']);
 Route::get('/faqs/{id}', [FaqController::class, 'show']);
 Route::put('/faqs/{id}', [FaqController::class, 'update']);
-Route::delete('/admin/faqs/{id}', [FaqController::class, 'destroy']);
+Route::delete('/faqs/{id}', [FaqController::class, 'destroy']);
 // Loan Applications (read + status change only)
 Route::get('/loan-applications',              [LoanApplicationController::class, 'index']);
 Route::get('/loan-applications/stats',         [LoanApplicationController::class, 'stats']);

@@ -114,32 +114,26 @@
         font-size: 0.9rem;
         flex-shrink: 0;
     }
-    .step-wizard {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1.25rem 1.5rem;
-        background: #f8fafc;
-        border-radius: 16px;
-        border: 1px solid #eef2f6;
-    }
-    .step-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex: 1;
-        position: relative;
-    }
-    .step-item:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        right: -0.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 2rem;
-        height: 2px;
-        background: #e2e8f0;
-    }
+.step-wizard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem 1rem;
+    padding: 1.25rem 1.5rem;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid #eef2f6;
+}
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+.step-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
     .step-number {
         width: 36px;
         height: 36px;
@@ -250,13 +244,28 @@
     }
     .alert-premium-success .icon { background: #6DBE3B; color: white; }
     .alert-premium-error .icon { background: #ef4444; color: white; }
-
-    @media (max-width: 640px) {
-        .form-header { padding: 1.5rem; }
-        .step-wizard { flex-direction: column; align-items: stretch; gap: 0.5rem; }
-        .step-item:not(:last-child)::after { display: none; }
-        .form-section-title { font-size: 0.95rem; }
+   @media (max-width: 640px) {
+    .step-wizard {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        padding: 1.25rem 1.5rem;
     }
+    .step-item {
+        width: 100%;
+    }
+    .step-connector {
+        width: 2px;
+        height: 20px;
+        min-width: 0;
+        margin: 2px 0 2px 17px;
+        flex: none;
+    }
+    .step-text {
+        white-space: normal;
+    }
+    .form-section-title { font-size: 0.95rem; }
+}
 </style>
 
 <div class="max-w-5xl mx-auto px-4 py-8">
@@ -613,15 +622,17 @@
                 </div>
 
                 {{-- Step 1 Actions --}}
-                <div class="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t-2 border-slate-100">
-                    <a href="{{ url()->previous() }}" class="btn-secondary-premium">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
-                    <button type="button" id="next-btn-1" class="btn-primary-premium">
-                        <span>Continue to Co-Signer</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-6 border-t-2 border-slate-100 mt-6">
+    <a href="{{ url()->previous() }}"
+       class="btn-secondary-premium w-full sm:w-auto text-center">
+        <i class="fas fa-times"></i> Cancel
+    </a>
+    <button type="button" id="next-btn-1"
+            class="btn-primary-premium w-full sm:w-auto justify-center">
+        <span>Continue to Co-Signer</span>
+        <i class="fas fa-arrow-right"></i>
+    </button>
+</div>
             </div>
 
             {{-- STEP 2 — CO-SIGNER --}}
@@ -716,7 +727,7 @@
                         <p class="field-error-msg" id="err-cosigner_address"><i class="fas fa-circle-exclamation"></i> <span></span></p>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label class="form-label-premium">Photo ID (Upload)</label>
                             <input type="file" name="cosigner_photo_id" id="cosigner_photo_id" class="form-input-premium !py-2" accept=".jpg,.jpeg,.png,.pdf">
                             <p class="field-hint">Accepted: JPG, PNG, PDF — max 2MB</p>
@@ -727,20 +738,106 @@
                             <input type="file" name="cosigner_evidence_of_occupation" id="cosigner_evidence_of_occupation" class="form-input-premium !py-2" accept=".jpg,.jpeg,.png,.pdf">
                             <p class="field-hint">Accepted: JPG, PNG, PDF — max 2MB</p>
                             <p class="field-error-msg" id="err-cosigner_evidence"><i class="fas fa-circle-exclamation"></i> <span></span></p>
-                        </div>
+                        </div> -->
+                        {{-- Co-signer Photo ID --}}
+<div class="form-group mt-4">
+    <label class="form-label-premium">Photo ID</label>
+
+    <div class="grid grid-cols-2 gap-2 mb-2">
+        <button type="button"
+                onclick="triggerFileSelect('cosigner_photo_id_file', 'cosigner_photo_id_camera')"
+                class="flex flex-col items-center justify-center gap-1.5 py-3 border-2 border-dashed border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:border-[#6DBE3B] hover:text-[#6DBE3B] hover:bg-green-50 transition">
+            <i class="fas fa-folder-open text-lg"></i>
+            <span>Choose File</span>
+            <span class="text-[10px] font-normal text-gray-400">PDF, JPG, PNG</span>
+        </button>
+        <button type="button"
+                onclick="triggerCameraSelect('cosigner_photo_id_camera', 'cosigner_photo_id_file')"
+                class="flex flex-col items-center justify-center gap-1.5 py-3 border-2 border-dashed border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:border-[#6DBE3B] hover:text-[#6DBE3B] hover:bg-green-50 transition">
+            <i class="fas fa-camera text-lg"></i>
+            <span>Take Photo</span>
+            <span class="text-[10px] font-normal text-gray-400">Use Camera</span>
+        </button>
+    </div>
+
+    <input type="file" id="cosigner_photo_id_file" name="cosigner_photo_id"
+           class="hidden" accept=".jpg,.jpeg,.png,.pdf"
+           onchange="showSinglePreview(this, 'cosigner_photo_id_preview')">
+    <input type="file" id="cosigner_photo_id_camera"
+           class="hidden" accept="image/*" capture="environment"
+           onchange="showSinglePreview(this, 'cosigner_photo_id_preview'); document.getElementById('cosigner_photo_id_file').removeAttribute('name'); this.name='cosigner_photo_id';">
+
+    <div id="cosigner_photo_id_preview" class="hidden mt-2 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+        <i class="fas fa-file-check text-[#6DBE3B]"></i>
+        <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-gray-700 preview-name truncate"></p>
+            <p class="text-[10px] text-gray-400 preview-size"></p>
+        </div>
+        <button type="button" onclick="clearSinglePreview('cosigner_photo_id_preview','cosigner_photo_id_file','cosigner_photo_id_camera','cosigner_photo_id')"
+                class="text-red-400 hover:text-red-600 text-xs">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <p class="field-error-msg" id="err-cosigner_photo_id"><i class="fas fa-circle-exclamation"></i> <span></span></p>
+</div>
+
+{{-- Co-signer Evidence of Occupation --}}
+<div class="form-group mt-4">
+    <label class="form-label-premium">Evidence of Occupation</label>
+
+    <div class="grid grid-cols-2 gap-2 mb-2">
+        <button type="button"
+                onclick="triggerFileSelect('cosigner_evidence_file', 'cosigner_evidence_camera')"
+                class="flex flex-col items-center justify-center gap-1.5 py-3 border-2 border-dashed border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:border-[#6DBE3B] hover:text-[#6DBE3B] hover:bg-green-50 transition">
+            <i class="fas fa-folder-open text-lg"></i>
+            <span>Choose File</span>
+            <span class="text-[10px] font-normal text-gray-400">PDF, JPG, PNG</span>
+        </button>
+        <button type="button"
+                onclick="triggerCameraSelect('cosigner_evidence_camera', 'cosigner_evidence_file')"
+                class="flex flex-col items-center justify-center gap-1.5 py-3 border-2 border-dashed border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:border-[#6DBE3B] hover:text-[#6DBE3B] hover:bg-green-50 transition">
+            <i class="fas fa-camera text-lg"></i>
+            <span>Take Photo</span>
+            <span class="text-[10px] font-normal text-gray-400">Use Camera</span>
+        </button>
+    </div>
+
+    <input type="file" id="cosigner_evidence_file" name="cosigner_evidence_of_occupation"
+           class="hidden" accept=".jpg,.jpeg,.png,.pdf"
+           onchange="showSinglePreview(this, 'cosigner_evidence_preview')">
+    <input type="file" id="cosigner_evidence_camera"
+           class="hidden" accept="image/*" capture="environment"
+           onchange="showSinglePreview(this, 'cosigner_evidence_preview'); document.getElementById('cosigner_evidence_file').removeAttribute('name'); this.name='cosigner_evidence_of_occupation';">
+
+    <div id="cosigner_evidence_preview" class="hidden mt-2 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+        <i class="fas fa-file-check text-[#6DBE3B]"></i>
+        <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-gray-700 preview-name truncate"></p>
+            <p class="text-[10px] text-gray-400 preview-size"></p>
+        </div>
+        <button type="button"
+                onclick="clearSinglePreview('cosigner_evidence_preview','cosigner_evidence_file','cosigner_evidence_camera','cosigner_evidence_of_occupation')"
+                class="text-red-400 hover:text-red-600 text-xs">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <p class="field-error-msg" id="err-cosigner_evidence"><i class="fas fa-circle-exclamation"></i> <span></span></p>
+</div>
                     </div>
                 </div>
 
                 {{-- Step 2 Actions --}}
-                <div class="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t-2 border-slate-100">
-                    <button type="button" id="back-btn-2" class="btn-secondary-premium">
-                        <i class="fas fa-arrow-left"></i> Back to Profile
-                    </button>
-                    <button type="button" id="next-btn-2" class="btn-primary-premium">
-                        <span>Continue to Loan</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t-2 border-slate-100 mt-6">
+    <button type="button" id="back-btn-2"
+            class="btn-secondary-premium w-full sm:w-auto justify-center">
+        <i class="fas fa-arrow-left"></i> Back to Profile
+    </button>
+    <button type="button" id="next-btn-2"
+            class="btn-primary-premium w-full sm:w-auto justify-center">
+        <span>Continue to Loan</span>
+        <i class="fas fa-arrow-right"></i>
+    </button>
+</div>
             </div>
 
             {{-- STEP 3 — LOAN APPLICATION --}}
@@ -828,15 +925,17 @@
                 </div>
 
                 {{-- Step 3 Actions --}}
-                <div class="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t-2 border-slate-100">
-                    <button type="button" id="back-btn-3" class="btn-secondary-premium">
-                        <i class="fas fa-arrow-left"></i> Back to Co-Signer
-                    </button>
-                    <button type="submit" id="submit-btn" class="btn-primary-premium">
-                        <span id="submit-btn-text">Submit & Create Customer</span>
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
+             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t-2 border-slate-100 mt-6">
+    <button type="button" id="back-btn-3"
+            class="btn-secondary-premium w-full sm:w-auto justify-center">
+        <i class="fas fa-arrow-left"></i> Back to Co-Signer
+    </button>
+    <button type="submit" id="submit-btn"
+            class="btn-primary-premium w-full sm:w-auto justify-center">
+        <span id="submit-btn-text">Submit & Create Customer</span>
+        <i class="fas fa-paper-plane"></i>
+    </button>
+</div>
             </div>
 
         </form>
@@ -845,36 +944,79 @@
 
 {{-- Document Template --}}
 <template id="document-row-template">
-    <div class="document-row">
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div class="form-group">
-                <label class="form-label-premium !text-[10px]">Document Type</label>
-                <select name="documents[__INDEX__][document_type]" class="form-input-premium !py-2">
+    <div class="document-row bg-white border-2 border-gray-100 rounded-2xl p-4 mb-3">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-sm font-bold text-gray-700">
+                <i class="fas fa-file-alt text-orange-500 mr-1"></i> Document
+            </p>
+            <button type="button" class="remove-document-btn text-red-400 hover:text-red-600 transition flex items-center gap-1 text-xs font-semibold">
+                <i class="fas fa-trash-can"></i> Remove
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Document Type</label>
+                <select name="documents[__INDEX__][document_type]" class="w-full px-3 py-2.5 border-2 border-gray-100 rounded-xl text-sm focus:outline-none focus:border-[#6DBE3B] bg-white transition">
                     <option value="national_id">National ID / NIN</option>
                     <option value="passport">International Passport</option>
                     <option value="driver_license">Driver's License</option>
                     <option value="other">Other Document</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label class="form-label-premium !text-[10px]">Upload File</label>
-                <input type="file" name="documents[__INDEX__][file]" class="form-input-premium !py-1.5 doc-file-input" accept=".jpg,.jpeg,.png,.pdf">
-                <p class="field-hint">JPG, PNG or PDF — max 2MB</p>
-                <p class="field-error-msg doc-file-error"><i class="fas fa-circle-exclamation"></i> <span></span></p>
-            </div>
-            <div class="form-group">
-                <label class="form-label-premium !text-[10px]">Verification Status</label>
-                <select name="documents[__INDEX__][verification_status]" class="form-input-premium !py-2">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Verification Status</label>
+                <select name="documents[__INDEX__][verification_status]" class="w-full px-3 py-2.5 border-2 border-gray-100 rounded-xl text-sm focus:outline-none focus:border-[#6DBE3B] bg-white transition">
                     <option value="pending">Pending Review</option>
                     <option value="verified">Verified</option>
                     <option value="rejected">Rejected</option>
                 </select>
             </div>
-            <div class="flex items-end">
-                <button type="button" class="remove-document-btn w-full py-2.5 border-2 border-rose-200 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-50 transition flex items-center justify-center gap-1.5">
-                    <i class="fas fa-trash-can"></i> Remove
+        </div>
+
+        {{-- Upload Options --}}
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Upload Document</label>
+
+            {{-- Option Buttons --}}
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <button type="button"
+                        class="upload-option-btn select-file-btn flex flex-col items-center justify-center gap-1.5 py-3 px-3 border-2 border-dashed border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:border-[#6DBE3B] hover:text-[#6DBE3B] hover:bg-green-50 transition active-option cursor-pointer">
+                    <i class="fas fa-folder-open text-lg"></i>
+                    <span>Choose File</span>
+                    <span class="text-[10px] font-normal text-gray-400">PDF, JPG, PNG</span>
+                </button>
+                <button type="button"
+                        class="upload-option-btn take-photo-btn flex flex-col items-center justify-center gap-1.5 py-3 px-3 border-2 border-dashed border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:border-[#6DBE3B] hover:text-[#6DBE3B] hover:bg-green-50 transition cursor-pointer">
+                    <i class="fas fa-camera text-lg"></i>
+                    <span>Take Photo</span>
+                    <span class="text-[10px] font-normal text-gray-400">Use Camera</span>
                 </button>
             </div>
+
+            {{-- Hidden inputs --}}
+            <input type="file" name="documents[__INDEX__][file]"
+                   class="doc-file-input hidden"
+                   accept=".jpg,.jpeg,.png,.pdf">
+            <input type="file" name="documents[__INDEX__][file]"
+                   class="doc-camera-input hidden"
+                   accept="image/*" capture="environment">
+
+            {{-- Preview --}}
+            <div class="doc-preview hidden mt-2 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+                <i class="fas fa-file-check text-[#6DBE3B]"></i>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-gray-700 doc-preview-name truncate"></p>
+                    <p class="text-[10px] text-gray-400 doc-preview-size"></p>
+                </div>
+                <button type="button" class="doc-clear-btn text-red-400 hover:text-red-600 text-xs">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <p class="field-error-msg doc-file-error hidden mt-1 text-xs text-red-500 flex items-center gap-1">
+                <i class="fas fa-circle-exclamation"></i> <span></span>
+            </p>
         </div>
     </div>
 </template>
@@ -1410,26 +1552,140 @@
         if (!wrapper || !template || !addBtn || !form) return;
 
         let docIndex = 0;
+function triggerFileSelect(fileInputId, cameraInputId) {
+    const fileInput   = document.getElementById(fileInputId);
+    const cameraInput = document.getElementById(cameraInputId);
+    // Restore name to file input
+    fileInput.name    = fileInput.dataset.fieldName || fileInput.name;
+    if (cameraInput) cameraInput.removeAttribute('name');
+    fileInput.click();
+}
 
-        function addDocumentRow() {
-            const clone = template.content.cloneNode(true);
-            clone.querySelectorAll('[name]').forEach(el => { el.name = el.name.replace('__INDEX__', docIndex); });
-            const row = document.createElement('div');
-            row.appendChild(clone);
-            row.querySelector('.doc-file-input')?.addEventListener('change', function () {
-                const errEl = this.closest('.form-group')?.querySelector('.doc-file-error');
-                if (!fileSizeOk(this)) {
-                    if (errEl) { errEl.querySelector('span').textContent = `File too large — maximum size is ${MAX_FILE_MB}MB`; errEl.classList.add('show'); }
-                    markInput(this, false);
-                } else {
-                    if (errEl) errEl.classList.remove('show');
-                    if (this.files?.length) markInput(this, true);
-                }
-            });
-            row.querySelector('.remove-document-btn')?.addEventListener('click', () => row.remove());
-            wrapper.appendChild(row);
-            docIndex++;
+function triggerCameraSelect(cameraInputId, fileInputId) {
+    const cameraInput = document.getElementById(cameraInputId);
+    const fileInput   = document.getElementById(fileInputId);
+    // Give name to camera input
+    cameraInput.name  = fileInput.name || fileInput.dataset.fieldName;
+    fileInput.removeAttribute('name');
+    cameraInput.click();
+}
+
+function showSinglePreview(input, previewId) {
+    const file    = input.files[0];
+    const preview = document.getElementById(previewId);
+    if (!file || !preview) return;
+    if (file.size > 5 * 1024 * 1024) {
+        alert('File too large — maximum 5MB');
+        input.value = '';
+        return;
+    }
+    preview.querySelector('.preview-name').textContent = file.name;
+    preview.querySelector('.preview-size').textContent = (file.size/1024/1024).toFixed(2) + ' MB';
+    preview.classList.remove('hidden');
+}
+
+function clearSinglePreview(previewId, fileInputId, cameraInputId, fieldName) {
+    document.getElementById(previewId).classList.add('hidden');
+    const fileInput   = document.getElementById(fileInputId);
+    const cameraInput = document.getElementById(cameraInputId);
+    fileInput.value   = '';
+    if (cameraInput) cameraInput.value = '';
+    // Restore file input name
+    fileInput.name    = fieldName;
+    if (cameraInput) cameraInput.removeAttribute('name');
+}
+       function addDocumentRow() {
+    const clone = template.content.cloneNode(true);
+    const idx   = docIndex;
+
+    // Fix names
+    clone.querySelectorAll('[name]').forEach(el => {
+        el.name = el.name.replace('__INDEX__', idx);
+    });
+
+    const row         = document.createElement('div');
+    row.appendChild(clone);
+    const rowEl       = row.firstElementChild;
+
+    const fileInput   = rowEl.querySelector('.doc-file-input');
+    const cameraInput = rowEl.querySelector('.doc-camera-input');
+    const preview     = rowEl.querySelector('.doc-preview');
+    const previewName = rowEl.querySelector('.doc-preview-name');
+    const previewSize = rowEl.querySelector('.doc-preview-size');
+    const clearBtn    = rowEl.querySelector('.doc-clear-btn');
+    const errEl       = rowEl.querySelector('.doc-file-error');
+    const selectBtn   = rowEl.querySelector('.select-file-btn');
+    const cameraBtn   = rowEl.querySelector('.take-photo-btn');
+
+    // Fix: only one file input should have the name for submission
+    // Remove name from camera input to avoid duplicate — handle via JS
+    cameraInput.removeAttribute('name');
+
+    function showPreview(file) {
+        if (!file) return;
+        const MAX = 5 * 1024 * 1024;
+        if (file.size > MAX) {
+            errEl.querySelector('span').textContent = 'File too large — max 5MB';
+            errEl.classList.remove('hidden');
+            return;
         }
+        errEl.classList.add('hidden');
+        previewName.textContent = file.name;
+        previewSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+        preview.classList.remove('hidden');
+        // Mark active button
+        selectBtn.classList.remove('border-[#6DBE3B]','text-[#6DBE3B]','bg-green-50');
+        cameraBtn.classList.remove('border-[#6DBE3B]','text-[#6DBE3B]','bg-green-50');
+    }
+
+    function clearPreview() {
+        fileInput.value   = '';
+        cameraInput.value = '';
+        // Reset the actual file input name back
+        fileInput.name = `documents[${idx}][file]`;
+        preview.classList.add('hidden');
+        previewName.textContent = '';
+        previewSize.textContent = '';
+        errEl.classList.add('hidden');
+    }
+
+    // Choose File
+    selectBtn.addEventListener('click', () => {
+        clearPreview();
+        fileInput.name = `documents[${idx}][file]`;
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function() {
+        if (this.files[0]) showPreview(this.files[0]);
+    });
+
+    // Take Photo
+    cameraBtn.addEventListener('click', () => {
+        clearPreview();
+        // Give camera input the submission name, remove from file input
+        cameraInput.name = `documents[${idx}][file]`;
+        fileInput.removeAttribute('name');
+        cameraInput.click();
+    });
+
+    cameraInput.addEventListener('change', function() {
+        if (this.files[0]) showPreview(this.files[0]);
+    });
+
+    clearBtn.addEventListener('click', () => {
+        clearPreview();
+        // Reset names
+        fileInput.name = `documents[${idx}][file]`;
+        cameraInput.removeAttribute('name');
+    });
+
+    // Remove row
+    rowEl.querySelector('.remove-document-btn').addEventListener('click', () => rowEl.remove());
+
+    wrapper.appendChild(rowEl);
+    docIndex++;
+}
 
         addBtn.addEventListener('click', addDocumentRow);
         if (wrapper.children.length === 0) addDocumentRow();

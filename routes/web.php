@@ -11,6 +11,8 @@ use App\Http\Controllers\Website\PolicyController;
 use App\Http\Controllers\Website\AgreementController;
 use App\Http\Controllers\Api\FaqController;
 
+ Route::get('/customer-add', [CustomerController::class, 'create'])->name('customer.create');
+    Route::post('/customer-add', [CustomerController::class, 'store'])->name('customer.store');
 Route::get('/api/faqs', [App\Http\Controllers\Api\FaqController::class, 'index']);
 // Agreement submission — customer facing
 Route::get('/loan-agreement/{token}',  [AgreementController::class, 'show'])->name('agreement.show');
