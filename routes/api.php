@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\PolicyController;
 use App\Http\Controllers\Api\StaffDashboardController;
 use App\Http\Controllers\Api\LoanAgreementTemplateController;
+use App\Http\Controllers\Api\PermissionController;
 
 // ============================================================
 // PUBLIC ROUTES (No Auth Required)
@@ -42,6 +43,10 @@ Route::post('staff/reset-password', [StaffController::class, 'resetPassword']);
 // AUTHENTICATED ROUTES (Sanctum Auth Required)
 // ============================================================
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/user/permissions', function () {
+        return response()->json(auth()->user()->getPermissionNames());
+    });
 
     // ---------- Admin Routes ----------
     Route::prefix('admin')->group(function () {
@@ -73,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/loan-applications/{id}/approve',               [LoanApplicationController::class, 'approve']);
 Route::post('/loan-applications/{id}/reject',                [LoanApplicationController::class, 'reject']);
 Route::post('/loan-applications/{id}/request-additional-info',[LoanApplicationController::class, 'requestAdditionalInfo']);
+Route::get('/loan-applications/{id}/download-agreement', [LoanApplicationController::class, 'downloadAgreement']);
                
         // Users
         Route::get('/users', [UserController::class, 'index']);
@@ -80,7 +86,27 @@ Route::post('/loan-applications/{id}/request-additional-info',[LoanApplicationCo
         Route::get('/users/{id}', [UserController::class, 'show']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
+// ✅ Permissions Routes
+Route::get('/permissions', [PermissionController::class, 'index']);
+Route::post('/permissions', [PermissionController::class, 'store']);
+Route::get('/permissions/{id}', [PermissionController::class, 'show']);
+Route::put('/permissions/{id}', [PermissionController::class, 'update']);
+Route::delete('/permissions/{id}', [PermissionController::class, 'destroy']);
 
+// ✅ Roles with permissions
+Route::get('/roles-with-permissions', [PermissionController::class, 'getRolesWithPermissions']);
+
+// ✅ Sync permissions for a role
+Route::put('/roles/{roleId}/sync-permissions', [PermissionController::class, 'syncRolePermissions']);
+
+// ✅ Get role permissions
+Route::get('/permissions/role/{roleId}', [PermissionController::class, 'getRolePermissions']);
+
+// ✅ Users with roles
+Route::get('/users-with-roles', [PermissionController::class, 'getUsersWithRoles']);
+
+// ✅ Assign role to user
+Route::post('/assign-role-to-user', [PermissionController::class, 'assignRoleToUser']);
         // Collaterals
         Route::get('/collaterals', [CollateralController::class, 'index']);
         Route::post('/collaterals', [CollateralController::class, 'store']);
@@ -99,7 +125,7 @@ Route::get('/faqs', [FaqController::class, 'index']);
 Route::post('/faqs', [FaqController::class, 'store']);
 Route::get('/faqs/{id}', [FaqController::class, 'show']);
 Route::put('/faqs/{id}', [FaqController::class, 'update']);
-Route::delete('/admin/faqs/{id}', [FaqController::class, 'destroy']);
+Route::delete('/faqs/{id}', [FaqController::class, 'destroy']);
 // Loan Applications (read + status change only)
 Route::get('/loan-applications',              [LoanApplicationController::class, 'index']);
 Route::get('/loan-applications/stats',         [LoanApplicationController::class, 'stats']);

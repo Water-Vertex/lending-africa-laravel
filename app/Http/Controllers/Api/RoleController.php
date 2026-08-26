@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RoleController extends Controller
 {
@@ -119,22 +121,62 @@ class RoleController extends Controller
     /**
      * Remove the specified role.
      */
-    public function destroy($id)
-    {
-        try {
-            $role = Role::findOrFail($id);
-            $role->delete();
+/**
+ * Remove the specified role safely.
+ */
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Role deleted successfully'
-            ], 200);
-        } catch (\Exception $e) {
+
+/**
+ * Remove the specified role.
+ */
+public function destroy($id)
+{
+    Log::info("Delete request hit for Role ID: " . $id);
+
+    try {
+        // 1. Role search karein
+        $role = Role::find($id);
+
+        if (!$role) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete role ,because it has associated users',
-                'error'   => $e->getMessage()
-            ], 500);
+                'message' => 'Role not found'
+            ], 404);
         }
+
+        // 2. Protected system roles check
+        if (in_array(strtolower($role->name), ['super_admin', 'admin'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This role cannot be deleted.'
+            ], 403);
+        }
+
+        // 3. Direct DB query se relationship clean karein (Safe from class resolution errors)
+        DB::table('model_has_roles')->where('role_id', $id)->delete();
+        DB::table('role_has_permissions')->where('role_id', $id)->delete();
+
+        // 4. Role record delete karein directly DB level se
+        DB::table('roles')->where('id', $id)->delete();
+
+        // 5. Spatie Cache clear (Safe string passing)
+        if (class_exists('\Spatie\Permission\PermissionRegistrar')) {
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Role deleted successfully'
+        ], 200);
+
+    } catch (\Throwable $e) {
+        Log::error("Role Delete Error: " . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to delete role',
+            'error'   => $e->getMessage()
+        ], 500);
     }
+}
 }

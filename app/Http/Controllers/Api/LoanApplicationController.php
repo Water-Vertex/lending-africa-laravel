@@ -197,92 +197,7 @@ if ($application->agreement && $application->agreement->signed_file_path) {
         'data'    => $application->fresh(),
     ]);
 }
-// public function approve(Request $request, $id): JsonResponse
-//     {
-//         $application = LoanApplication::with([
-//             'customer',
-//             'loanProduct',
-//             'customerByStaff.staff',
-//         ])->find($id);
 
-//         if (! $application) {
-//             return response()->json(['success' => false, 'message' => 'Application not found'], 404);
-//         }
-
-//         $validated = $request->validate([
-//             'message' => 'nullable|string|max:2000',
-//         ]);
-
-//         // Update status
-//         $application->update(['status' => 'approved']);
-
-//         // Log approval
-//         LoanApproval::create([
-//             'application_id' => $application->id,
-//             'actioned_by'    => auth()->id(),
-//             'action'         => 'approved',
-//             'message'        => $validated['message'] ?? null,
-//             'actioned_at'    => now(),
-//         ]);
-
-//         $debugFile = storage_path('debug_mail.txt');
-//         $debugLog  = function (string $line) use ($debugFile) {
-//             // Direct file write, does not depend on Log facade / permissions on storage/logs
-//             @file_put_contents($debugFile, '[' . now()->toDateTimeString() . '] ' . $line . "\n", FILE_APPEND);
-//         };
-
-//         $debugLog('=== approve() called for application id=' . $application->id . ' by user=' . (auth()->id() ?? 'GUEST/NULL'));
-//         $debugLog('MAIL CONFIG: ' . json_encode([
-//             'default'    => config('mail.default'),
-//             'mailer'     => config('mail.mailers.' . config('mail.default')),
-//             'from'       => config('mail.from'),
-//         ]));
-
-//         // Email to customer
-//         $customerEmail = $application->customer->email ?? null;
-//         $debugLog('customerEmail resolved as: ' . var_export($customerEmail, true));
-
-//         if ($customerEmail) {
-//             $debugLog('BEFORE Mail::send() to customer');
-//             try {
-//                 Mail::to($customerEmail)
-//                     ->send(new LoanApprovedMail($application, $validated['message'] ?? ''));
-//                 $debugLog('AFTER Mail::send() to customer - NO EXCEPTION THROWN (does not guarantee delivery, only that send() call completed)');
-//             } catch (\Throwable $e) {
-//                 // Catching \Throwable instead of \Exception so we also catch Errors (e.g. TypeError, missing class, etc.)
-//                 $debugLog('EXCEPTION on customer mail: ' . get_class($e) . ' - ' . $e->getMessage());
-//                 $debugLog('TRACE: ' . $e->getTraceAsString());
-//                 \Log::error('Loan approved email failed (customer): ' . $e->getMessage());
-//             }
-//         } else {
-//             $debugLog('SKIPPED customer email - $customerEmail was empty/null/falsy');
-//         }
-
-//       // Email to staff if submitted by staff
-// if ($application->customerByStaff && $application->customerByStaff->staff) {
-//     $staffEmail = $application->customerByStaff->staff->email ?? null;
-
-//     if ($staffEmail) {
-//         try {
-//             Mail::to($staffEmail)
-//                 ->send(new LoanActionStaffMail(
-//                     $application,
-//                     'approved',
-//                     $validated['message'] ?? ''
-//                 ));
-//         } catch (\Exception $e) {
-//             \Log::error('Loan approved staff email failed: ' . $e->getMessage());
-//         }
-//     }
-// }
-//         $debugLog('=== approve() finished for application id=' . $application->id);
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Loan application approved and email sent.',
-//             'data'    => $application->fresh(),
-//         ]);
-//     }
 
     // ── Reject ───────────────────────────────────────────────────────────────
     public function reject(Request $request, $id): JsonResponse
@@ -347,69 +262,6 @@ if ($application->customerByStaff && $application->customerByStaff->staff) {
         ]);
     }
 
-//     // ── Additional Info Required ──────────────────────────────────────────────
-//     public function requestAdditionalInfo(Request $request, $id): JsonResponse
-//     {
-//         $application = LoanApplication::with([
-//             'customer',
-//             'loanProduct',
-//             'customerByStaff.staff',
-//         ])->find($id);
-
-//         if (! $application) {
-//             return response()->json(['success' => false, 'message' => 'Application not found'], 404);
-//         }
-
-//         $validated = $request->validate([
-//             'message' => 'required|string|min:10|max:2000',
-//         ]);
-
-//         // Status under_review pe rakho ya pending — additional info pending
-//         $application->update(['status' => 'under_review']);
-
-//         LoanApproval::create([
-//             'application_id' => $application->id,
-//             'actioned_by'    => auth()->id(),
-//             'action'         => 'additional_info_requested',
-//             'message'        => $validated['message'],
-//             'actioned_at'    => now(),
-//         ]);
-
-//         // Email to customer
-//         $customerEmail = $application->customer->email ?? null;
-//         if ($customerEmail) {
-//             try {
-//                 Mail::to($customerEmail)
-//                     ->send(new LoanAdditionalInfoMail($application, $validated['message']));
-//             } catch (\Exception $e) {
-//                 \Log::error('Additional info email failed (customer): ' . $e->getMessage());
-//             }
-//         }
-
-//         // Email to staff
-//      // Email to staff
-// if ($application->customerByStaff && $application->customerByStaff->staff) {
-//     $staffEmail = $application->customerByStaff->staff->email ?? null;
-
-//     if ($staffEmail) {
-//         try {
-//             Mail::to($staffEmail)
-//                 ->send(new LoanActionStaffMail(
-//                     $application,
-//                     'additional_info_requested',
-//                     $validated['message']
-//                 ));
-//         } catch (\Exception $e) {
-//             \Log::error('Additional info staff email failed: ' . $e->getMessage());
-//         }
-//     }
-// }
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Message sent to customer successfully.',
-//             'data'    => $application->fresh(),
-//         ]);
-//     }
 
 public function requestAdditionalInfo(Request $request, $id): JsonResponse
 {
@@ -498,6 +350,65 @@ public function requestAdditionalInfo(Request $request, $id): JsonResponse
     $application->delete();
 
     return response()->json(['success' => true, 'message' => 'Application deleted successfully.']);
+}
+
+
+
+// ── Download Signed Agreement ──────────────────────────────────────────────
+public function downloadAgreement($id)
+{
+    try {
+        $application = LoanApplication::with('agreement')->find($id);
+        
+        if (!$application || !$application->agreement) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Agreement not found'
+            ], 404);
+        }
+        
+        $filePath = $application->agreement->signed_file_path;
+        
+        if (!$filePath) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'No file path found'
+            ], 404);
+        }
+        
+        // ✅ Full path build karein
+        $fullPath = storage_path('app/public/' . $filePath);
+        
+        // ✅ Debug log
+        \Log::info('Downloading file:', [
+            'file_path' => $filePath,
+            'full_path' => $fullPath,
+            'exists' => file_exists($fullPath)
+        ]);
+        
+        if (!file_exists($fullPath)) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'File not found on server',
+                'path' => $fullPath
+            ], 404);
+        }
+        
+        $fileName = $application->agreement->signed_file_original_name ?? 'agreement.pdf';
+        
+        return response()->download($fullPath, $fileName, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+        ]);
+        
+    } catch (\Exception $e) {
+        \Log::error('Download error: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Server error: ' . $e->getMessage()
+        ], 500);
+    }
 }
 
 }

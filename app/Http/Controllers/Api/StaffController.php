@@ -461,7 +461,7 @@ class StaffController extends Controller
 
             // ✅ LIVE RESET LINK
             $resetLink = 'https://portal.aiploan.com/staff/reset-password?token=' . $plainToken . '&email=' . urlencode($staff->email);
-
+// $resetLink = 'http://localhost:4200/staff/reset-password?token=' . $plainToken . '&email=' . urlencode($staff->email);
             try {
                 Mail::to($staff->email)->send(new StaffForgotPasswordMail(
                     $staff->first_name . ' ' . $staff->last_name,
