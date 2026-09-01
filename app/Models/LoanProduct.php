@@ -15,6 +15,7 @@ class LoanProduct extends Model
         'processing_fee',
         'late_fee',
         'duration_months',
+        'minimum_duration_month', 
         'description',
         'status',
     ];
@@ -26,4 +27,10 @@ class LoanProduct extends Model
         'processing_fee' => 'decimal:2',
         'late_fee'       => 'decimal:2',
     ];
+
+    // ye relationship add karein
+    public function loanApplications()
+    {
+        return $this->hasMany(LoanApplication::class);
+    }
 }

@@ -10,18 +10,22 @@ return new class extends Migration
     {
         Schema::create('loan_approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('application_id')->constrained('loan_applications')->cascadeOnDelete();
-            $table->enum('review_stage', [
-                'loan_officer_review',
-                'credit_verification',
-                'manager_approval',
-                'accountant_approval',
-                'disbursement'
+            $table->foreignId('application_id')
+                  ->constrained('loan_applications')
+                  ->cascadeOnDelete();
+            $table->foreignId('actioned_by')
+                  ->nullable()
+                  ->constrained('users')
+                  ->nullOnDelete();
+            $table->enum('action', [
+                'approved',
+                'rejected',
+                'additional_info_requested',
             ]);
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->text('remarks')->nullable();
-            $table->timestamp('approved_at')->nullable();
+            $table->text('message')->nullable();   // reason / message to customer
+            $table->text('remarks')->nullable();   // internal admin notes
+            $table->timestamp('actioned_at')->nullable();
+            $table->timestamps();
         });
     }
 

@@ -1,0 +1,85 @@
+<!-- src/app/components/admin/pages/roles/role-add/role-add.html -->
+<div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Add New Role</h1>
+      <p class="text-gray-600 mt-1">Create a new system role</p>
+    </div>
+    <a routerLink="/admin/roles"
+      class="px-4 py-2 text-white rounded-md hover:bg-[#005C59] transition-colors flex items-center space-x-2 text-sm font-medium"
+      style="background-color: #007B77;">
+      <i class="fas fa-arrow-left"></i>
+      <span>Back</span>
+    </a>
+  </div>
+</div>
+
+<div class="space-y-6">
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <form (ngSubmit)="onSubmit()" #roleForm="ngForm" class="space-y-6">
+
+      <!-- Name -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Role Name <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          name="name"
+          [(ngModel)]="form.name"
+          required
+          placeholder="e.g. Loan Officer"
+          class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#007B77] focus:border-[#007B77]"
+          [class.border-red-300]="errors['name']"
+        >
+        <div *ngIf="errors['name']" class="mt-2 text-xs text-red-600 space-y-1">
+          <div class="flex items-center space-x-1">
+            <i class="fas fa-exclamation-circle text-xs"></i>
+            <span>{{ errors['name'][0] }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+        <textarea
+          name="description"
+          [(ngModel)]="form.description"
+          rows="4"
+          placeholder="Short description about this role"
+          class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#007B77] focus:border-[#007B77]"
+          [class.border-red-300]="errors['description']"
+        ></textarea>
+        <div *ngIf="errors['description']" class="mt-2 text-xs text-red-600 space-y-1">
+          <div class="flex items-center space-x-1">
+            <i class="fas fa-exclamation-circle text-xs"></i>
+            <span>{{ errors['description'][0] }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <a routerLink="/admin/roles"
+          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-2">
+          <i class="fas fa-times"></i>
+          <span>Cancel</span>
+        </a>
+        <button type="submit" [disabled]="isSubmitting"
+          class="px-4 py-2 text-white rounded-md hover:bg-[#005C59] transition-colors flex items-center space-x-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background-color: #007B77;">
+          <span *ngIf="!isSubmitting" class="flex items-center space-x-2">
+            <i class="fas fa-save"></i>
+            <span>Create Role</span>
+          </span>
+          <span *ngIf="isSubmitting" class="flex items-center space-x-2">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <span>Creating...</span>
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
